@@ -137,7 +137,12 @@
                         </div>
                         <div class="fg">
                             <label>Número de Documento <span class="req">*</span></label>
-                            <input type="text" th:field="*{numeroDocumento}" class="fi" placeholder="DNI o RUC">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;">
+                                <button type="button" id="btn-validar" class="btn-submit" style="width: auto; padding: 0 20px; margin-top: 0; height: 45px; background: #0094bc;">
+                                    Validar
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -194,6 +199,28 @@
                             <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización">
                         </div>
                     </div>
+
+                    <!-- ─── Ubicación Geográfica ─── -->
+                    <div class="frow frow-2">
+                        <div class="fg">
+                            <label>País</label>
+                            <input type="text" th:field="*{pais}" class="fi" placeholder="Perú">
+                        </div>
+                        <div class="fg">
+                            <label>Departamento</label>
+                            <input type="text" th:field="*{departamento}" class="fi" placeholder="Lima">
+                        </div>
+                    </div>
+                    <div class="frow frow-2">
+                        <div class="fg">
+                            <label>Provincia</label>
+                            <input type="text" th:field="*{provincia}" class="fi" placeholder="Lima">
+                        </div>
+                        <div class="fg">
+                            <label>Distrito</label>
+                            <input type="text" th:field="*{distrito}" class="fi" placeholder="Miraflores">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="cb-row" style="margin: 20px 0;">
@@ -210,5 +237,354 @@
         </div>
     </main>
 </div>
+
+<!-- ── Modern Modal Overlay ── -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-deco-ring"></div>
+        <div id="modalIcon" class="modal-icon-wrapper"></div>
+        <h3 id="modalTitle" class="modal-title"></h3>
+        <p id="modalText" class="modal-text"></p>
+        <div id="modalActions" class="modal-actions"></div>
+    </div>
+</div>
+
+<style>
+    /* ── Premium Modal Styles ── */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(13, 43, 78, 0.4);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(13, 43, 78, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        max-width: 420px;
+        width: 90%;
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .modal-overlay.active .modal-card {
+        transform: scale(1) translateY(0);
+    }
+
+    .modal-deco-ring {
+        position: absolute;
+        top: -50px; left: -50px;
+        width: 150px; height: 150px;
+        border: 20px solid rgba(0, 148, 188, 0.03);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .modal-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        position: relative;
+        background: #fff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+    .modal-icon-wrapper svg {
+        width: 40px;
+        height: 40px;
+        stroke-width: 2;
+    }
+
+    .modal-icon-ok { color: #10b981; background: #ecfdf5; }
+    .modal-icon-confirm { color: #1565a0; background: #eff6ff; }
+    .modal-icon-error { color: #ef4444; background: #fef2f2; }
+
+    .modal-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #0d2b4e;
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+    }
+    .modal-text {
+        font-size: 15px;
+        color: #5a6a80;
+        line-height: 1.6;
+        margin-bottom: 32px;
+        padding: 0 10px;
+    }
+
+    .modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .modal-actions:not(.single) {
+        flex-direction: row;
+    }
+    .modal-actions > button {
+        flex: 1;
+        padding: 14px 24px;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #0d2b4e 0%, #1565a0 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(13, 43, 78, 0.25);
+    }
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(13, 43, 78, 0.35);
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    /* Animations for icons */
+    @keyframes modalBounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    .modal-overlay.active .modal-icon-wrapper {
+        animation: modalBounce 0.8s ease;
+    }
+</style>
+
+<script>
+    /**
+     * Gestión dinámica del formulario de registro
+     * Maneja el cambio de etiquetas, validación y autocompletado desde JSON.
+     */
+    class RegistrationManager {
+        constructor() {
+            this.form = document.getElementById('formRegistro');
+            this.tipoDocSelect = document.getElementById('tipoDocSelect');
+            this.numeroDocInput = document.getElementById('numeroDocumento');
+            this.btnValidar = document.getElementById('btn-validar');
+            
+            // Modal Elements
+            this.modal = document.getElementById('customModal');
+            this.modalIcon = document.getElementById('modalIcon');
+            this.modalTitle = document.getElementById('modalTitle');
+            this.modalText = document.getElementById('modalText');
+            this.modalActions = document.getElementById('modalActions');
+
+            // Campos a completar
+            this.fields = {
+                nombre: document.querySelector('[name="nombre"]'),
+                apellidoPaterno: document.querySelector('[name="apellidoPaterno"]'),
+                apellidoMaterno: document.querySelector('[name="apellidoMaterno"]'),
+                razonSocial: document.querySelector('[name="razonSocial"]'),
+                fechaNacimiento: document.querySelector('[name="fechaNacimiento"]'),
+                correo: document.querySelector('[name="correo"]'),
+                telefono: document.querySelector('[name="telefono"]'),
+                direccion: document.querySelector('[name="direccion"]'),
+                codigoPostal: document.querySelector('[name="codigoPostal"]'),
+                pais: document.querySelector('[name="pais"]'),
+                departamento: document.querySelector('[name="departamento"]'),
+                provincia: document.querySelector('[name="provincia"]'),
+                distrito: document.querySelector('[name="distrito"]')
+            };
+
+            this.jsonUrl = 'https://jsonubicaciongeografica.onrender.com/json/documentos';
+            this.init();
+        }
+
+        init() {
+            // Cambio de tipo de documento
+            this.tipoDocSelect.addEventListener('change', () => {
+                this.clearFields();
+                this.updateUIByDocumentType();
+            });
+
+            // Botón Validar
+            this.btnValidar.addEventListener('click', () => this.validateAndFill());
+            
+            // Confirmación antes de enviar
+            this.form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.showModal({
+                    title: "¿Confirmar Registro?",
+                    text: "¿Estás seguro de enviar tu solicitud de membresía? Por favor revisa que tus datos sean correctos.",
+                    type: "confirm",
+                    confirmText: "Sí, registrar",
+                    cancelText: "No, revisar",
+                    onConfirm: () => this.form.submit()
+                });
+            });
+
+            // Inicializar estado UI
+            this.updateUIByDocumentType();
+        }
+
+        /**
+         * Muestra el modal personalizado premium
+         */
+        showModal({ title, text, type, confirmText, cancelText, onConfirm }) {
+            this.modalTitle.innerText = title;
+            this.modalText.innerText = text;
+            this.modalActions.innerHTML = "";
+            this.modalIcon.className = "modal-icon-wrapper " + (type === 'confirm' ? 'modal-icon-confirm' : (type === 'error' ? 'modal-icon-error' : 'modal-icon-ok'));
+            
+            // Icono SVG premium
+            const iconSvg = type === 'confirm' 
+                ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+                : '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+            this.modalIcon.innerHTML = iconSvg;
+
+            const btnOk = document.createElement('button');
+            btnOk.className = "btn-confirm";
+            btnOk.innerText = confirmText || "Entendido";
+            btnOk.onclick = () => {
+                this.modal.classList.remove('active');
+                if (onConfirm) onConfirm();
+            };
+
+            if (type === 'confirm') {
+                const btnCancel = document.createElement('button');
+                btnCancel.className = "btn-cancel";
+                btnCancel.innerText = cancelText || "Cancelar";
+                btnCancel.onclick = () => this.modal.classList.remove('active');
+                this.modalActions.appendChild(btnCancel);
+                this.modalActions.classList.remove('single');
+            } else {
+                this.modalActions.classList.add('single');
+            }
+            
+            this.modalActions.appendChild(btnOk);
+            this.modal.classList.add('active');
+        }
+
+        clearFields() {
+            this.numeroDocInput.value = "";
+            Object.values(this.fields).forEach(field => {
+                if (field) field.value = "";
+            });
+        }
+
+        updateUIByDocumentType() {
+            const isDNI = this.tipoDocSelect.value === 'DNI';
+            this.numeroDocInput.placeholder = isDNI ? "Número de DNI" : "Número de RUC";
+            
+            // Razón Social solo para RUC
+            this.toggleFieldGroup('razonSocial', !isDNI);
+            
+            // Todos los campos de persona visibles (manual para RUC)
+            ['nombre', 'apellidoPaterno', 'apellidoMaterno', 'fechaNacimiento'].forEach(f => this.toggleFieldGroup(f, true));
+        }
+
+        toggleFieldGroup(fieldName, show) {
+            const field = this.fields[fieldName];
+            if (field) {
+                const group = field.closest('.fg');
+                if (group) group.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        async validateAndFill() {
+            const tipo = this.tipoDocSelect.value.toLowerCase();
+            const numero = this.numeroDocInput.value.trim();
+
+            if (!numero) {
+                this.showModal({ 
+                    title: "Campo Necesario", 
+                    text: `Debes ingresar el número de ${tipo.toUpperCase()} para realizar la validación.`, 
+                    type: "confirm" // Use confirm icon for warning
+                });
+                return;
+            }
+
+            this.btnValidar.innerText = "Buscando...";
+            this.btnValidar.disabled = true;
+
+            try {
+                const response = await fetch(this.jsonUrl);
+                const data = await response.json();
+                const record = data[tipo]?.find(item => item.numero_documento === numero);
+
+                if (record) {
+                    this.fillForm(record, tipo);
+                    this.showModal({ 
+                        title: "¡Datos Encontrados!", 
+                        text: "Hemos sincronizado la información correctamente con nuestra base de datos.", 
+                        type: "alert" 
+                    });
+                } else {
+                    this.showModal({ 
+                        title: "Sin Resultados", 
+                        text: `No pudimos localizar un registro vinculado al ${tipo.toUpperCase()} ${numero}.`, 
+                        type: "error" 
+                    });
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                this.showModal({ title: "Error de Conexión", text: "No se pudo establecer contacto con el servicio de validación.", type: "error" });
+            } finally {
+                this.btnValidar.innerText = "Validar";
+                this.btnValidar.disabled = false;
+            }
+        }
+
+        fillForm(data, type) {
+            if (type === 'dni') {
+                this.fields.nombre.value = data.nombres || "";
+                this.fields.apellidoPaterno.value = data.apellido_paterno || "";
+                this.fields.apellidoMaterno.value = data.apellido_materno || "";
+                this.fields.fechaNacimiento.value = data.fecha_nacimiento || "";
+            } else if (type === 'ruc') {
+                this.fields.razonSocial.value = data.razon_social || "";
+                this.fields.nombre.value = "";
+                this.fields.apellidoPaterno.value = "";
+                this.fields.apellidoMaterno.value = "";
+            }
+
+            this.fields.correo.value = data.correo_electronico || "";
+            this.fields.telefono.value = data.telefono || "";
+            this.fields.direccion.value = data.direccion || "";
+            this.fields.codigoPostal.value = data.codigo_postal || "";
+
+            if (data.ubicacion_geografica) {
+                this.fields.pais.value = data.ubicacion_geografica.pais || "";
+                this.fields.departamento.value = data.ubicacion_geografica.departamento || "";
+                this.fields.provincia.value = data.ubicacion_geografica.provincia || "";
+                this.fields.distrito.value = data.ubicacion_geografica.distrito || "";
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new RegistrationManager());
+</script>
 </body>
 </html>

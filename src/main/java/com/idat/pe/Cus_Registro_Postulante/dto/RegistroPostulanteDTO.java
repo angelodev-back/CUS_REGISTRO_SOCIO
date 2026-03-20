@@ -35,4 +35,10 @@ public class RegistroPostulanteDTO {
     private LocalDate fechaNacimiento;
     private String tipoInteres;
     private String codigoPostal;
+
+    // Campos de ubicación detallada
+    private String pais;
+    private String departamento;
+    private String provincia;
+    private String distrito;
 }

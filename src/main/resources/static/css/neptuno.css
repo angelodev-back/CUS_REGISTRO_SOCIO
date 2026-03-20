@@ -882,3 +882,56 @@ select.fi {
     .frow-2, .frow-3 { grid-template-columns: 1fr; }
     .type-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Custom Modals & Toasts ── */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(13, 43, 78, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    opacity: 0; visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-content {
+    background: var(--white);
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 400px; width: 90%;
+    transform: translateY(30px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+
+.modal-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+}
+.modal-icon svg { width: 30px; height: 30px; }
+
+.modal-icon-ok { background: var(--ok-bg); color: var(--ok); }
+.modal-icon-confirm { background: var(--info-bg); color: var(--info); }
+.modal-icon-error { background: var(--error-bg); color: var(--error); }
+
+.modal-title { font-size: 19px; font-weight: 700; color: var(--txt); margin-bottom: 10px; }
+.modal-text { font-size: 14.5px; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions.single { grid-template-columns: 1fr; }
+
+.btn-modal {
+    padding: 12px 16px; border-radius: var(--radius-md);
+    font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.btn-modal-primary { background: var(--teal); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-modal-primary:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-modal-secondary { background: #f1f3f7; color: var(--muted); }
+.btn-modal-secondary:hover { background: #e5e9f0; color: var(--txt); }
