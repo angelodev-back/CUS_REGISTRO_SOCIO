@@ -66,7 +66,7 @@ public class Postulante {
             this.fechaRegistro = LocalDate.now();
         }
         if (this.estado == null) {
-            this.estado = EstadoPostulante.pendiente;
+            this.estado = EstadoPostulante.PENDIENTE;
         }
     }
 }

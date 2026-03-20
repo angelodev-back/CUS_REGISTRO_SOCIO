@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/postulantes/registrar")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/postulantes/listar")).hasRole("JEFE")
                 .requestMatchers(new AntPathRequestMatcher("/api/postulantes/**")).hasRole("JEFE")
+                .requestMatchers(new AntPathRequestMatcher("/api/jefe/**")).hasRole("JEFE")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))

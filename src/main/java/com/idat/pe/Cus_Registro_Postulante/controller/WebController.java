@@ -56,8 +56,14 @@ public class WebController {
 
     @GetMapping("/jefe/dashboard")
     public String jefeDashboard() {
-        // TODO: Crear dashboard completo del JEFE
-        return "jefe/dashboard";
+        // Redirige al dashboard de deudas del JEFE
+        return "redirect:/jefe/dashboard-deudas";
+    }
+    
+    @GetMapping("/jefe/dashboard-deudas")
+    public String jefeDashboardDeudas() {
+        // Dashboard del JEFE para revisar postulantes y deudas externas
+        return "jefe/dashboard-deudas";
     }
 
     @GetMapping("/socio/dashboard")

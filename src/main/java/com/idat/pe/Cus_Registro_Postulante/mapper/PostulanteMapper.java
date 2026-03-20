@@ -26,7 +26,7 @@ public class PostulanteMapper {
                 .tipoInteres(dto.getTipoInteres())
                 .codigoPostal(dto.getCodigoPostal())
                 .fechaRegistro(LocalDate.now())
-                .estado(EstadoPostulante.pendiente);
+                .estado(EstadoPostulante.PENDIENTE);
 
         if (tipo == TipoDocumento.DNI) {
             builder.nombres(blankToNull(dto.getNombre()))
