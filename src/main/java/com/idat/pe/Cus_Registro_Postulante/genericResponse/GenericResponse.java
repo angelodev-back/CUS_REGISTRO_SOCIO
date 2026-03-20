@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class GenericResponse<M, T> {
     private M message;
     private T body;
+    private String statusCode;
 }

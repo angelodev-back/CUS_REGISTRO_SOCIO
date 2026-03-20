@@ -23,10 +23,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
+        // Validar que el usuario esté activo (case-insensitive)
+        if (usuario.getEstado() == null || !usuario.getEstado().equalsIgnoreCase("activo")) {
+            throw new UsernameNotFoundException("Usuario inactivo o no validado: " + username);
+        }
+
         return new User(
                 usuario.getUsername(),
                 usuario.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol().getNombre()))
+                Collections.singletonList(
+                        new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre().toUpperCase())
+                )
         );
     }
 }

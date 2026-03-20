@@ -38,6 +38,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/jefe/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/socio/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/registro/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
