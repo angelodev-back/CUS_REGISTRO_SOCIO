@@ -10,8 +10,9 @@
  */
 
 // ─── Constantes ────────────────────────────────────────────────────
-const API_BASE      = '/api/jefe';
-const API_DEUDAS_EXT = 'https://jsonubicaciongeografica.onrender.com/json/deudas-externas';
+const API_BASE       = '/api/jefe';
+// Usamos el endpoint proxy del backend para evitar CORS y cold-starts de Render.com
+const API_DEUDAS_EXT = '/api/jefe/deudas-externas';
 
 // ─── Estado global ──────────────────────────────────────────────────
 let postulanteActual   = null;   // Objeto completo del postulante seleccionado
@@ -168,16 +169,31 @@ async function seleccionarPostulante(idPostulante, elemento) {
     }
 }
 
-/** Carga y cachea el JSON externo */
+/** Carga y cachea el JSON de deudas externas via proxy del backend */
 async function cargarDeudasExternas() {
     if (deudasExternasAll !== null) return; // Ya tenemos cache
 
+    const token = localStorage.getItem('jwt_token');
     try {
-        const res = await fetch(API_DEUDAS_EXT);
-        if (!res.ok) throw new Error('API externa no disponible');
+        const res = await fetch(API_DEUDAS_EXT, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 503) {
+            // El servidor externo (Render.com) puede tener cold start
+            const data = await res.json().catch(() => ({}));
+            const msg = data.error || 'El servicio externo no está disponible.';
+            mostrarToast('⚠️ ' + msg, 'error');
+            deudasExternasAll = [];
+            return;
+        }
+
+        if (!res.ok) throw new Error('Error al consultar el proxy de deudas (' + res.status + ')');
         deudasExternasAll = await res.json();
+
     } catch (err) {
-        console.warn('No se pudo cargar el API externo de deudas:', err.message);
+        console.warn('No se pudo cargar el API de deudas:', err.message);
+        mostrarToast('No se pudo cargar el registro de deudas externas. Intente nuevamente.', 'error');
         deudasExternasAll = [];
     }
 }

@@ -39,7 +39,7 @@ public class PostulanteMapper {
                    .nombres(null)
                    .apellidoPaterno(null)
                    .apellidoMaterno(null)
-                   .fechaNacimiento(null);
+                   .fechaNacimiento(dto.getFechaNacimiento());
         }
 
         return builder.build();

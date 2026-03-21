@@ -26,9 +26,9 @@ public class PostulanteConDeudasDTO {
     private String correoElectronico;
     private String telefono;
     private String direccion;
-    private LocalDate fechaNacimiento;
+    private String fechaNacimiento;
     private String tipoInteres; // Nautico o Social
-    private LocalDate fechaRegistro;
+    private String fechaRegistro;
     private String estadoPostulacion; // pendiente, aprobado, rechazado, subsanado
     
     // Deudas asociadas

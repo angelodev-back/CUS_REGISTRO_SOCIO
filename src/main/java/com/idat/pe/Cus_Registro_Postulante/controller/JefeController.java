@@ -1,7 +1,9 @@
 package com.idat.pe.Cus_Registro_Postulante.controller;
 
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteConDeudasDTO;
+import com.idat.pe.Cus_Registro_Postulante.entity.Usuario;
 import com.idat.pe.Cus_Registro_Postulante.genericResponse.GenericResponse;
+import com.idat.pe.Cus_Registro_Postulante.repository.UsuarioRepository;
 import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import com.idat.pe.Cus_Registro_Postulante.service.DeudaExternaService;
 import lombok.AllArgsConstructor;
@@ -15,13 +17,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Controlador REST para operaciones del JEFE de Atención al Cliente
  * Endpoint base: /api/jefe
- * 
+ *
  * Aplica SOLID:
  * - Single Responsibility: solo maneja lógica de JEFE
  * - Separation of Concerns: delegación a servicios
@@ -30,15 +35,54 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/jefe")
 public class JefeController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(JefeController.class);
-    
+
+    private static final String API_DEUDAS_EXTERNA =
+            "https://jsonubicaciongeografica.onrender.com/json/deudas-externas";
+
     @Autowired
     private PostulanteService postulanteService;
-    
+
     @Autowired
     private DeudaExternaService deudaExternaService;
-    
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    // =====================================================
+    // ENDPOINT PROXY — API externa de deudas
+    // =====================================================
+
+    /**
+     * GET /api/jefe/deudas-externas
+     * Actúa como proxy hacia el JSON externo para evitar problemas de CORS en el browser
+     * y centralizar el timeout en el backend.
+     */
+    @GetMapping("/deudas-externas")
+    public ResponseEntity<?> obtenerDeudasExternas() {
+        try {
+            logger.info("Proxiando petición al API externo de deudas: {}", API_DEUDAS_EXTERNA);
+            Object[] data = restTemplate.getForObject(API_DEUDAS_EXTERNA, Object[].class);
+            List<?> lista = (data != null) ? Arrays.asList(data) : Collections.emptyList();
+            logger.info("Se obtuvieron {} registros del API externo de deudas", lista.size());
+            return ResponseEntity.ok(lista);
+        } catch (Exception e) {
+            logger.error("Error al obtener deudas externas: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Collections.singletonMap("error",
+                            "El servicio externo de deudas no está disponible en este momento. " +
+                            "Intente recargando en unos segundos."));
+        }
+    }
+
+    // =====================================================
+    // POSTULANTES
+    // =====================================================
+
     /**
      * GET /api/jefe/postulantes
      * Obtiene lista de postulantes pendientes/subsanados con sus deudas
@@ -48,13 +92,13 @@ public class JefeController {
         try {
             logger.info("JEFE solicitando lista de postulantes pendientes");
             List<PostulanteConDeudasDTO> postulantes = postulanteService.obtenerPostulantesPendientesConDeudas();
-            
+
             return ResponseEntity.ok(GenericResponse.<String, List<PostulanteConDeudasDTO>>builder()
                     .message("Postulantes obtenidos exitosamente")
                     .body(postulantes)
                     .statusCode("200")
                     .build());
-                    
+
         } catch (Exception e) {
             logger.error("Error al listar postulantes: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -65,7 +109,7 @@ public class JefeController {
                             .build());
         }
     }
-    
+
     /**
      * GET /api/jefe/postulantes/{idPostulante}
      * Obtiene detalles de un postulante específico con sus deudas
@@ -76,13 +120,13 @@ public class JefeController {
         try {
             logger.info("JEFE solicitando detalles de postulante ID: {}", idPostulante);
             PostulanteConDeudasDTO postulante = postulanteService.obtenerPostulanteConDeudasDetalle(idPostulante);
-            
+
             return ResponseEntity.ok(GenericResponse.<String, PostulanteConDeudasDTO>builder()
                     .message("Postulante obtenido exitosamente")
                     .body(postulante)
                     .statusCode("200")
                     .build());
-                    
+
         } catch (Exception e) {
             logger.error("Error al obtener postulante: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -93,7 +137,7 @@ public class JefeController {
                             .build());
         }
     }
-    
+
     /**
      * POST /api/jefe/postulantes/{idPostulante}/aprobar
      * Aprueba un postulante
@@ -104,15 +148,15 @@ public class JefeController {
         try {
             Integer idJefe = obtenerIdJefeActual();
             logger.info("JEFE {} aprobando postulante ID: {}", idJefe, idPostulante);
-            
+
             postulanteService.aprobarPostulante(idPostulante, idJefe);
-            
+
             return ResponseEntity.ok(GenericResponse.<String, String>builder()
                     .message("Postulante aprobado exitosamente")
                     .body("ID: " + idPostulante)
                     .statusCode("200")
                     .build());
-                    
+
         } catch (Exception e) {
             logger.error("Error al aprobar postulante: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -123,7 +167,7 @@ public class JefeController {
                             .build());
         }
     }
-    
+
     /**
      * POST /api/jefe/postulantes/{idPostulante}/rechazar
      * Rechaza un postulante con motivo
@@ -134,17 +178,17 @@ public class JefeController {
             @RequestBody RechazarRequest request) {
         try {
             Integer idJefe = obtenerIdJefeActual();
-            logger.info("JEFE {} rechazando postulante ID: {} - Motivo: {}", 
+            logger.info("JEFE {} rechazando postulante ID: {} - Motivo: {}",
                        idJefe, idPostulante, request.getMotivo());
-            
+
             postulanteService.rechazarPostulante(idPostulante, idJefe, request.getMotivo());
-            
+
             return ResponseEntity.ok(GenericResponse.<String, String>builder()
                     .message("Postulante rechazado exitosamente")
                     .body("ID: " + idPostulante)
                     .statusCode("200")
                     .build());
-                    
+
         } catch (Exception e) {
             logger.error("Error al rechazar postulante: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -155,7 +199,7 @@ public class JefeController {
                             .build());
         }
     }
-    
+
     /**
      * POST /api/jefe/deudas/{idDeuda}/verificar
      * Verifica una deuda específica
@@ -167,15 +211,15 @@ public class JefeController {
         try {
             Integer idJefe = obtenerIdJefeActual();
             logger.info("JEFE {} verificando deuda ID: {}", idJefe, idDeuda);
-            
+
             deudaExternaService.verificarDeuda(idDeuda, idJefe, request.getObservaciones());
-            
+
             return ResponseEntity.ok(GenericResponse.<String, String>builder()
                     .message("Deuda verificada exitosamente")
                     .body("ID: " + idDeuda)
                     .statusCode("200")
                     .build());
-                    
+
         } catch (Exception e) {
             logger.error("Error al verificar deuda: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -186,29 +230,42 @@ public class JefeController {
                             .build());
         }
     }
-    
+
+    // =====================================================
+    // HELPER PRIVADO
+    // =====================================================
+
     /**
-     * Obtiene el ID del JEFE actual desde el contexto de seguridad
-     * TODO: Implementar mapping de username a ID
+     * Resuelve el ID del JEFE autenticado buscándolo en la BD por su username.
+     * Fallback a 1 si el contexto no está disponible (ej. en tests).
      */
     private Integer obtenerIdJefeActual() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.debug("Usuario autenticado: {}", auth == null ? "NONE" : auth.getName());
-        // Placeholder: idealmente debería mapear username a ID del usuario
-        return 1;
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            logger.warn("No hay usuario autenticado en el contexto, usando ID de jefe = 1");
+            return 1;
+        }
+        String username = auth.getName();
+        logger.debug("Resolviendo ID para usuario autenticado: {}", username);
+        return usuarioRepository.findByUsername(username)
+                .map(Usuario::getId)
+                .orElseGet(() -> {
+                    logger.warn("Usuario '{}' no encontrado en BD, usando ID = 1", username);
+                    return 1;
+                });
     }
-    
+
     // =====================================================
     // DTOs para Requests
     // =====================================================
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RechazarRequest {
         private String motivo;
     }
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

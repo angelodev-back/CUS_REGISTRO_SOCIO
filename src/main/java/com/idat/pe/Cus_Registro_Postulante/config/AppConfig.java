@@ -6,21 +6,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+
 /**
  * Configuración para beans de la aplicación
  * Aplica SOLID: Separation of Concerns
  */
 @Configuration
 public class AppConfig {
-    
+
     /**
-     * Bean para RestTemplate que permite consumir APIs HTTP
+     * Bean para RestTemplate que permite consumir APIs HTTP.
+     * Timeouts configurados para tolerar cold-starts del servidor Render.com:
+     *  - connectTimeout: 6 segundos
+     *  - readTimeout: 15 segundos
      */
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+        return builder
+                .connectTimeout(Duration.ofSeconds(6))
+                .readTimeout(Duration.ofSeconds(15))
+                .build();
     }
-    
+
     /**
      * Bean para ObjectMapper usado en mapeo de JSON
      */

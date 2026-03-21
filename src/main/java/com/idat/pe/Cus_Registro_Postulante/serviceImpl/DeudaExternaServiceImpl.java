@@ -141,10 +141,10 @@ public class DeudaExternaServiceImpl implements DeudaExternaService {
                 .id(entity.getId())
                 .nombreClubOrigen(entity.getNombreClubOrigen())
                 .montoDeuda(entity.getMontoDeuda())
-                .fechaRegistro(entity.getFechaRegistro())
+                .fechaRegistro(entity.getFechaRegistro() != null ? entity.getFechaRegistro().toString() : null)
                 .estado(entity.getEstado())
                 .verificada(entity.getVerificada())
-                .fechaVerificacion(entity.getFechaVerificacion())
+                .fechaVerificacion(entity.getFechaVerificacion() != null ? entity.getFechaVerificacion().toString() : null)
                 .jefe(nombreJefe)
                 .observacionesVerificacion(entity.getObservacionesVerificacion())
                 .build();

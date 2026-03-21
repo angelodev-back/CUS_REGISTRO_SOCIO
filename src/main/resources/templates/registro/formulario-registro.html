@@ -129,12 +129,22 @@
 
                     <div class="frow frow-2">
                         <div class="fg">
+                            <label>Tipo de Interés <span class="req">*</span></label>
+                            <select th:field="*{tipoInteres}" class="fi" id="tipoInteres">
+                                <option value="Nautico">Náutico</option>
+                                <option value="Social">Social</option>
+                            </select>
+                        </div>
+                        <div class="fg">
                             <label>Tipo de Documento <span class="req">*</span></label>
                             <select th:field="*{tipoDocumento}" class="fi" id="tipoDocSelect">
                                 <option value="DNI">DNI (Persona Natural)</option>
                                 <option value="RUC">RUC (Persona Jurídica)</option>
                             </select>
                         </div>
+                    </div>
+                    
+                    <div class="frow frow-1">
                         <div class="fg">
                             <label>Número de Documento <span class="req">*</span></label>
                             <div style="display: flex; gap: 10px;">
@@ -173,8 +183,8 @@
 
                     <div class="frow frow-2">
                         <div class="fg">
-                            <label>Fecha de Nacimiento <span class="opt">(Solo para DNI)</span></label>
-                            <input type="date" th:field="*{fechaNacimiento}" class="fi">
+                            <label>Fecha de Nacimiento / Constitución <span class="req">*</span></label>
+                            <input type="date" th:field="*{fechaNacimiento}" class="fi" required>
                         </div>
                         <div class="fg">
                             <label>Código Postal</label>
@@ -501,8 +511,9 @@
             // Razón Social solo para RUC
             this.toggleFieldGroup('razonSocial', !isDNI);
             
-            // Todos los campos de persona visibles (manual para RUC)
-            ['nombre', 'apellidoPaterno', 'apellidoMaterno', 'fechaNacimiento'].forEach(f => this.toggleFieldGroup(f, true));
+            // Campos de persona
+            ['nombre', 'apellidoPaterno', 'apellidoMaterno'].forEach(f => this.toggleFieldGroup(f, isDNI));
+            this.toggleFieldGroup('fechaNacimiento', true);
         }
 
         toggleFieldGroup(fieldName, show) {

@@ -20,7 +20,7 @@ public class Usuario {
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
 
-    @Column(unique = true, nullable = false, length = 8)
+    @Column(unique = true, nullable = false, length = 11)
     private String dni;
 
     @Column(nullable = false, length = 100)
