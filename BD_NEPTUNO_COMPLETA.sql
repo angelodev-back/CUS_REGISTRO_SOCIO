@@ -3,6 +3,7 @@
 -- =====================================================
 -- Crea la base de datos completa con datos iniciales
 -- Sin errores, lista para ejecutar
+-- Versión simplificada: ubicación como campo ciudad directo
 -- =====================================================
 
 DROP DATABASE IF EXISTS Neptuno;
@@ -22,34 +23,7 @@ CREATE TABLE rol (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 2. TABLA DE UBICACION GEOGRAFICA
--- =========================================================
-CREATE TABLE ubicacion_geografica (
-    id_ubicacion INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    tipo_ubicacion VARCHAR(20) NOT NULL,
-    id_padre INT NULL,
-    codigo_postal VARCHAR(20) NULL,
-    estado VARCHAR(20) NOT NULL DEFAULT 'activo',
-
-    CONSTRAINT FK_ubicacion_padre FOREIGN KEY (id_padre)
-        REFERENCES ubicacion_geografica(id_ubicacion),
-
-    CONSTRAINT CK_ubicacion_tipo
-        CHECK (tipo_ubicacion IN ('PAIS', 'DEPARTAMENTO', 'PROVINCIA', 'DISTRITO')),
-
-    CONSTRAINT CK_ubicacion_estado
-        CHECK (estado IN ('activo', 'inactivo')),
-
-    CONSTRAINT UQ_ubicacion_nombre_tipo_padre
-        UNIQUE (nombre, tipo_ubicacion, id_padre)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE INDEX IX_ubicacion_padre ON ubicacion_geografica(id_padre);
-CREATE INDEX IX_ubicacion_tipo ON ubicacion_geografica(tipo_ubicacion);
-
--- =========================================================
--- 3. TABLA DE USUARIOS
+-- 2. TABLA DE USUARIOS (sin ubicación jerárquica)
 -- =========================================================
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -59,27 +33,23 @@ CREATE TABLE usuario (
     apellido_paterno VARCHAR(100) NOT NULL,
     apellido_materno VARCHAR(100) NOT NULL,
     direccion VARCHAR(200) NULL,
+    ciudad VARCHAR(100) NULL,                -- ← campo directo
     correo_electronico VARCHAR(100) NULL,
     nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
     contrasena_hash VARCHAR(255) NOT NULL,
     estado_usuario VARCHAR(20) NOT NULL,
-    id_ubicacion INT NULL,
 
     CONSTRAINT FK_usuario_rol FOREIGN KEY (id_rol)
         REFERENCES rol(id_rol),
-
-    CONSTRAINT FK_usuario_ubicacion FOREIGN KEY (id_ubicacion)
-        REFERENCES ubicacion_geografica(id_ubicacion),
 
     CONSTRAINT CK_usuario_estado
         CHECK (estado_usuario IN ('activo', 'inactivo', 'suspendido'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE INDEX IX_usuario_ubicacion ON usuario(id_ubicacion);
 CREATE INDEX IX_usuario_nombre ON usuario(nombre_usuario);
 
 -- =========================================================
--- 4. TABLA DE POSTULANTES
+-- 3. TABLA DE POSTULANTES (sin ubicación jerárquica)
 -- =========================================================
 CREATE TABLE postulante (
     id_postulante INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,15 +64,12 @@ CREATE TABLE postulante (
     correo_electronico VARCHAR(100) NOT NULL UNIQUE,
     telefono VARCHAR(15) NULL,
     direccion VARCHAR(200) NULL,
-    id_ubicacion INT NULL,
+    ciudad VARCHAR(100) NULL,                -- ← campo directo
     fecha_nacimiento DATE NULL,
     tipo_interes VARCHAR(20) NULL,
     codigo_postal VARCHAR(20) NULL,
     fecha_registro DATE NOT NULL,
     estado_postulacion VARCHAR(20) NOT NULL,
-
-    CONSTRAINT FK_postulante_ubicacion FOREIGN KEY (id_ubicacion)
-        REFERENCES ubicacion_geografica(id_ubicacion),
 
     CONSTRAINT CK_postulante_tipo_documento
         CHECK (tipo_documento IN ('DNI', 'RUC')),
@@ -115,7 +82,7 @@ CREATE INDEX IX_postulante_numero ON postulante(numero_documento);
 CREATE INDEX IX_postulante_email ON postulante(correo_electronico);
 
 -- =========================================================
--- 5. TABLA DE HISTORIAL DE ESTADOS DEL POSTULANTE
+-- 4. TABLA DE HISTORIAL DE ESTADOS DEL POSTULANTE
 -- =========================================================
 CREATE TABLE historial_estado_postulante (
     id_historial INT AUTO_INCREMENT PRIMARY KEY,
@@ -134,7 +101,7 @@ CREATE TABLE historial_estado_postulante (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 6. TABLA DE DEUDAS EXTERNAS
+-- 5. TABLA DE DEUDAS EXTERNAS
 -- =========================================================
 CREATE TABLE deuda_externa (
     id_deuda INT AUTO_INCREMENT PRIMARY KEY,
@@ -158,7 +125,7 @@ CREATE TABLE deuda_externa (
 CREATE INDEX IX_deuda_externa_postulante ON deuda_externa(id_postulante);
 
 -- =========================================================
--- 7. TABLA DE SOCIOS
+-- 6. TABLA DE SOCIOS
 -- =========================================================
 CREATE TABLE socio (
     id_socio INT AUTO_INCREMENT PRIMARY KEY,
@@ -180,7 +147,7 @@ CREATE TABLE socio (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 8. TABLA DE EMBARCACIONES
+-- 7. TABLA DE EMBARCACIONES
 -- =========================================================
 CREATE TABLE embarcacion (
     id_embarcacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -196,7 +163,7 @@ CREATE TABLE embarcacion (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 9. TABLA DE MOVIMIENTO DE NAVE
+-- 8. TABLA DE MOVIMIENTO DE NAVE
 -- =========================================================
 CREATE TABLE movimiento_nave (
     id_movimiento INT AUTO_INCREMENT PRIMARY KEY,
@@ -217,7 +184,7 @@ CREATE TABLE movimiento_nave (
 CREATE INDEX IX_movimiento_fechas ON movimiento_nave(fecha_salida, fecha_retorno);
 
 -- =========================================================
--- 10. TABLA DE PERSONAS EN MOVIMIENTO
+-- 9. TABLA DE PERSONAS EN MOVIMIENTO
 -- =========================================================
 CREATE TABLE persona_movimiento (
     id_persona INT AUTO_INCREMENT PRIMARY KEY,
@@ -236,7 +203,7 @@ CREATE TABLE persona_movimiento (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 11. TABLA DE PERMISOS DE NAVEGACION
+-- 10. TABLA DE PERMISOS DE NAVEGACION
 -- =========================================================
 CREATE TABLE permiso_navegacion (
     id_permiso INT AUTO_INCREMENT PRIMARY KEY,
@@ -250,7 +217,7 @@ CREATE TABLE permiso_navegacion (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 12. TABLA DE CONSOLIDADO MENSUAL DE GASTOS
+-- 11. TABLA DE CONSOLIDADO MENSUAL DE GASTOS
 -- =========================================================
 CREATE TABLE consolidado_gastos (
     id_consolidado INT AUTO_INCREMENT PRIMARY KEY,
@@ -266,7 +233,7 @@ CREATE TABLE consolidado_gastos (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 13. TABLA DE TIPO DE PAGO
+-- 12. TABLA DE TIPO DE PAGO
 -- =========================================================
 CREATE TABLE tipo_pago (
     id_tipo_pago INT AUTO_INCREMENT PRIMARY KEY,
@@ -275,7 +242,7 @@ CREATE TABLE tipo_pago (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 14. TABLA DE DOCUMENTO DE PAGO
+-- 13. TABLA DE DOCUMENTO DE PAGO
 -- =========================================================
 CREATE TABLE documento_pago (
     id_documento_pago INT AUTO_INCREMENT PRIMARY KEY,
@@ -305,7 +272,7 @@ CREATE TABLE documento_pago (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 15. TABLA DE DETALLE DEL DOCUMENTO DE PAGO
+-- 14. TABLA DE DETALLE DEL DOCUMENTO DE PAGO
 -- =========================================================
 CREATE TABLE detalle_documento_pago (
     id_detalle INT AUTO_INCREMENT PRIMARY KEY,
@@ -322,7 +289,7 @@ CREATE TABLE detalle_documento_pago (
 CREATE INDEX IX_detalle_documento ON detalle_documento_pago(id_documento_pago);
 
 -- =========================================================
--- 16. TABLA DE ESTADO DE CUENTA DEL SOCIO
+-- 15. TABLA DE ESTADO DE CUENTA DEL SOCIO
 -- =========================================================
 CREATE TABLE estado_cuenta (
     id_estado_cuenta INT AUTO_INCREMENT PRIMARY KEY,
@@ -340,7 +307,7 @@ CREATE TABLE estado_cuenta (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 17. TABLA DE QUEJAS Y RECLAMOS
+-- 16. TABLA DE QUEJAS Y RECLAMOS
 -- =========================================================
 CREATE TABLE queja_reclamo (
     id_queja_reclamo INT AUTO_INCREMENT PRIMARY KEY,
@@ -355,7 +322,7 @@ CREATE TABLE queja_reclamo (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================
--- 18. TABLA DE SEGUIMIENTO DE QUEJAS Y RECLAMOS
+-- 17. TABLA DE SEGUIMIENTO DE QUEJAS Y RECLAMOS
 -- =========================================================
 CREATE TABLE seguimiento_queja_reclamo (
     id_seguimiento INT AUTO_INCREMENT PRIMARY KEY,
@@ -384,7 +351,6 @@ SET @socio_id := (SELECT id_rol FROM rol WHERE nombre_rol = 'SOCIO');
 
 -- 3. Insertar Usuario JEFE de prueba
 -- Contraseña: 123456
--- Hash generado con BCrypt (puedes cambiar por uno tuyo usando /debug/bcrypt)
 INSERT INTO usuario (
     id_rol,
     dni,
@@ -392,6 +358,7 @@ INSERT INTO usuario (
     apellido_paterno,
     apellido_materno,
     direccion,
+    ciudad,
     correo_electronico,
     nombre_usuario,
     contrasena_hash,
@@ -402,10 +369,11 @@ INSERT INTO usuario (
     'Juan',
     'Pérez',
     'García',
-    'Av. Náutica 1234, Lima',
+    'Av. Náutica 1234',
+    'Lima',
     'jefe@neptuno.club',
     'jefe_admin',
-    '$2a$12$AsGDqFuMqbKvbt/ccAU5Fea35hLPI7qFkcR/dgaQBP10Ichmk9J1K',
+    '$2a$12$B8CqiaCtaMQSbVTRpGSjduNc/A2G4yKqfdW4oZ8ULmtOr8fVQ2b/a',
     'activo'
 );
 
@@ -417,6 +385,7 @@ INSERT INTO usuario (
     apellido_paterno,
     apellido_materno,
     direccion,
+    ciudad,
     correo_electronico,
     nombre_usuario,
     contrasena_hash,
@@ -427,24 +396,22 @@ INSERT INTO usuario (
     'María',
     'López',
     'Rodríguez',
-    'Av. Libertad 5678, Lima',
+    'Av. Libertad 5678',
+    'Lima',
     'maria@email.com',
     'maria_socio',
-    '$2a$12$AsGDqFuMqbKvbt/ccAU5Fea35hLPI7qFkcR/dgaQBP10Ichmk9J1K',
+    '$2a$12$B8CqiaCtaMQSbVTRpGSjduNc/A2G4yKqfdW4oZ8ULmtOr8fVQ2b/a',
     'activo'
 );
 
 -- =====================================================
--- VERIFICACIÓN - EJECUTAR QUERIES
+-- VERIFICACIÓN
 -- =====================================================
-
--- Ver roles creados
 SELECT 'ROLES CREADOS' as 'INFO';
 SELECT * FROM rol;
 
--- Ver usuarios creados
 SELECT 'USUARIOS CREADOS' as 'INFO';
-SELECT id_usuario, nombre_usuario, nombres, apellido_paterno, estado_usuario, r.nombre_rol 
+SELECT id_usuario, nombre_usuario, nombres, apellido_paterno, ciudad, estado_usuario, r.nombre_rol 
 FROM usuario u 
 LEFT JOIN rol r ON u.id_rol = r.id_rol 
 ORDER BY u.id_usuario;
@@ -452,15 +419,9 @@ ORDER BY u.id_usuario;
 -- =====================================================
 -- CREDENCIALES DE PRUEBA
 -- =====================================================
--- Usuario JEFE:
---   - Usuario: jefe_admin
---   - Contraseña: 123456
---   - Rol: JEFE
---   - Estado: activo
---
--- Usuario SOCIO:
---   - Usuario: maria_socio
---   - Contraseña: 123456
---   - Rol: SOCIO
---   - Estado: activo
+-- Usuario JEFE:   jefe_admin / 123456
+-- Usuario SOCIO:  maria_socio / 123456
 -- =====================================================
+
+
+select * from postulante

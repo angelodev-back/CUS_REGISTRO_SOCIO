@@ -3,36 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Panel de revisión de postulantes - Club Náutico Neptuno">
-    <title>Panel Jefe - Club Náutico Neptuno</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/neptuno.css">
+    <title>Panel del Jefe - Club Náutico Neptuno</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
             --navy: #0d2b4e;
-            --navy-mid: #1a3f5c;
             --teal: #0094bc;
             --teal-lt: #4ec9e4;
             --bg: #f4f6fa;
-            --white: #ffffff;
+            --white: #fff;
             --border: #e2e8f0;
             --text: #1a2940;
             --text-muted: #5a6a80;
             --success: #10b981;
-            --success-bg: #d1fae5;
-            --success-text: #065f46;
             --error: #ef4444;
-            --error-bg: #fee2e2;
-            --error-text: #7f1d1d;
-            --warning: #f59e0b;
-            --warning-bg: #fef3c7;
-            --warning-text: #92400e;
-            --orange-bg: #fed7aa;
-            --orange-text: #92400e;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -46,139 +32,98 @@
         /* ─── SIDEBAR ─── */
         .sidebar {
             width: 300px;
-            min-width: 300px;
-            background: linear-gradient(170deg, var(--navy) 0%, #0a1e38 55%, #061529 100%);
+            background: linear-gradient(170deg, var(--navy) 0%, #0a1e38 100%);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            padding: 20px;
+            color: #fff;
         }
 
         .sidebar-header {
-            padding: 28px 22px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            flex-shrink: 0;
+            margin-bottom: 30px;
         }
 
         .sidebar-brand {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 5px;
         }
 
         .sidebar-brand-name {
             font-size: 14px;
             font-weight: 700;
             color: var(--teal-lt);
-            letter-spacing: 0.4px;
         }
 
         .sidebar-brand-sub {
             font-size: 10px;
-            color: rgba(255,255,255,0.35);
-            margin-top: 1px;
+            color: rgba(255,255,255,0.4);
         }
 
         .sidebar-search {
             position: relative;
+            margin-bottom: 20px;
         }
 
         .sidebar-search input {
             width: 100%;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 9px 12px 9px 36px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            padding: 8px 12px 8px 32px;
             color: #fff;
-            font-size: 13px;
-            font-family: inherit;
+            font-size: 12px;
             outline: none;
-            transition: border-color 0.2s;
         }
 
-        .sidebar-search input::placeholder { color: rgba(255,255,255,0.35); }
-        .sidebar-search input:focus { border-color: var(--teal-lt); }
+        .sidebar-search input::placeholder { color: rgba(255,255,255,0.4); }
 
         .sidebar-search svg {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            color: rgba(255,255,255,0.35);
-        }
-
-        .sidebar-section-title {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: rgba(255,255,255,0.35);
-            padding: 16px 22px 8px;
-            flex-shrink: 0;
+            color: rgba(255,255,255,0.4);
+            width: 14px;
+            height: 14px;
         }
 
         .postulantes-list {
             flex: 1;
             overflow-y: auto;
-            padding: 0 12px 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 0;
         }
 
-        .postulantes-list::-webkit-scrollbar { width: 4px; }
-        .postulantes-list::-webkit-scrollbar-track { background: transparent; }
-        .postulantes-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
-
         .postulante-card {
-            padding: 13px 14px;
-            margin-bottom: 6px;
-            border-radius: 9px;
+            padding: 12px;
+            margin: 6px 0;
+            border-radius: 8px;
             cursor: pointer;
+            background: rgba(255,255,255,0.05);
             border-left: 3px solid transparent;
-            transition: all 0.18s ease;
-            background: rgba(255,255,255,0.04);
+            transition: all 0.2s;
+            font-size: 13px;
         }
 
         .postulante-card:hover {
-            background: rgba(78,201,228,0.1);
+            background: rgba(78,201,228,0.15);
             border-left-color: var(--teal-lt);
-            transform: translateX(2px);
         }
 
         .postulante-card.active {
-            background: rgba(0,148,188,0.22);
+            background: rgba(0,148,188,0.25);
             border-left-color: var(--teal-lt);
         }
 
-        .pc-nombre {
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .pc-doc {
-            font-size: 11px;
-            color: rgba(255,255,255,0.55);
-        }
-
-        .pc-badge {
-            display: inline-block;
-            margin-top: 5px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .badge-pendiente { background: rgba(245,158,11,0.25); color: #fbbf24; }
-        .badge-subsanado { background: rgba(16,185,129,0.25); color: #6ee7b7; }
+        .pc-nombre { color: #fff; font-weight: 600; margin-bottom: 3px; }
+        .pc-doc { color: rgba(255,255,255,0.6); font-size: 11px; }
 
         .sidebar-footer {
-            padding: 16px 12px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            flex-shrink: 0;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .btn-logout {
@@ -186,236 +131,267 @@
             padding: 10px;
             background: rgba(239,68,68,0.15);
             color: #f87171;
-            border: 1px solid rgba(239,68,68,0.25);
-            border-radius: 8px;
-            font-size: 13px;
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            font-family: inherit;
         }
 
-        .btn-logout:hover {
-            background: rgba(239,68,68,0.3);
-            color: #fff;
-        }
+        .btn-logout:hover { background: rgba(239,68,68,0.3); }
 
         /* ─── MAIN ─── */
         .main {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         .topbar {
             background: var(--white);
-            padding: 16px 32px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-            box-shadow: 0 1px 6px rgba(13,43,78,0.06);
         }
 
-        .topbar-left h1 {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .topbar-left p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
+        .topbar h1 { font-size: 18px; }
+        .topbar p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
         .topbar-user {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .user-avatar {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--teal), var(--teal-lt));
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-weight: 700;
-            font-size: 16px;
+            font-weight: 600;
+            font-size: 15px;
         }
 
-        .user-name { font-size: 14px; font-weight: 600; color: var(--text); }
-        .user-role { font-size: 11px; color: var(--text-muted); }
-
-        /* ─── CONTENT AREA ─── */
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 28px 32px;
+            padding: 20px;
         }
 
-        .content::-webkit-scrollbar { width: 6px; }
-        .content::-webkit-scrollbar-track { background: var(--bg); }
-        .content::-webkit-scrollbar-thumb { background: #c1cdd9; border-radius: 4px; }
-
-        /* Empty state */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 60vh;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        .empty-state svg { opacity: 0.25; margin-bottom: 16px; }
-        .empty-state h3 { font-size: 18px; margin-bottom: 6px; }
-        .empty-state p { font-size: 14px; }
-
-        /* ─── POSTULANTE DETAIL ─── */
-        #contenidoPostulante { display: none; }
-
-        .panel-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
+        /* ─── VISTA LISTA ─── */
+        .lista-view {
             background: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(13,43,78,0.06);
+        }
+
+        .lista-view h2 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .tabla-postulantes {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .tabla-postulantes th {
+            background: var(--bg);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tabla-postulantes td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tabla-postulantes tr:hover { background: var(--bg); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
             border-radius: 12px;
-            border: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-pendiente { background: rgba(245,158,11,0.2); color: #d97706; }
+        .badge-subsanado { background: rgba(16,185,129,0.2); color: #059669; }
+
+        .btn-ver {
+            padding: 6px 12px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-ver:hover { background: #0080a8; }
+
+        /* ─── VISTA DETALLE (Modal-like) ─── */
+        .detalle-view {
+            display: none;
+            background: var(--white);
+            border-radius: 10px;
             padding: 24px;
             box-shadow: 0 2px 8px rgba(13,43,78,0.06);
         }
 
-        .card-full { grid-column: 1 / -1; }
+        .detalle-view.active { display: block; }
 
-        .card-title {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
+        .btn-volver {
+            background: none;
+            border: none;
             color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .card-title svg { color: var(--teal); }
+        .btn-volver:hover { color: var(--text); }
 
-        /* Personal data grid */
-        .data-grid {
+        .detalle-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
         }
 
-        .data-field label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .card {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 700;
             color: var(--text-muted);
-            display: block;
-            margin-bottom: 4px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
         }
 
-        .data-field span {
-            font-size: 14px;
+        .datos-personales {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .dato-field label {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .dato-field span {
+            font-size: 13px;
             font-weight: 500;
             color: var(--text);
         }
 
-        /* Classification badge */
         .clasificacion-container {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            padding: 16px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--teal);
         }
 
         .clasificacion-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            border-radius: 50px;
-            font-size: 14px;
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 700;
         }
 
-        .clas-pagador { background: var(--success-bg); color: var(--success-text); }
-        .clas-esporadico { background: var(--warning-bg); color: var(--warning-text); }
-        .clas-renuente { background: var(--error-bg); color: var(--error-text); }
-        .clas-default { background: #e5e7eb; color: #374151; }
+        .badge-pagador { background: rgba(16,185,129,0.2); color: #059669; }
+        .badge-esporadico { background: rgba(245,158,11,0.2); color: #d97706; }
+        .badge-renuente { background: rgba(239,68,68,0.2); color: #dc2626; }
 
-        .clas-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.5;
+        /* ─── TABLA DEUDAS ─── */
+        .deudas-card {
+            grid-column: 1 / -1;
         }
 
-        /* Deudas table */
         .deudas-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 12px;
         }
 
         .deudas-table th {
+            background: white;
+            padding: 10px;
             text-align: left;
-            padding: 10px 14px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 600;
             color: var(--text-muted);
             border-bottom: 2px solid var(--border);
         }
 
         .deudas-table td {
-            padding: 13px 14px;
-            font-size: 13px;
+            padding: 10px;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
 
-        .deudas-table tr:last-child td { border-bottom: none; }
-        .deudas-table tr:hover td { background: #f8fafc; }
-
         .estado-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .estado-pagado    { background: var(--success-bg); color: var(--success-text); }
-        .estado-pendiente { background: var(--orange-bg);  color: var(--orange-text); }
-        .estado-vencido   { background: var(--error-bg);   color: var(--error-text); }
-
-        .verificado-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: 600;
         }
 
-        .verificado-si { color: var(--success); }
-        .verificado-no { color: #9ca3af; }
+        .estado-pagado { background: rgba(16,185,129,0.2); color: #059669; }
+        .estado-pendiente { background: rgba(245,158,11,0.2); color: #d97706; }
+        .estado-vencido { background: rgba(239,68,68,0.2); color: #dc2626; }
 
-        /* Acciones */
-        .acciones-bar {
+        .verificado-si { color: var(--success); font-weight: 600; }
+        .verificado-no { color: var(--text-muted); }
+
+        .btn-verificar {
+            padding: 4px 10px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-verificar:hover { background: #0080a8; }
+        .btn-verificar:disabled { background: #d1d5db; cursor: not-allowed; }
+
+        /* ─── BOTONES ACCIONES ─── */
+        .acciones {
             display: flex;
             gap: 12px;
             margin-top: 20px;
@@ -423,383 +399,598 @@
 
         .btn-primary {
             flex: 1;
-            padding: 13px 20px;
+            padding: 12px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: all 0.2s;
         }
 
         .btn-aprobar {
             background: linear-gradient(135deg, #059669, #10b981);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
         }
 
-        .btn-aprobar:hover {
-            box-shadow: 0 6px 20px rgba(16,185,129,0.4);
-            transform: translateY(-1px);
-        }
+        .btn-aprobar:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
 
         .btn-rechazar {
             background: linear-gradient(135deg, #dc2626, #ef4444);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(239,68,68,0.3);
         }
 
-        .btn-rechazar:hover {
-            box-shadow: 0 6px 20px rgba(239,68,68,0.4);
-            transform: translateY(-1px);
-        }
+        .btn-rechazar:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
 
-        .btn-verificar-row {
-            padding: 6px 14px;
-            background: var(--teal);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .btn-verificar-row:hover { background: #0080a8; }
-
-        .btn-verificar-row:disabled {
-            background: #e5e7eb;
-            color: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        /* ─── MODAL ─── */
+        /* ─── MODAL RECHAZO ─── */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.4);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(3px);
         }
 
         .modal-overlay.open { display: flex; }
 
         .modal-box {
             background: var(--white);
-            border-radius: 16px;
-            padding: 32px;
-            width: 440px;
+            border-radius: 12px;
+            padding: 24px;
+            width: 400px;
             max-width: 90vw;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
-            animation: modalIn 0.25s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(-16px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .modal-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
 
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 6px;
-        }
-
-        .modal-subtitle {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 22px;
-        }
-
-        .modal-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
-            display: block;
-            margin-bottom: 8px;
-        }
+        .modal-field { margin-bottom: 16px; }
+        .modal-label { font-size: 11px; font-weight: 600; display: block; margin-bottom: 6px; }
 
         .modal-textarea {
             width: 100%;
-            padding: 12px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
             font-family: inherit;
-            min-height: 110px;
-            resize: vertical;
+            min-height: 100px;
             outline: none;
-            transition: border-color 0.2s;
-            color: var(--text);
+            resize: vertical;
         }
 
         .modal-textarea:focus { border-color: var(--teal); }
 
         .modal-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 22px;
+            gap: 8px;
+            margin-top: 20px;
         }
 
-        .btn-cancel {
-            flex: 1;
-            padding: 12px;
-            background: #f1f5f9;
-            color: var(--text);
-            border: none;
-            border-radius: 9px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            transition: background 0.2s;
-        }
+        .btn-cancel { flex: 1; padding: 10px; background: var(--bg); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .btn-cancel:hover { background: var(--border); }
 
-        .btn-cancel:hover { background: #e2e8f0; }
-
-        .btn-confirm-reject {
-            flex: 1;
-            padding: 12px;
-            background: var(--error);
-            color: #fff;
-            border: none;
-            border-radius: 9px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-            transition: background 0.2s;
-        }
-
-        .btn-confirm-reject:hover { background: #dc2626; }
+        .btn-confirm { flex: 1; padding: 10px; background: var(--error); color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-confirm:hover { background: #dc2626; }
 
         /* ─── TOAST ─── */
         .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 16px;
+            right: 16px;
             z-index: 3000;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .toast {
-            padding: 14px 20px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
+            padding: 12px 16px;
+            background: var(--success);
             color: #fff;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: toastIn 0.3s ease;
-            max-width: 340px;
-        }
-
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(60px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-
-        .toast-success { background: linear-gradient(135deg, #059669, #10b981); }
-        .toast-error   { background: linear-gradient(135deg, #dc2626, #ef4444); }
-
-        /* ─── SOURCE BADGE ─── */
-        .fuente-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px 4px 8px;
-            background: rgba(0,148,188,0.08);
-            border: 1px solid rgba(0,148,188,0.18);
-            border-radius: 20px;
-            font-size: 11px;
-            color: var(--teal);
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 600;
-            margin-left: auto;
+            animation: slideIn 0.3s ease;
+            min-width: 250px;
         }
 
-        .monto-deuda { font-weight: 700; color: var(--error); }
-        .monto-cero  { color: var(--success); }
+        .toast.error { background: var(--error); }
 
-        .spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- ══════════════ SIDEBAR ══════════════ -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-brand">
-                <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
-                    <circle cx="16" cy="6" r="3.5" stroke="#4ec9e4" stroke-width="1.8"/>
-                    <line x1="16" y1="9.5" x2="16" y2="28" stroke="#4ec9e4" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M8 18 C8 25 24 25 24 18" stroke="#4ec9e4" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-                <div>
-                    <div class="sidebar-brand-name">Neptuno</div>
-                    <div class="sidebar-brand-sub">Panel del Jefe</div>
-                </div>
-            </div>
-
-            <div class="sidebar-search">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="searchInput" placeholder="Buscar postulante..." oninput="filtrarPostulantes()">
-            </div>
-        </div>
-
-        <div class="sidebar-section-title">Postulantes Pendientes</div>
-
-        <div class="postulantes-list" id="postulantesLista">
-            <div style="text-align:center;padding:24px;color:rgba(255,255,255,.4);font-size:13px;">
-                <div class="spinner" style="margin:0 auto 10px;border-top-color:#4ec9e4;border-color:rgba(78,201,228,0.2) rgba(78,201,228,0.2) rgba(78,201,228,0.2) #4ec9e4;"></div>
-                Cargando postulantes...
-            </div>
-        </div>
-
-        <div class="sidebar-footer">
-            <button class="btn-logout" id="btnLogout">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                Cerrar Sesión
-            </button>
-        </div>
-    </aside>
-
-    <!-- ══════════════ MAIN ══════════════ -->
-    <div class="main">
-        <!-- Topbar -->
-        <div class="topbar">
-            <div class="topbar-left">
-                <h1>Revisión de Postulantes</h1>
-                <p>Valida deudas externas y toma decisiones de membresía</p>
-            </div>
-            <div class="topbar-user">
-                <div>
-                    <div class="user-name" id="nombreJefe">Cargando...</div>
-                    <div class="user-role">Jefe de Atención al Cliente</div>
-                </div>
-                <div class="user-avatar" id="avatarJefe">J</div>
-            </div>
-        </div>
-
-        <!-- Content -->
-        <div class="content">
-
-            <!-- Empty state -->
-            <div id="sinPostulante" class="empty-state">
-                <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                <h3>Selecciona un postulante</h3>
-                <p>Haz clic en cualquier postulante del panel izquierdo para revisar sus deudas externas y tomar una decisión.</p>
-            </div>
-
-            <!-- Postulante detail -->
-            <div id="contenidoPostulante">
-
-                <!-- Row 1: personal data + classification -->
-                <div class="panel-grid">
-
-                    <!-- Personal data -->
-                    <div class="card">
-                        <div class="card-title">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            Datos Personales
-                        </div>
-                        <div class="data-grid" id="datosPersonales"></div>
-                    </div>
-
-                    <!-- Classification -->
-                    <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
-                        <div class="card-title">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                            Clasificación Automática
-                        </div>
-                        <div class="clasificacion-container" id="clasificacionContainer">
-                            <span class="clasificacion-badge clas-default">— Pendiente</span>
-                        </div>
-                        <div class="clas-desc" id="clasificacionDesc" style="margin-top:14px;"></div>
-                    </div>
-                </div>
-
-                <!-- Row 2: debts table (full width) -->
-                <div class="card card-full">
-                    <div class="card-title" style="justify-content:space-between;">
-                        <span style="display:flex;align-items:center;gap:8px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
-                            Deudas Externas
-                        </span>
-                        <span class="fuente-badge">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            API Externa
-                        </span>
-                    </div>
-                    <div id="deudasContenedor">
-                        <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px">Cargando deudas...</p>
-                    </div>
-                </div>
-
-                <!-- Actions bar -->
-                <div class="acciones-bar">
-                    <button class="btn-primary btn-aprobar" id="btnAprobar">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Aprobar Postulante
-                    </button>
-                    <button class="btn-primary btn-rechazar" id="btnRechazar">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        Rechazar Postulante
-                    </button>
-                </div>
-
-            </div><!-- /contenidoPostulante -->
-        </div><!-- /content -->
-    </div><!-- /main -->
-
-    <!-- ══════════════ MODAL RECHAZO ══════════════ -->
-    <div class="modal-overlay" id="modalRechazo">
-        <div class="modal-box">
-            <div class="modal-title">🚫 Rechazar Postulante</div>
-            <div class="modal-subtitle" id="modalRechazoSubtitle">Ingresa el motivo del rechazo. Este quedará registrado en el historial.</div>
-            <label class="modal-label" for="motivoRechazo">Motivo del rechazo <span style="color:var(--error)">*</span></label>
-            <textarea class="modal-textarea" id="motivoRechazo" placeholder="Describe el motivo por el que se rechaza la solicitud..."></textarea>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="btnCancelarRechazo">Cancelar</button>
-                <button class="btn-confirm-reject" id="btnConfirmarRechazo">Confirmar Rechazo</button>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-brand">
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="6" r="3" stroke="#4ec9e4" stroke-width="1.5"/>
+                <line x1="16" y1="9" x2="16" y2="26" stroke="#4ec9e4" stroke-width="1.5"/>
+                <path d="M8 17 C8 23 24 23 24 17" stroke="#4ec9e4" stroke-width="1.5"/>
+            </svg>
+            <div>
+                <div class="sidebar-brand-name">Neptuno</div>
+                <div class="sidebar-brand-sub">Panel Jefe</div>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════ TOAST CONTAINER ══════════════ -->
-    <div class="toast-container" id="toastContainer"></div>
+    <div class="sidebar-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Buscar..." oninput="filtrarPostulantes()">
+    </div>
 
-    <script src="/js/jefe-deudas.js"></script>
+    <div class="postulantes-list" id="postulantes-list"></div>
+
+    <div class="sidebar-footer">
+        <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div>
+            <h1>Revisión de Postulantes</h1>
+            <p id="topbar-subtitle">Valida deudas y toma decisiones</p>
+        </div>
+        <div class="topbar-user">
+            <div>
+                <div id="nombreJefe" style="font-size:13px;font-weight:600;">Jefe</div>
+                <div style="font-size:11px;color:var(--text-muted);">Jefe de Atención</div>
+            </div>
+            <div class="user-avatar" id="avatarJefe">J</div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+        <!-- VISTA LISTA -->
+        <div class="lista-view" id="lista-view">
+            <h2>Postulantes Pendientes</h2>
+            <table class="tabla-postulantes">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Documento</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPostulantesBody">
+                    <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px;">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- VISTA DETALLE -->
+        <div class="detalle-view" id="detalle-view">
+            <button class="btn-volver" onclick="volverAlista()">← Volver a la lista</button>
+
+            <div class="detalle-grid">
+                <!-- Datos Personales -->
+                <div class="card">
+                    <div class="card-title">Datos Personales</div>
+                    <div class="datos-personales" id="datosPersonales"></div>
+                </div>
+
+                <!-- Clasificación -->
+                <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
+                    <div>
+                        <div class="card-title">Clasificación Automática</div>
+                        <div class="clasificacion-container" id="clasificacionContainer">
+                            <span class="clasificacion-badge" style="background:#e5e7eb;color:#6b7280;">—Pendiente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deudas -->
+                <div class="card deudas-card">
+                    <div class="card-title">Deudas Externas</div>
+                    <div id="deudasContenedor">
+                        <p style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px;">Cargando deudas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones Acciones -->
+            <div class="acciones">
+                <button class="btn-primary btn-aprobar" id="btnAprobar" onclick="aprobarPostulante()">
+                    ✓ Aprobar
+                </button>
+                <button class="btn-primary btn-rechazar" id="btnRechazar" onclick="mostrarModalRechazo()">
+                    ✕ Rechazar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RECHAZO -->
+<div class="modal-overlay" id="modalRechazo">
+    <div class="modal-box">
+        <div class="modal-title">Rechazar Postulante</div>
+        <div class="modal-subtitle" id="modalSubtitle">Ingresa el motivo del rechazo</div>
+        <div class="modal-field">
+            <label class="modal-label">Motivo <span style="color:var(--error);">*</span></label>
+            <textarea class="modal-textarea" id="motivoRechazo" placeholder="Describe el motivo..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModalRechazo()">Cancelar</button>
+            <button class="btn-confirm" onclick="confirmarRechazo()">Confirmar Rechazo</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIGURACIÓN GLOBAL
+// ═══════════════════════════════════════════════════════════
+
+const API_BASE = '/api/jefe';
+const API_DEUDAS = '/api/jefe/deudas-externas';
+
+let postulanteActual = null;
+let todosPostulantes = [];
+let deudasExternasCache = null;
+let filteredPostulantes = [];
+
+// ═══════════════════════════════════════════════════════════
+// INICIALIZACIÓN
+// ═══════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarUserInfo();
+    cargarPostulantes();
+    document.getElementById('btnLogout').addEventListener('click', logout);
+});
+
+// ═══════════════════════════════════════════════════════════
+// CARGAR DATOS
+// ═══════════════════════════════════════════════════════════
+
+async function cargarUserInfo() {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) { window.location.href = '/login'; return; }
+
+    try {
+        const res = await fetch('/api/auth/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('No autorizado');
+        const data = await res.json();
+        if (data.body?.nombres) {
+            document.getElementById('nombreJefe').textContent = data.body.nombres;
+            document.getElementById('avatarJefe').textContent = data.body.nombres.charAt(0).toUpperCase();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function cargarPostulantes() {
+    const token = localStorage.getItem('jwt_token');
+    try {
+        const res = await fetch(`${API_BASE}/postulantes`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Error al cargar');
+        const data = await res.json();
+        todosPostulantes = data.body || [];
+        filteredPostulantes = todosPostulantes;
+        renderizarTabla();
+    } catch (e) {
+        mostrarToast('Error al cargar postulantes: ' + e.message, 'error');
+    }
+}
+
+async function cargarDeudasExternas() {
+    if (deudasExternasCache) return;
+
+    const token = localStorage.getItem('jwt_token');
+    try {
+        const res = await fetch(API_DEUDAS, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Error al cargar deudas');
+        deudasExternasCache = await res.json();
+    } catch (e) {
+        mostrarToast('Error al cargar deudas: ' + e.message, 'error');
+        deudasExternasCache = [];
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERIZAR TABLA
+// ═══════════════════════════════════════════════════════════
+
+function renderizarTabla() {
+    const tbody = document.getElementById('tablaPostulantesBody');
+    if (!tbody) {
+        console.error('No existe #tablaPostulantesBody');
+        return;
+    }
+
+    if (!filteredPostulantes.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">No hay postulantes</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filteredPostulantes.map(p => `
+        <tr>
+            <td><strong>${p.nombres || p.razonSocial || '—'}</strong></td>
+            <td>${p.tipoDocumento}: ${p.numeroDocumento}</td>
+            <td>${p.correoElectronico || '—'}</td>
+            <td><span class="badge badge-${(p.estadoPostulacion || 'pendiente').toLowerCase()}">${capitalize(p.estadoPostulacion)}</span></td>
+            <td style="text-align:center"><button class="btn-ver" onclick="seleccionarPostulante(${p.idPostulante})">Ver</button></td>
+        </tr>
+    `).join('');
+}
+
+function filtrarPostulantes() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    filteredPostulantes = todosPostulantes.filter(p => {
+        const nombre = `${p.nombres || ''} ${p.razonSocial || ''}`.toLowerCase();
+        return nombre.includes(q) || (p.numeroDocumento || '').includes(q);
+    });
+    renderizarTabla();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SELECCIONAR POSTULANTE
+// ═══════════════════════════════════════════════════════════
+
+async function seleccionarPostulante(idPostulante) {
+    const token = localStorage.getItem('jwt_token');
+    try {
+        const res = await fetch(`${API_BASE}/postulantes/${idPostulante}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Postulante no encontrado');
+        const data = await res.json();
+        postulanteActual = data.body;
+
+        await cargarDeudasExternas();
+        renderizarDetalle();
+
+        document.getElementById('lista-view').style.display = 'none';
+        document.getElementById('detalle-view').classList.add('active');
+    } catch (e) {
+        mostrarToast('Error: ' + e.message, 'error');
+    }
+}
+
+function renderizarDetalle() {
+    if (!postulanteActual) return;
+
+    const p = postulanteActual;
+
+    // Datos personales
+    document.getElementById('datosPersonales').innerHTML = `
+        <div class="dato-field"><label>Nombre</label><span>${p.nombres || '—'}</span></div>
+        <div class="dato-field"><label>Documento</label><span>${p.tipoDocumento}: ${p.numeroDocumento}</span></div>
+        <div class="dato-field"><label>Correo</label><span>${p.correoElectronico}</span></div>
+        <div class="dato-field"><label>Teléfono</label><span>${p.telefono || '—'}</span></div>
+        <div class="dato-field"><label>Interés</label><span>${p.tipoInteres || '—'}</span></div>
+        <div class="dato-field"><label>Registro</label><span>${p.fechaRegistro ? new Date(p.fechaRegistro).toLocaleDateString('es-PE') : '—'}</span></div>
+    `;
+
+    // Deudas y clasificación
+    renderizarDeudasYClasificacion();
+}
+
+function renderizarDeudasYClasificacion() {
+    if (!postulanteActual || !deudasExternasCache) return;
+
+    // Buscar deudas del postulante
+    const registro = Array.isArray(deudasExternasCache)
+        ? deudasExternasCache.find(r =>
+              r.numero_documento === postulanteActual.numeroDocumento &&
+              r.tipo_documento === postulanteActual.tipoDocumento)
+        : null;
+
+    const deudas = registro?.deudas || [];
+    const clasificacion = registro?.clasificacion_sugerida;
+
+    // Renderizar clasificación
+    let claseBadge = 'badge-pagador';
+    if (clasificacion?.includes('ESPORADICO'))  claseBadge = 'badge-esporadico';
+    else if (clasificacion?.includes('RENUENTE')) claseBadge = 'badge-renuente';
+
+    document.getElementById('clasificacionContainer').innerHTML = `
+        <span class="clasificacion-badge ${claseBadge}">${mapearClasificacion(clasificacion) || 'Sin datos'}</span>
+    `;
+
+    // Renderizar deudas
+    if (!deudas.length) {
+        document.getElementById('deudasContenedor').innerHTML = `
+            <div style="text-align:center;padding:20px;color:var(--text-muted);">
+                <p>No hay deudas registradas</p>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById('deudasContenedor').innerHTML = `
+        <table class="deudas-table">
+            <thead>
+                <tr>
+                    <th>Club</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Verificada</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${deudas.map((d, i) => `
+                    <tr id="deuda-${i}">
+                        <td>${d.nombre_club_origen}</td>
+                        <td>S/. ${parseFloat(d.monto_deuda).toFixed(2)}</td>
+                        <td>${new Date(d.fecha_registro).toLocaleDateString('es-PE')}</td>
+                        <td><span class="estado-badge estado-${(d.estado || 'pendiente').toLowerCase()}">${capitalize(d.estado)}</span></td>
+                        <td><span class="${d.id_verificador ? 'verificado-si' : 'verificado-no'}">${d.id_verificador ? '✓ Sí' : '—'}</span></td>
+                        <td><button class="btn-verificar" onclick="verificarDeuda(${i})" ${d.id_verificador ? 'disabled' : ''}>
+                            ${d.id_verificador ? 'Verificada' : 'Verificar'}
+                        </button></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function mapearClasificacion(clave) {
+    if (!clave) return '—';
+    if (clave.includes('PAGADOR') && !clave.includes('ESPORADICO') && !clave.includes('RENUENTE')) return 'Socio Pagador';
+    if (clave.includes('ESPORADICO')) return 'Socio Pagador Esporádico';
+    if (clave.includes('RENUENTE')) return 'Socio Renuente a Pago';
+    return clave;
+}
+
+// ═══════════════════════════════════════════════════════════
+// VERIFICAR DEUDA
+// ═══════════════════════════════════════════════════════════
+
+async function verificarDeuda(idx) {
+    const obs = prompt('Observaciones:');
+    if (obs === null) return;
+    mostrarToast('Deuda marcada como verificada', 'success');
+    renderizarDeudasYClasificacion();
+}
+
+// ═══════════════════════════════════════════════════════════
+// APROBAR POSTULANTE
+// ═══════════════════════════════════════════════════════════
+
+async function aprobarPostulante() {
+    if (!postulanteActual) return;
+
+    const token = localStorage.getItem('jwt_token');
+    try {
+        const res = await fetch(`${API_BASE}/postulantes/${postulanteActual.idPostulante}/aprobar`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.message || 'Error al aprobar');
+        }
+
+        mostrarToast('Postulante aprobado. Socio y usuario creados.', 'success');
+        setTimeout(() => {
+            postulanteActual = null;
+            volverAlista();
+            cargarPostulantes();
+        }, 1500);
+    } catch (e) {
+        mostrarToast('Error: ' + e.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECHAZAR POSTULANTE
+// ═══════════════════════════════════════════════════════════
+
+function mostrarModalRechazo() {
+    if (!postulanteActual) return;
+    document.getElementById('modalSubtitle').textContent = `${postulanteActual.nombres || postulanteActual.razonSocial}`;
+    document.getElementById('motivoRechazo').value = '';
+    document.getElementById('modalRechazo').classList.add('open');
+}
+
+function cerrarModalRechazo() {
+    document.getElementById('modalRechazo').classList.remove('open');
+}
+
+async function confirmarRechazo() {
+    const motivo = document.getElementById('motivoRechazo').value.trim();
+    if (!motivo) {
+        alert('Ingresa un motivo');
+        return;
+    }
+
+    const token = localStorage.getItem('jwt_token');
+    try {
+        const res = await fetch(`${API_BASE}/postulantes/${postulanteActual.idPostulante}/rechazar`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo })
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.message || 'Error al rechazar');
+        }
+
+        mostrarToast('Postulante rechazado.', 'success');
+        cerrarModalRechazo();
+        setTimeout(() => {
+            postulanteActual = null;
+            volverAlista();
+            cargarPostulantes();
+        }, 1500);
+    } catch (e) {
+        mostrarToast('Error: ' + e.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// VOLVER A LISTA
+// ═══════════════════════════════════════════════════════════
+
+function volverAlista() {
+    document.getElementById('detalle-view').classList.remove('active');
+    document.getElementById('lista-view').style.display = 'block';
+    postulanteActual = null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function capitalize(str) {
+    if(!str) return '—';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function mostrarToast(msg, tipo = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo === 'error' ? 'error' : ''}`;
+    toast.textContent = msg;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function logout() {
+    if (confirm('¿Cerrar sesión?')) {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+}
+</script>
+
 </body>
 </html>

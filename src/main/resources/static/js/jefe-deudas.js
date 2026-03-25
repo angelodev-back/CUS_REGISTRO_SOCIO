@@ -65,7 +65,6 @@ async function cargarUserInfo() {
 // ─── Cargar postulantes (BD local) ───────────────────────────────────
 async function cargarPostulantes() {
     const token = localStorage.getItem('jwt_token');
-    const container = document.getElementById('postulantesLista');
 
     try {
         const res = await fetch(`${API_BASE}/postulantes`, {
@@ -76,25 +75,37 @@ async function cargarPostulantes() {
 
         const data = await res.json();
         todosPostulantes = data.body || [];
-        renderizarSidebar(todosPostulantes);
+        renderizarTablaPostulantes(todosPostulantes);
 
     } catch (err) {
         console.error(err);
-        container.innerHTML = `
-            <p style="text-align:center;color:rgba(255,255,255,0.45);padding:20px;font-size:13px;">
-                ⚠️ Error al cargar postulantes
-            </p>`;
+            const container = document.getElementById('tablaPostulantesBody');
+            if (!container) {
+                console.warn('No se encontró #tablaPostulantesBody en el DOM. ¿Estás usando la vista correcta?');
+                return;
+            }
+            container.innerHTML = `
+                <tr><td colspan="5" style="text-align:center;color:var(--error);padding:20px;font-size:13px;">
+                    ⚠️ Error al cargar postulantes: ${err.message}
+                </td></tr>`;
     }
 }
 
-function renderizarSidebar(lista) {
-    const container = document.getElementById('postulantesLista');
+function renderizarTablaPostulantes(lista) {
+    const container = document.getElementById('tablaPostulantesBody');
+    
+    if (!container) {
+        console.error('ERROR CRÍTICO: No se encontró #tablaPostulantesBody en el DOM.');
+        console.warn('Verifica que estés usando la URL correcta: /jefe/dashboard-deudas');
+        console.warn('O que el HTML incluya <tbody id="tablaPostulantesBody">');
+        return;
+    }
 
     if (!lista || lista.length === 0) {
         container.innerHTML = `
-            <p style="text-align:center;color:rgba(255,255,255,0.4);padding:24px;font-size:13px;line-height:1.6;">
-                No hay postulantes pendientes de revisión
-            </p>`;
+            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;font-size:13px;line-height:1.6;">
+                No hay postulantes pendientes de revisión en este momento.
+            </td></tr>`;
         return;
     }
 
@@ -103,31 +114,33 @@ function renderizarSidebar(lista) {
             ? `${p.nombres} ${p.apellidoPaterno || ''} ${p.apellidoMaterno || ''}`.trim()
             : (p.razonSocial || 'Sin nombre');
         const estado = (p.estadoPostulacion || 'PENDIENTE').toLowerCase();
+        const fecha = p.fechaRegistro ? formatearFecha(p.fechaRegistro) : '—';
         return `
-            <div class="postulante-card" data-id="${p.idPostulante}" onclick="seleccionarPostulante(${p.idPostulante}, this)">
-                <div class="pc-nombre">${nombre}</div>
-                <div class="pc-doc">${p.tipoDocumento}: ${p.numeroDocumento}</div>
-                <span class="pc-badge badge-${estado}">${capitalizarPrimera(p.estadoPostulacion || 'PENDIENTE')}</span>
-            </div>`;
+            <tr>
+                <td><strong>${nombre}</strong></td>
+                <td><span style="color:var(--text-muted);font-size:12px">${p.tipoDocumento}:</span> ${p.numeroDocumento}</td>
+                <td>${fecha}</td>
+                <td><span class="pc-badge badge-${estado}">${capitalizarPrimera(p.estadoPostulacion || 'PENDIENTE')}</span></td>
+                <td style="text-align:center">
+                    <button class="btn-verificar-row" onclick="seleccionarPostulante(${p.idPostulante})">Ver Detalles</button>
+                </td>
+            </tr>`;
     }).join('');
 }
 
 function filtrarPostulantes() {
     const q = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!q) { renderizarSidebar(todosPostulantes); return; }
+    if (!q) { renderizarTablaPostulantes(todosPostulantes); return; }
 
     const filtrados = todosPostulantes.filter(p => {
         const nombre = `${p.nombres || ''} ${p.apellidoPaterno || ''} ${p.razonSocial || ''}`.toLowerCase();
         return nombre.includes(q) || (p.numeroDocumento || '').includes(q);
     });
-    renderizarSidebar(filtrados);
+    renderizarTablaPostulantes(filtrados);
 }
 
 // ─── Seleccionar postulante ───────────────────────────────────────────
-async function seleccionarPostulante(idPostulante, elemento) {
-    // Marcar activo en sidebar
-    document.querySelectorAll('.postulante-card').forEach(c => c.classList.remove('active'));
-    elemento.classList.add('active');
+async function seleccionarPostulante(idPostulante) {
 
     mostrarLoadingDetalle();
 
@@ -210,21 +223,21 @@ function mapearClasificacion(claveAPI) {
 
 // ─── Renderizar detalle ───────────────────────────────────────────────
 function mostrarLoadingDetalle() {
-    document.getElementById('sinPostulante').style.display   = 'none';
+    document.getElementById('vistaLista').style.display   = 'none';
     document.getElementById('contenidoPostulante').style.display = 'block';
     document.getElementById('datosPersonales').innerHTML = '<p style="color:#9ca3af;font-size:13px;">Cargando...</p>';
     document.getElementById('deudasContenedor').innerHTML  = '<p style="color:#9ca3af;font-size:13px;text-align:center;padding:20px">Cargando deudas desde API externo...</p>';
 }
 
 function ocultarDetalle() {
-    document.getElementById('sinPostulante').style.display       = 'flex';
+    document.getElementById('vistaLista').style.display = 'block';
     document.getElementById('contenidoPostulante').style.display = 'none';
 }
 
 function renderizarDetalle(clasificacion) {
     if (!postulanteActual) return;
 
-    document.getElementById('sinPostulante').style.display       = 'none';
+    document.getElementById('vistaLista').style.display = 'none';
     document.getElementById('contenidoPostulante').style.display = 'block';
 
     renderizarDatosPersonales();

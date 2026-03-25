@@ -34,6 +34,9 @@ public class Usuario {
 
     private String direccion;
 
+    @Column(name = "ciudad", length = 100)
+    private String ciudad;
+
     @Column(name = "correo_electronico", length = 100)
     private String correoElectronico;
 

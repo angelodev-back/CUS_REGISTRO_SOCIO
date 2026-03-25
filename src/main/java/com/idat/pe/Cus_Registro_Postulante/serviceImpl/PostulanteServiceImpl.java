@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +40,6 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private UbicacionGeograficaRepository ubicacionRepo;
 
     @Autowired
     private SocioRepository socioRepository;
@@ -67,10 +67,6 @@ public class PostulanteServiceImpl implements PostulanteService {
             throw new RuntimeException("El correo " + dto.getCorreo() + " ya se encuentra registrado.");
         }
 
-        Integer idUbicacion = getOrCreateUbicacion(dto);
-        if (idUbicacion != null) {
-            dto.setIdCiudad(idUbicacion);
-        }
 
         Postulante postulante = postulanteMapper.toEntity(dto);
         Postulante guardado = postulanteRepository.save(postulante);
@@ -105,14 +101,8 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setCorreoElectronico(dto.getCorreo());
         postulante.setTelefono(dto.getTelefono());
         postulante.setDireccion(dto.getDireccion());
-        
-        Integer idUbicacion = getOrCreateUbicacion(dto);
-        if (idUbicacion != null) {
-            postulante.setIdCiudad(idUbicacion);
-        } else {
-            postulante.setIdCiudad(dto.getIdCiudad());
-        }
-        
+        postulante.setCiudad(dto.getCiudad());
+
         postulante.setTipoInteres(dto.getTipoInteres());
         postulante.setCodigoPostal(dto.getCodigoPostal());
 
@@ -140,56 +130,32 @@ public class PostulanteServiceImpl implements PostulanteService {
         Postulante postulante = postulanteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Postulante no encontrado con id: " + id));
 
+        EstadoPostulante estadoAnterior = postulante.getEstado();
         try {
-            postulante.setEstado(EstadoPostulante.valueOf(nuevoEstado));
+            postulante.setEstado(EstadoPostulante.valueOf(nuevoEstado.toUpperCase()));
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Estado no válido: " + nuevoEstado);
         }
 
         Postulante actualizado = postulanteRepository.save(postulante);
+
+        // Registro de Auditoría
+        HistorialEstadoPostulante historial = HistorialEstadoPostulante.builder()
+                .idPostulante(actualizado.getId())
+                .idJefe(obtenerIdUsuarioActual())
+                .fechaCambio(LocalDate.now())
+                .estadoAnterior(estadoAnterior != null ? estadoAnterior.name().toLowerCase() : "pendiente")
+                .estadoNuevo(actualizado.getEstado().name().toLowerCase())
+                .motivo("Cambio de estado manual")
+                .build();
+        historialRepository.save(historial);
+
         return postulanteMapper.toDTO(actualizado);
     }
 
     // =====================================================
     // MÉTODOS PARA FLUJO JEFE (Paso 2)
     // =====================================================
-
-    private Integer getOrCreateUbicacion(RegistroPostulanteDTO dto) {
-        if (dto.getPais() == null || dto.getPais().trim().isEmpty()) return null;
-
-        UbicacionGeografica pais = getOrCreate(dto.getPais().trim(), "PAIS", null);
-        
-        if (dto.getDepartamento() == null || dto.getDepartamento().trim().isEmpty()) return pais.getId();
-        UbicacionGeografica dep = getOrCreate(dto.getDepartamento().trim(), "DEPARTAMENTO", pais);
-        
-        if (dto.getProvincia() == null || dto.getProvincia().trim().isEmpty()) return dep.getId();
-        UbicacionGeografica prov = getOrCreate(dto.getProvincia().trim(), "PROVINCIA", dep);
-        
-        if (dto.getDistrito() == null || dto.getDistrito().trim().isEmpty()) return prov.getId();
-        UbicacionGeografica dist = getOrCreate(dto.getDistrito().trim(), "DISTRITO", prov);
-        
-        return dist.getId();
-    }
-
-    private UbicacionGeografica getOrCreate(String nombre, String tipo, UbicacionGeografica padre) {
-        if (padre == null) {
-            return ubicacionRepo.findByNombreAndTipoUbicacionAndPadreIsNull(nombre, tipo)
-                .orElseGet(() -> ubicacionRepo.save(UbicacionGeografica.builder()
-                    .nombre(nombre)
-                    .tipoUbicacion(tipo)
-                    .padre(null)
-                    .estado("activo")
-                    .build()));
-        } else {
-            return ubicacionRepo.findByNombreAndTipoUbicacionAndPadre(nombre, tipo, padre)
-                .orElseGet(() -> ubicacionRepo.save(UbicacionGeografica.builder()
-                    .nombre(nombre)
-                    .tipoUbicacion(tipo)
-                    .padre(padre)
-                    .estado("activo")
-                    .build()));
-        }
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -240,7 +206,7 @@ public class PostulanteServiceImpl implements PostulanteService {
                 .fechaNacimiento(postulante.getFechaNacimiento() != null ? postulante.getFechaNacimiento().toString() : null)
                 .tipoInteres(postulante.getTipoInteres())
                 .fechaRegistro(postulante.getFechaRegistro() != null ? postulante.getFechaRegistro().toString() : null)
-                .estadoPostulacion(postulante.getEstado() != null ? postulante.getEstado().toString() : "PENDIENTE")
+                .estadoPostulacion(postulante.getEstado() != null ? postulante.getEstado().name().toLowerCase() : "pendiente")
                 .deudas(deudas)
                 .clasificacion(clasificacion)
                 .build();
@@ -300,8 +266,8 @@ public class PostulanteServiceImpl implements PostulanteService {
                     .idPostulante(postulante.getId())
                     .idJefe(idJefe)
                     .fechaCambio(LocalDate.now())
-                    .estadoAnterior(estadoAnterior.toString())
-                    .estadoNuevo("APROBADO")
+                    .estadoAnterior(estadoAnterior != null ? estadoAnterior.name().toLowerCase() : "pendiente")
+                    .estadoNuevo("aprobado")
                     .motivo("Postulante aprobado - Creacion de Socio y Usuario")
                     .build();
             
@@ -332,8 +298,8 @@ public class PostulanteServiceImpl implements PostulanteService {
                     .idPostulante(postulante.getId())
                     .idJefe(idJefe)
                     .fechaCambio(LocalDate.now())
-                    .estadoAnterior(estadoAnterior.toString())
-                    .estadoNuevo("RECHAZADO")
+                    .estadoAnterior(estadoAnterior != null ? estadoAnterior.name().toLowerCase() : "pendiente")
+                    .estadoNuevo("rechazado")
                     .motivo(motivo)
                     .build();
             
@@ -369,9 +335,20 @@ public class PostulanteServiceImpl implements PostulanteService {
                 .fechaNacimiento(postulante.getFechaNacimiento() != null ? postulante.getFechaNacimiento().toString() : null)
                 .tipoInteres(postulante.getTipoInteres())
                 .fechaRegistro(postulante.getFechaRegistro() != null ? postulante.getFechaRegistro().toString() : null)
-                .estadoPostulacion(postulante.getEstado() != null ? postulante.getEstado().toString() : "PENDIENTE")
+                .estadoPostulacion(postulante.getEstado() != null ? postulante.getEstado().name().toLowerCase() : "pendiente")
                 .deudas(null)
                 .clasificacion(null)
                 .build();
+    }
+
+    private Integer obtenerIdUsuarioActual() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return 1;
+        }
+        String username = auth.getName();
+        return usuarioRepository.findByUsername(username)
+                .map(Usuario::getId)
+                .orElse(1);
     }
 }

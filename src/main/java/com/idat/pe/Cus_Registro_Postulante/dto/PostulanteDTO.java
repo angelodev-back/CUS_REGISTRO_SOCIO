@@ -18,7 +18,7 @@ public class PostulanteDTO {
     private String correo;
     private String telefono;
     private String direccion;
-    private Integer idCiudad;
+    private String ciudad;
     private LocalDate fechaNacimiento;
     private String tipoInteres;
     private String codigoPostal;

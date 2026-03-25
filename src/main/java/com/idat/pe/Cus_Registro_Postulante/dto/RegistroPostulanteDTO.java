@@ -31,14 +31,8 @@ public class RegistroPostulanteDTO {
 
     private String telefono;
     private String direccion;
-    private Integer idCiudad;
+    private String ciudad;
     private LocalDate fechaNacimiento;
     private String tipoInteres;
     private String codigoPostal;
-
-    // Campos de ubicación detallada
-    private String pais;
-    private String departamento;
-    private String provincia;
-    private String distrito;
 }

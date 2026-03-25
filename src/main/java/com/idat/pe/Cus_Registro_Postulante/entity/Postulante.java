@@ -41,8 +41,8 @@ public class Postulante {
     private String telefono;
     private String direccion;
 
-    @Column(name = "id_ubicacion")
-    private Integer idCiudad;
+    @Column(name = "ciudad", length = 100)
+    private String ciudad;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
@@ -56,6 +56,7 @@ public class Postulante {
     @Column(name = "fecha_registro", nullable = false)
     private LocalDate fechaRegistro;
 
+    @Convert(converter = EstadoPostulanteConverter.class)
     @Column(name = "estado_postulacion", nullable = false)
     private EstadoPostulante estado;
 

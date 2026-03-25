@@ -211,24 +211,10 @@
                     </div>
 
                     <!-- ─── Ubicación Geográfica ─── -->
-                    <div class="frow frow-2">
+                    <div class="frow frow-1">
                         <div class="fg">
-                            <label>País</label>
-                            <input type="text" th:field="*{pais}" class="fi" placeholder="Perú">
-                        </div>
-                        <div class="fg">
-                            <label>Departamento</label>
-                            <input type="text" th:field="*{departamento}" class="fi" placeholder="Lima">
-                        </div>
-                    </div>
-                    <div class="frow frow-2">
-                        <div class="fg">
-                            <label>Provincia</label>
-                            <input type="text" th:field="*{provincia}" class="fi" placeholder="Lima">
-                        </div>
-                        <div class="fg">
-                            <label>Distrito</label>
-                            <input type="text" th:field="*{distrito}" class="fi" placeholder="Miraflores">
+                            <label>Ciudad</label>
+                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores, Lima">
                         </div>
                     </div>
                 </div>
@@ -422,10 +408,7 @@
                 telefono: document.querySelector('[name="telefono"]'),
                 direccion: document.querySelector('[name="direccion"]'),
                 codigoPostal: document.querySelector('[name="codigoPostal"]'),
-                pais: document.querySelector('[name="pais"]'),
-                departamento: document.querySelector('[name="departamento"]'),
-                provincia: document.querySelector('[name="provincia"]'),
-                distrito: document.querySelector('[name="distrito"]')
+                ciudad: document.querySelector('[name="ciudad"]')
             };
 
             this.jsonUrl = 'https://jsonubicaciongeografica.onrender.com/json/documentos';
@@ -586,12 +569,7 @@
             this.fields.direccion.value = data.direccion || "";
             this.fields.codigoPostal.value = data.codigo_postal || "";
 
-            if (data.ubicacion_geografica) {
-                this.fields.pais.value = data.ubicacion_geografica.pais || "";
-                this.fields.departamento.value = data.ubicacion_geografica.departamento || "";
-                this.fields.provincia.value = data.ubicacion_geografica.provincia || "";
-                this.fields.distrito.value = data.ubicacion_geografica.distrito || "";
-            }
+            this.fields.ciudad.value = data.ciudad || "";
         }
     }
 

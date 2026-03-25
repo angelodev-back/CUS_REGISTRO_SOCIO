@@ -11,16 +11,14 @@ public class EstadoPostulanteConverter implements AttributeConverter<EstadoPostu
         if (attribute == null) {
             return null;
         }
-        // La base de datos espera minúsculas debido al CHECK constraint
         return attribute.name().toLowerCase();
     }
 
     @Override
     public EstadoPostulante convertToEntityAttribute(String dbData) {
-        if (dbData == null) {
+        if (dbData == null || dbData.trim().isEmpty()) {
             return null;
         }
-        // Hibernate lo lee de la base de datos y lo convierte al Enum en mayúsculas
         return EstadoPostulante.valueOf(dbData.toUpperCase());
     }
 }

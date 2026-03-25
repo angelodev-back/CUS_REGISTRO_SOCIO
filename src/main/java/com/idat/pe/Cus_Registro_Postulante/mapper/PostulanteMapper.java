@@ -22,7 +22,7 @@ public class PostulanteMapper {
                 .correoElectronico(dto.getCorreo())
                 .telefono(dto.getTelefono())
                 .direccion(dto.getDireccion())
-                .idCiudad(dto.getIdCiudad())
+                .ciudad(dto.getCiudad())
                 .tipoInteres(dto.getTipoInteres())
                 .codigoPostal(dto.getCodigoPostal())
                 .fechaRegistro(LocalDate.now())
@@ -63,12 +63,12 @@ public class PostulanteMapper {
                 .correo(entity.getCorreoElectronico())
                 .telefono(entity.getTelefono())
                 .direccion(entity.getDireccion())
-                .idCiudad(entity.getIdCiudad())
+                .ciudad(entity.getCiudad())
                 .fechaNacimiento(entity.getFechaNacimiento())
                 .tipoInteres(entity.getTipoInteres())
                 .codigoPostal(entity.getCodigoPostal())
                 .fechaRegistro(entity.getFechaRegistro())
-                .estado(entity.getEstado().name())
+                .estado(entity.getEstado() != null ? entity.getEstado().name().toLowerCase() : null)
                 .build();
     }
 }
