@@ -16,5 +16,5 @@ public interface HistorialEstadoPostulanteRepository extends JpaRepository<Histo
     /**
      * Busca el historial por ID de postulante
      */
-    List<HistorialEstadoPostulante> findByIdPostulanteOrderByFechaCambioDesc(Integer idPostulante);
+    List<HistorialEstadoPostulante> findByPostulante_IdOrderByFechaCambioDesc(Integer idPostulante);
 }

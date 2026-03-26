@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error — Club Náutico Neptuno</title>
+    <link rel="stylesheet" th:href="@{/css/neptuno.css}">
+    <style>
+        body { background: #f4f6fa; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Inter', sans-serif; }
+        .error-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; text-align: center; }
+        h1 { color: #ef4444; margin-bottom: 20px; }
+        p { color: #64748b; line-height: 1.6; margin-bottom: 30px; }
+        .btn-home { background: #0d2b4e; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="error-card">
+        <svg style="width: 80px; height: 80px; color: #ef4444; margin-bottom: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <h1 th:text="${mensaje}">¡Ups! Algo salió mal</h1>
+        <p th:text="${detalle}">No pudimos procesar tu solicitud en este momento.</p>
+        <a href="/" class="btn-home">Ir al Inicio</a>
+    </div>
+</body>
+</html>

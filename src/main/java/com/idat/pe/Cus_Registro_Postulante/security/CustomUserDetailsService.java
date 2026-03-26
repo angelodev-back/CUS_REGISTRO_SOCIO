@@ -19,21 +19,26 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UsuarioRepository usuarioRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
+        // Buscamos por nombre de usuario O por correo electrónico
+        Usuario usuario = usuarioRepository.findByUsernameOrCorreoElectronico(input, input)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario o correo no encontrado: " + input));
 
-        // Validar que el usuario esté activo (case-insensitive)
+        // Validar que el usuario esté activo
         if (usuario.getEstado() == null || !usuario.getEstado().equalsIgnoreCase("activo")) {
-            throw new UsernameNotFoundException("Usuario inactivo o no validado: " + username);
+            throw new UsernameNotFoundException("Usuario inactivo: " + input);
+        }
+
+        // Obtener el nombre del rol (asegurándonos de que tenga el prefijo ROLE_)
+        String nombreRol = usuario.getRol().getNombre().toUpperCase();
+        if (!nombreRol.startsWith("ROLE_")) {
+            nombreRol = "ROLE_" + nombreRol;
         }
 
         return new User(
                 usuario.getUsername(),
                 usuario.getPassword(),
-                Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre().toUpperCase())
-                )
+                Collections.singletonList(new SimpleGrantedAuthority(nombreRol))
         );
     }
 }

@@ -9,6 +9,7 @@ import com.idat.pe.Cus_Registro_Postulante.mapper.PostulanteMapper;
 import com.idat.pe.Cus_Registro_Postulante.repository.*;
 import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import com.idat.pe.Cus_Registro_Postulante.service.DeudaExternaService;
+import com.idat.pe.Cus_Registro_Postulante.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +41,6 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-
     @Autowired
     private SocioRepository socioRepository;
 
@@ -51,11 +51,10 @@ public class PostulanteServiceImpl implements PostulanteService {
     private RolRepository rolRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private EmailService emailService;
 
-    // =====================================================
-    // MÉTODOS BÁSICOS
-    // =====================================================
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -67,8 +66,10 @@ public class PostulanteServiceImpl implements PostulanteService {
             throw new RuntimeException("El correo " + dto.getCorreo() + " ya se encuentra registrado.");
         }
 
-
         Postulante postulante = postulanteMapper.toEntity(dto);
+        postulante.setEstado(EstadoPostulante.PENDIENTE);
+        postulante.setFechaRegistro(LocalDate.now());
+        
         Postulante guardado = postulanteRepository.save(postulante);
         return postulanteMapper.toDTO(guardado);
     }
@@ -76,8 +77,7 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Override
     @Transactional(readOnly = true)
     public List<PostulanteDTO> listarPostulantes() {
-        List<Postulante> postulantes = postulanteRepository.findAll();
-        return postulantes.stream()
+        return postulanteRepository.findAll().stream()
                 .map(postulanteMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -102,7 +102,6 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setTelefono(dto.getTelefono());
         postulante.setDireccion(dto.getDireccion());
         postulante.setCiudad(dto.getCiudad());
-
         postulante.setTipoInteres(dto.getTipoInteres());
         postulante.setCodigoPostal(dto.getCodigoPostal());
 
@@ -139,36 +138,18 @@ public class PostulanteServiceImpl implements PostulanteService {
 
         Postulante actualizado = postulanteRepository.save(postulante);
 
-        // Registro de Auditoría
-        HistorialEstadoPostulante historial = HistorialEstadoPostulante.builder()
-                .idPostulante(actualizado.getId())
-                .idJefe(obtenerIdUsuarioActual())
-                .fechaCambio(LocalDate.now())
-                .estadoAnterior(estadoAnterior != null ? estadoAnterior.name().toLowerCase() : "pendiente")
-                .estadoNuevo(actualizado.getEstado().name().toLowerCase())
-                .motivo("Cambio de estado manual")
-                .build();
-        historialRepository.save(historial);
+        registrarHistorial(actualizado, estadoAnterior, "Cambio de estado manual", obtenerIdUsuarioActual());
 
         return postulanteMapper.toDTO(actualizado);
     }
 
-    // =====================================================
-    // MÉTODOS PARA FLUJO JEFE (Paso 2)
-    // =====================================================
-
     @Override
     @Transactional(readOnly = true)
     public List<PostulanteConDeudasDTO> obtenerPostulantesPendientesConDeudas() {
-        logger.info("Obteniendo postulantes pendientes/subsanados");
-        
-        // ArrayList mutable para evitar UnsupportedOperationException
-        List<Postulante> postulantes = new ArrayList<>(postulanteRepository.findByEstado(EstadoPostulante.PENDIENTE));
+        List<Postulante> postulantes = new ArrayList<>();
+        postulantes.addAll(postulanteRepository.findByEstado(EstadoPostulante.PENDIENTE));
         postulantes.addAll(postulanteRepository.findByEstado(EstadoPostulante.SUBSANADO));
         
-        logger.info("Se encontraron {} postulantes pendientes/subsanados", postulantes.size());
-        
-        // Para el listado NO consultamos deudas — eso se hace al seleccionar un postulante
         return postulantes.stream()
                 .map(this::mapearPostulanteBasico)
                 .collect(Collectors.toList());
@@ -177,19 +158,16 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Override
     @Transactional(readOnly = true)
     public PostulanteConDeudasDTO obtenerPostulanteConDeudasDetalle(Integer idPostulante) {
-        logger.info("Obteniendo detalles de postulante ID: {}", idPostulante);
-        
         Postulante postulante = postulanteRepository.findById(idPostulante)
                 .orElseThrow(() -> new RuntimeException("Postulante no encontrado con id: " + idPostulante));
         
-        // Para el detalle sí consultamos deudas en BD local (con protección)
-        List<DeudaExternaDTO> deudas = List.of();
+        List<DeudaExternaDTO> deudas = new ArrayList<>();
         String clasificacion = "Sin datos";
         try {
             deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
             clasificacion = deudaExternaService.clasificarPostulante(deudas);
         } catch (Exception e) {
-            logger.warn("No se pudieron obtener deudas locales para postulante {}: {}", idPostulante, e.getMessage());
+            logger.warn("No se pudieron obtener deudas para postulante {}: {}", idPostulante, e.getMessage());
         }
         
         return PostulanteConDeudasDTO.builder()
@@ -215,12 +193,8 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Override
     @Transactional
     public void aprobarPostulante(Integer idPostulante, Integer idJefe) {
-        logger.info("======= INICIANDO APROBACIÓN DE POSTULANTE =======");
-        logger.info("Postulante ID: {}, Jefe ID: {}", idPostulante, idJefe);
-        
         Postulante postulante = postulanteRepository.findById(idPostulante)
-                .orElseThrow(() -> new RuntimeException("Postulante no encontrado con id: " + idPostulante));
-        logger.info("Postulante encontrado: {}", postulante.getNumeroDocumento());
+                .orElseThrow(() -> new RuntimeException("Postulante no encontrado"));
         
         EstadoPostulante estadoAnterior = postulante.getEstado();
         
@@ -228,127 +202,131 @@ public class PostulanteServiceImpl implements PostulanteService {
             Rol rolSocio = rolRepository.findByNombre("SOCIO")
                     .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
             
-            String passwordHash = passwordEncoder.encode("123456");
-            
-            Usuario nuevoUsuario = Usuario.builder()
+            Usuario usuario = Usuario.builder()
                     .rol(rolSocio)
                     .dni(postulante.getNumeroDocumento())
-                    .nombres(postulante.getNombres() != null ? postulante.getNombres() : "")
-                    .apellidoPaterno(postulante.getApellidoPaterno() != null ? postulante.getApellidoPaterno() : "")
-                    .apellidoMaterno(postulante.getApellidoMaterno() != null ? postulante.getApellidoMaterno() : "")
+                    .nombres(postulante.getNombres())
+                    .apellidoPaterno(postulante.getApellidoPaterno())
+                    .apellidoMaterno(postulante.getApellidoMaterno())
                     .correoElectronico(postulante.getCorreoElectronico())
                     .username(postulante.getNumeroDocumento())
-                    .password(passwordHash)
+                    .password(passwordEncoder.encode("123456"))
                     .estado("activo")
                     .build();
             
-            Usuario usuarioCreado = usuarioRepository.save(nuevoUsuario);
-            logger.info("Usuario creado - ID: {}", usuarioCreado.getId());
+            Usuario usuarioCreado = usuarioRepository.save(usuario);
             
-            String tipoSocio = postulante.getTipoInteres() != null
-                    ? ("NAUTICO".equalsIgnoreCase(postulante.getTipoInteres()) ? "Nautico" : "Social")
-                    : "Social";
-            
-            Socio nuevoSocio = Socio.builder()
-                    .idPostulante(postulante.getId())
-                    .idUsuario(usuarioCreado.getId())
-                    .tipoSocio(tipoSocio)
+            Socio socio = Socio.builder()
+                    .postulante(postulante)
+                    .usuario(usuarioCreado)
+                    .tipoSocio("NAUTICO".equalsIgnoreCase(postulante.getTipoInteres()) ? "Nautico" : "Social")
                     .estadoSocio("activo")
                     .fechaActivacion(LocalDate.now())
                     .build();
             
-            socioRepository.save(nuevoSocio);
+            socioRepository.save(socio);
             
             postulante.setEstado(EstadoPostulante.APROBADO);
             postulanteRepository.save(postulante);
             
-            HistorialEstadoPostulante historial = HistorialEstadoPostulante.builder()
-                    .idPostulante(postulante.getId())
-                    .idJefe(idJefe)
-                    .fechaCambio(LocalDate.now())
-                    .estadoAnterior(estadoAnterior != null ? estadoAnterior.name().toLowerCase() : "pendiente")
-                    .estadoNuevo("aprobado")
-                    .motivo("Postulante aprobado - Creacion de Socio y Usuario")
-                    .build();
+            registrarHistorial(postulante, estadoAnterior, "Postulante aprobado - Creacion de Socio", idJefe);
             
-            historialRepository.save(historial);
-            logger.info("======= APROBACIÓN COMPLETADA =======");
-            
+            emailService.enviarCredenciales(postulante.getCorreoElectronico(), postulante.getNumeroDocumento(), "123456");
+
         } catch (Exception e) {
-            logger.error("Error al aprobar postulante: {}", e.getMessage(), e);
-            throw new RuntimeException("Error al aprobar postulante: " + e.getMessage());
+            throw new RuntimeException("Error al aprobar: " + e.getMessage());
         }
     }
 
     @Override
     @Transactional
     public void rechazarPostulante(Integer idPostulante, Integer idJefe, String motivo) {
-        logger.info("======= INICIANDO RECHAZO DE POSTULANTE =======");
+        Postulante postulante = postulanteRepository.findById(idPostulante)
+                .orElseThrow(() -> new RuntimeException("Postulante no encontrado"));
         
-        try {
-            Postulante postulante = postulanteRepository.findById(idPostulante)
-                    .orElseThrow(() -> new RuntimeException("Postulante no encontrado con id: " + idPostulante));
-            
-            EstadoPostulante estadoAnterior = postulante.getEstado();
-            
-            postulante.setEstado(EstadoPostulante.RECHAZADO);
-            postulanteRepository.save(postulante);
-            
-            HistorialEstadoPostulante historial = HistorialEstadoPostulante.builder()
-                    .idPostulante(postulante.getId())
-                    .idJefe(idJefe)
-                    .fechaCambio(LocalDate.now())
-                    .estadoAnterior(estadoAnterior != null ? estadoAnterior.name().toLowerCase() : "pendiente")
-                    .estadoNuevo("rechazado")
-                    .motivo(motivo)
-                    .build();
-            
-            historialRepository.save(historial);
-            logger.info("======= RECHAZO COMPLETADO =======");
-            
-        } catch (Exception e) {
-            logger.error("Error al rechazar postulante: {}", e.getMessage(), e);
-            throw new RuntimeException("Error al rechazar postulante: " + e.getMessage());
-        }
+        EstadoPostulante estadoAnterior = postulante.getEstado();
+        postulante.setEstado(EstadoPostulante.RECHAZADO);
+        postulanteRepository.save(postulante);
+        
+        registrarHistorial(postulante, estadoAnterior, motivo, idJefe);
+        
+        emailService.enviarNotificacionSubsanacion(postulante.getCorreoElectronico(), motivo);
     }
 
-    // =====================================================
-    // MÉTODOS PRIVADOS HELPER
-    // =====================================================
+    @Override
+    @Transactional
+    public void subsanarPostulante(Integer idPostulante, RegistroPostulanteDTO dto) {
+        Postulante postulante = postulanteRepository.findById(idPostulante)
+                .orElseThrow(() -> new RuntimeException("Postulante no encontrado"));
+        
+        EstadoPostulante estadoAnterior = postulante.getEstado();
+        
+        postulante.setCorreoElectronico(dto.getCorreo());
+        postulante.setTelefono(dto.getTelefono());
+        postulante.setDireccion(dto.getDireccion());
+        postulante.setCiudad(dto.getCiudad());
+        postulante.setTipoInteres(dto.getTipoInteres());
+        
+        if (postulante.getTipoDocumento() == TipoDocumento.DNI) {
+            postulante.setNombres(dto.getNombre());
+            postulante.setApellidoPaterno(dto.getApellidoPaterno());
+            postulante.setApellidoMaterno(dto.getApellidoMaterno());
+        } else {
+            postulante.setRazonSocial(dto.getRazonSocial());
+        }
+        
+        postulante.setEstado(EstadoPostulante.SUBSANADO);
+        postulanteRepository.save(postulante);
+        
+        registrarHistorial(postulante, estadoAnterior, "Subsanación enviada por el postulante", null);
+    }
 
-    /**
-     * Mapea un Postulante a DTO básico SIN consultar deudas.
-     * Usado en el listado para evitar queries innecesarias.
-     */
-    private PostulanteConDeudasDTO mapearPostulanteBasico(Postulante postulante) {
+    @Override
+    @Transactional(readOnly = true)
+    public PostulanteDTO buscarPorNumeroDocumento(String numero) {
+        return postulanteRepository.findByNumeroDocumento(numero)
+                .map(postulanteMapper::toDTO)
+                .orElse(null);
+    }
+
+    private void registrarHistorial(Postulante p, EstadoPostulante anterior, String motivo, Integer idJefe) {
+        HistorialEstadoPostulante h = HistorialEstadoPostulante.builder()
+                .postulante(p)
+                .idJefe(idJefe != null ? idJefe : 0)
+                .fechaCambio(LocalDate.now())
+                .estadoAnterior(anterior != null ? anterior.name().toLowerCase() : "pendiente")
+                .estadoNuevo(p.getEstado().name().toLowerCase())
+                .motivo(motivo)
+                .build();
+        historialRepository.save(h);
+    }
+
+    private PostulanteConDeudasDTO mapearPostulanteBasico(Postulante p) {
         return PostulanteConDeudasDTO.builder()
-                .idPostulante(postulante.getId())
-                .tipoDocumento(postulante.getTipoDocumento() != null ? postulante.getTipoDocumento().toString() : "DNI")
-                .numeroDocumento(postulante.getNumeroDocumento())
-                .nombres(postulante.getNombres())
-                .apellidoPaterno(postulante.getApellidoPaterno())
-                .apellidoMaterno(postulante.getApellidoMaterno())
-                .razonSocial(postulante.getRazonSocial())
-                .correoElectronico(postulante.getCorreoElectronico())
-                .telefono(postulante.getTelefono())
-                .direccion(postulante.getDireccion())
-                .fechaNacimiento(postulante.getFechaNacimiento() != null ? postulante.getFechaNacimiento().toString() : null)
-                .tipoInteres(postulante.getTipoInteres())
-                .fechaRegistro(postulante.getFechaRegistro() != null ? postulante.getFechaRegistro().toString() : null)
-                .estadoPostulacion(postulante.getEstado() != null ? postulante.getEstado().name().toLowerCase() : "pendiente")
-                .deudas(null)
-                .clasificacion(null)
+                .idPostulante(p.getId())
+                .tipoDocumento(p.getTipoDocumento().toString())
+                .numeroDocumento(p.getNumeroDocumento())
+                .nombres(p.getNombres())
+                .apellidoPaterno(p.getApellidoPaterno())
+                .apellidoMaterno(p.getApellidoMaterno())
+                .razonSocial(p.getRazonSocial())
+                .correoElectronico(p.getCorreoElectronico())
+                .telefono(p.getTelefono())
+                .direccion(p.getDireccion())
+                .fechaNacimiento(p.getFechaNacimiento() != null ? p.getFechaNacimiento().toString() : null)
+                .tipoInteres(p.getTipoInteres())
+                .fechaRegistro(p.getFechaRegistro() != null ? p.getFechaRegistro().toString() : null)
+                .estadoPostulacion(p.getEstado().name().toLowerCase())
                 .build();
     }
 
     private Integer obtenerIdUsuarioActual() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return 1;
+            return 0;
         }
-        String username = auth.getName();
-        return usuarioRepository.findByUsername(username)
+        return usuarioRepository.findByUsername(auth.getName())
                 .map(Usuario::getId)
-                .orElse(1);
+                .orElse(0);
     }
 }

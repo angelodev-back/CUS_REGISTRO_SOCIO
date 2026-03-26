@@ -325,20 +325,26 @@ function renderizarDeudas() {
             </tbody>
         </table>`;
 }
-
 function filadeDeuda(d, idx) {
     const monto      = parseFloat(d.monto_deuda || 0);
     const montoClass = monto > 0 ? 'monto-deuda' : 'monto-cero';
     const montoTexto = `S/. ${monto.toFixed(2)}`;
-    const estado     = (d.estado || 'pendiente').toLowerCase();
     const verificada = d.id_verificador != null;
+
+    function getBadgeEstado(estado) {
+        const est = (estado || 'pendiente').toLowerCase();
+        if (est === 'pendiente') return '<span class="badge badge-pendiente">Pendiente</span>';
+        if (est === 'subsanado') return '<span class="badge badge-subsanado">Subsanado</span>';
+        if (est === 'rechazado') return '<span class="badge badge-rechazado">Rechazado</span>';
+        return `<span class="badge">${estado}</span>`;
+    }
 
     return `
         <tr id="fila-deuda-${idx}">
             <td><strong>${d.nombre_club_origen || '—'}</strong></td>
             <td><span class="${montoClass}">${montoTexto}</span></td>
             <td>${d.fecha_registro ? formatearFecha(d.fecha_registro) : '—'}</td>
-            <td><span class="estado-badge estado-${estado}">${capitalizarPrimera(d.estado)}</span></td>
+            <td>${getBadgeEstado(d.estado)}</td>
             <td>
                 <span class="verificado-badge ${verificada ? 'verificado-si' : 'verificado-no'}">
                     ${verificada

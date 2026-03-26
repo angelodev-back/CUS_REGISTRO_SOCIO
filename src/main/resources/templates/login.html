@@ -3,143 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Accede al panel de administración del Club Náutico Neptuno.">
-    <title>Club Náutico Neptuno — Acceso a Panel</title>
+    <title>Club Náutico Neptuno — Acceso</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/neptuno.css}">
+    <style>
+        /* Ajustes rápidos para mejorar el diseño sin depender de login.js */
+        .alert-error { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; display: flex; align-items: center; gap: 8px; border: 1px solid #ef4444; }
+        .alert-logout { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; border: 1px solid #10b981; }
+    </style>
 </head>
 <body>
 <div class="split-wrapper">
-
-    <!-- ══ PANEL IZQUIERDO ══ -->
     <div class="panel-left">
-
         <div class="brand-row">
             <svg class="brand-anchor" viewBox="0 0 32 32" fill="none">
                 <circle cx="16" cy="6" r="3.5" stroke="#4ec9e4" stroke-width="1.8"/>
                 <line x1="16" y1="9.5" x2="16" y2="28" stroke="#4ec9e4" stroke-width="1.8" stroke-linecap="round"/>
                 <path d="M8 18 C8 25 24 25 24 18" stroke="#4ec9e4" stroke-width="1.8" stroke-linecap="round"/>
-                <line x1="5" y1="13.5" x2="27" y2="13.5" stroke="#4ec9e4" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>
-                <circle cx="5" cy="28" r="2.4" stroke="#4ec9e4" stroke-width="1.5"/>
-                <circle cx="27" cy="28" r="2.4" stroke="#4ec9e4" stroke-width="1.5"/>
             </svg>
             <div>
                 <div class="brand-name">Club Náutico Neptuno</div>
                 <span class="brand-sub">Sistema Administrativo</span>
             </div>
         </div>
-
         <div class="left-body">
-            <div class="left-icon-circle">
-                <svg viewBox="0 0 34 34">
-                    <circle cx="17" cy="10" r="5" stroke="#4ec9e4" stroke-width="2" fill="none"/>
-                    <path d="M8 26 Q8 20 17 20 Q26 20 26 26" stroke="#4ec9e4" stroke-width="2" fill="none" stroke-linecap="round"/>
-                </svg>
-            </div>
-
             <div class="left-overline">Autenticación · Sistema</div>
-            <h1 class="left-title">Acceso a<br><em>Panel de Control</em><br>Administrativo</h1>
-            <div class="left-divider"></div>
-            <p class="left-desc">
-                Inicia sesión con tus credenciales para acceder a las herramientas de gestión y validación de solicitudes.
-            </p>
-
-            <ul class="benefit-list">
-                <li>
-                    <div class="benefit-check">
-                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
-                    </div>
-                    Acceso seguro con autenticación de dos factores
-                </li>
-                <li>
-                    <div class="benefit-check">
-                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
-                    </div>
-                    Consulta el historial de validaciones en tiempo real
-                </li>
-                <li>
-                    <div class="benefit-check">
-                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
-                    </div>
-                    Gestión centralizada de solicitudes de membresía
-                </li>
-            </ul>
+            <h1 class="left-title">Acceso a<br><em>Panel de Control</em></h1>
+            <p class="left-desc">Inicia sesión con tus credenciales para administrar el club.</p>
         </div>
-
-        <svg class="left-wave" viewBox="0 0 800 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0,50 C150,90 350,10 500,50 C650,90 750,20 800,50 L800,100 L0,100 Z" fill="#4ec9e4"/>
-        </svg>
-
-        <div class="left-copy">© 2025 Club Náutico Neptuno — Sistema Interno v1.0</div>
+        <div class="left-copy">© 2025 Club Náutico Neptuno</div>
     </div>
 
-    <!-- ══ PANEL DERECHO ══ -->
     <div class="panel-right">
         <div class="welcome-card">
-            <div class="page-tag">Autenticación</div>
             <h2>Iniciar sesión</h2>
-            <p class="desc">
-                Ingresa tus credenciales de acceso para continuar al panel administrativo.
-            </p>
+            <p class="desc">Ingresa tus credenciales para continuar.</p>
 
-            <!-- Alert de error (oculto por defecto) -->
-            <div id="alertError" class="alert alert-error" style="display:none;">
-                <svg viewBox="0 0 24 24"><path d="M12 2c5.5 0 10 4.5 10 10s-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2m0 9v4m0-8v1"/></svg>
-                <span id="errorMsg">Usuario o contraseña incorrectos</span>
+            <!-- Mensajes de Error o Logout -->
+            <div th:if="${param.error}" class="alert alert-error">
+                <span>Usuario o contraseña incorrectos. Por favor, intente de nuevo.</span>
+            </div>
+            <div th:if="${param.logout}" class="alert alert-logout">
+                <span>Has cerrado sesión correctamente.</span>
             </div>
 
-            <!-- Formulario de login -->
-            <form id="loginForm" style="margin-top: 28px;">
-                <!-- Usuario/Email -->
+            <!-- Formulario estándar de Spring Security -->
+            <form th:action="@{/login}" method="post" style="margin-top: 28px;">
                 <div class="frow" style="margin-bottom: 16px;">
                     <div class="fg">
-                        <label for="username">Usuario o Correo<span class="req">*</span></label>
-                        <input 
-                            type="text" 
-                            id="username" 
-                            name="username" 
-                            class="fi" 
-                            placeholder="Ingresa tu usuario o correo"
-                            required
-                        />
+                        <label for="username">Usuario o Correo</label>
+                        <input type="text" id="username" name="username" class="fi" placeholder="Usuario" required />
                     </div>
                 </div>
-
-                <!-- Contraseña -->
                 <div class="frow" style="margin-bottom: 24px;">
                     <div class="fg">
-                        <label for="password">Contraseña<span class="req">*</span></label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            class="fi" 
-                            placeholder="Ingresa tu contraseña"
-                            required
-                        />
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" name="password" class="fi" placeholder="********" required />
                     </div>
                 </div>
-
-                <!-- Botón de envío -->
-                <button id="btnLogin" type="submit" class="btn-submit" style="width:100%; justify-content:center;">
-                    <svg viewBox="0 0 24 24" style="width:20px; height:20px; stroke:currentColor; stroke-width:2; fill:none;">
-                        <path d="M13 12h8M20 9l-3 3 3 3"/>
-                        <path d="M4 12a8 8 0 1 0 16 0"/>
-                    </svg>
+                <button type="submit" class="btn-submit" style="width:100%; justify-content:center;">
                     Acceder
                 </button>
-
-                <!-- Link de registro -->
-                <p style="text-align:center; margin-top:24px; font-size:13px; color:#5a6a80;">
-                    ¿Eres nuevo socio? <a href="/registro" style="color:#0094bc; text-decoration:none; font-weight:600;">Registrate aquí</a>
-                </p>
             </form>
+            
+            <p style="text-align:center; margin-top:24px; font-size:13px; color:#5a6a80;">
+                ¿Eres nuevo socio? <a href="/registro" style="color:#0094bc; text-decoration:none; font-weight:600;">Registrate aquí</a>
+            </p>
         </div>
     </div>
-
 </div>
-
-<script th:src="@{/js/login.js}"></script>
 </body>
 </html>

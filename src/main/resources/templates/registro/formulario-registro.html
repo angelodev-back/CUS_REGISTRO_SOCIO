@@ -515,7 +515,7 @@
                 this.showModal({ 
                     title: "Campo Necesario", 
                     text: `Debes ingresar el número de ${tipo.toUpperCase()} para realizar la validación.`, 
-                    type: "confirm" // Use confirm icon for warning
+                    type: "confirm"
                 });
                 return;
             }
@@ -524,6 +524,36 @@
             this.btnValidar.disabled = true;
 
             try {
+                // 1. Primero chequear si ya existe en el club para subsanación
+                const clubRes = await fetch(`/api/postulantes/buscar-por-documento/${numero}`);
+                const clubData = await clubRes.json();
+                
+                if (clubData.body) {
+                    const p = clubData.body;
+                    if (p.estadoPostulacion === 'rechazado') {
+                        this.showModal({
+                            title: "Solicitud Existente (Rechazada)",
+                            text: "Hemos detectado una solicitud anterior que requiere subsanación. Sus datos se han cargado para que los actualice.",
+                            type: "confirm",
+                            confirmText: "Cargar para Subsanar",
+                            onConfirm: () => {
+                                this.fillFormFromClub(p);
+                                this.form.action = `/registro/subsanar/${p.idPostulante}`;
+                                // No necesitamos cambiar el método a PUT porque el controlador usa POST
+                            }
+                        });
+                        return;
+                    } else {
+                         this.showModal({
+                            title: "Solicitud en Proceso",
+                            text: `Ya tienes una solicitud en estado: ${p.estadoPostulacion.toUpperCase()}. No puedes registrarte de nuevo aún.`,
+                            type: "alert"
+                        });
+                        return;
+                    }
+                }
+
+                // 2. Si no existe en el club, buscar en fuentes externas
                 const response = await fetch(this.jsonUrl);
                 const data = await response.json();
                 const record = data[tipo]?.find(item => item.numero_documento === numero);
@@ -532,7 +562,7 @@
                     this.fillForm(record, tipo);
                     this.showModal({ 
                         title: "¡Datos Encontrados!", 
-                        text: "Hemos sincronizado la información correctamente con nuestra base de datos.", 
+                        text: "Hemos sincronizado la información correctamente con nuestra base de datos externa.", 
                         type: "alert" 
                     });
                 } else {
@@ -549,6 +579,18 @@
                 this.btnValidar.innerText = "Validar";
                 this.btnValidar.disabled = false;
             }
+        }
+
+        fillFormFromClub(data) {
+            this.fields.nombre.value = data.nombres || "";
+            this.fields.apellidoPaterno.value = data.apellidoPaterno || "";
+            this.fields.apellidoMaterno.value = data.apellidoMaterno || "";
+            this.fields.razonSocial.value = data.razonSocial || "";
+            this.fields.fechaNacimiento.value = data.fechaNacimiento || "";
+            this.fields.correo.value = data.correoElectronico || "";
+            this.fields.telefono.value = data.telefono || "";
+            this.fields.direccion.value = data.direccion || "";
+            this.fields.ciudad.value = data.ciudad || "";
         }
 
         fillForm(data, type) {

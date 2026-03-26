@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitud Enviada — Club Náutico Neptuno</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/neptuno.css}">
 </head>
 <body>
@@ -68,18 +68,25 @@
             <div class="alert alert-ok" style="margin-bottom:20px;">
                 <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><polyline points="6,10 9,13 14,7"/></svg>
                 <div>
-                        <span class="tracking-code" style="display:inline-block; font-weight:600; color:#4ec9e4; font-family:monospace; margin-left:8px;" th:text="'#' + ${postulante.id}">#0000</span>
+                        <span class="tracking-code" style="display:inline-block; font-weight:600; color:#4ec9e4; font-family:monospace; margin-left:8px;" 
+                              th:text="${postulante != null} ? '#' + ${postulante.id} : '#0000'">#0000</span>
                 </div>
             </div>
 
             <!-- Mensaje de confirmación -->
             <div class="alert alert-info" style="margin-bottom:20px;">
                 <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="7" r=".5" fill="currentColor"/></svg>
-                <span>Solicitud de registro enviada exitosamente.</span>
+                <span th:if="${postulante != null}">Solicitud de registro enviada exitosamente.</span>
+                <span th:if="${postulante == null}">Su solicitud ha sido procesada correctamente. Puede volver al inicio.</span>
+            </div>
+
+            <div th:if="${postulante == null}" class="alert alert-warn" style="margin-bottom:20px; background: rgba(255,193,7,0.1); border-color: rgba(255,193,7,0.2); color: #ffc107;">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L2 18h16L10 2zm0 3.5L16.5 17H3.5L10 5.5zm-1 8h2v2H9v-2zm0-5h2v4H9V8.5z"/></svg>
+                <span style="margin-left:8px;">La información detallada ya no está disponible por seguridad. Guarde su número de documento para consultas futuras.</span>
             </div>
 
             <!-- Datos del postulante -->
-            <div class="data-card">
+            <div class="data-card" th:if="${postulante != null}">
                 <div class="data-card-head">Datos registrados</div>
                 <div class="data-row">
                     <span class="data-key" th:text="${postulante.tipoDocumento}">DNI</span>
@@ -125,7 +132,8 @@
                         <div class="step-n">3</div>
                         <div class="step-body">
                             Notificación por correo
-                            <span>Le comunicaremos el resultado a <strong th:text="${postulante.correo}">su correo</strong>.</span>
+                            <span th:if="${postulante != null}">Le comunicaremos el resultado a <strong th:text="${postulante.correo}">su correo</strong>.</span>
+                            <span th:if="${postulante == null}">Le comunicaremos el resultado a su correo electrónico registrado.</span>
                         </div>
                     </li>
                 </ul>

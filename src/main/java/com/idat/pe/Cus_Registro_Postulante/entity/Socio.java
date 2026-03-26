@@ -23,11 +23,13 @@ public class Socio {
     @Column(name = "id_socio")
     private Integer id;
 
-    @Column(name = "id_postulante", nullable = false)
-    private Integer idPostulante;
+    @OneToOne
+    @JoinColumn(name = "id_postulante", nullable = false)
+    private Postulante postulante;
 
-    @Column(name = "id_usuario", nullable = false)
-    private Integer idUsuario;
+    @OneToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
     @Column(name = "tipo_socio", nullable = false, length = 20)
     private String tipoSocio; // Nautico, Social
@@ -41,10 +43,4 @@ public class Socio {
     @Column(name = "fecha_baja")
     private LocalDate fechaBaja;
 
-    // Relaciones (transient, se cargan manualmente si es necesario)
-    @Transient
-    private Postulante postulante;
-
-    @Transient
-    private Usuario usuario;
 }

@@ -23,8 +23,9 @@ public class HistorialEstadoPostulante {
     @Column(name = "id_historial")
     private Integer id;
 
-    @Column(name = "id_postulante", nullable = false)
-    private Integer idPostulante;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_postulante", nullable = false)
+    private Postulante postulante;
 
     @Column(name = "id_jefe", nullable = false)
     private Integer idJefe;
@@ -40,10 +41,6 @@ public class HistorialEstadoPostulante {
 
     @Column(name = "motivo", columnDefinition = "TEXT")
     private String motivo;
-
-    // Relaciones (transient, se cargan manualmente si es necesario)
-    @Transient
-    private Postulante postulante;
 
     @Transient
     private Usuario jefe;

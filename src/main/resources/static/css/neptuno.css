@@ -12,40 +12,40 @@
 
 /* ── Tokens ── */
 :root {
-    --navy:      #0d2b4e;
-    --navy-mid:  #1565a0;
-    --teal:      #0094bc;
-    --teal-lt:   #4ec9e4;
-    --bg:        #f4f6fa;
+    --navy:      #0f172a;
+    --navy-mid:  #1e293b;
+    --teal:      #0284c7;
+    --teal-lt:   #38bdf8;
+    --bg:        #f8fafc;
     --white:     #ffffff;
-    --border:    #dde3ee;
-    --txt:       #1a2940;
-    --muted:     #5a6a80;
-    --error:     #c0392b;
-    --error-bg:  #fff5f5;
-    --warn-bg:   #fff8e0;
-    --warn:      #b8780a;
-    --info-bg:   #eef7fb;
-    --info:      #1565a0;
-    --ok:        #1a8a5a;
-    --ok-bg:     #f0fdf5;
+    --border:    #e2e8f0;
+    --txt:       #1e293b;
+    --muted:     #64748b;
+    --error:     #ef4444;
+    --error-bg:  #fef2f2;
+    --warn-bg:   #fffbeb;
+    --warn:      #d97706;
+    --info-bg:   #eff6ff;
+    --info:      #1d4ed8;
+    --ok:        #059669;
+    --ok-bg:     #ecfdf5;
 
-    --radius-sm: 8px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
 
-    --shadow-sm:  0 2px 8px rgba(13,43,78,.08);
-    --shadow-md:  0 6px 24px rgba(13,43,78,.14);
-    --shadow-lg:  0 12px 40px rgba(13,43,78,.22);
+    --shadow-sm:  0 2px 8px rgba(15,23,42,.04);
+    --shadow-md:  0 8px 24px rgba(15,23,42,.08);
+    --shadow-lg:  0 16px 48px rgba(15,23,42,.12);
 
-    --transition: 0.2s ease;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Base ── */
 html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', sans-serif;
     background: var(--bg);
     color: var(--txt);
     min-height: 100vh;
@@ -796,6 +796,18 @@ select.fi {
     font-size: 11.5px;
     font-weight: 600;
     color: var(--warn);
+}
+
+.badge-subsanado {
+    background: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #d8b4fe;
+}
+
+.badge-rechazado {
+    background: var(--error-bg);
+    color: var(--error);
+    border: 1px solid #fecaca;
 }
 
 /* Next steps list */
