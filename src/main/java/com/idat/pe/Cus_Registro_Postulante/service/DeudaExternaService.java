@@ -1,6 +1,7 @@
 package com.idat.pe.Cus_Registro_Postulante.service;
 
 import com.idat.pe.Cus_Registro_Postulante.dto.DeudaExternaDTO;
+import com.idat.pe.Cus_Registro_Postulante.dto.ExternalDebtResponseDTO;
 import java.util.List;
 
 /**
@@ -11,9 +12,14 @@ import java.util.List;
 public interface DeudaExternaService {
     
     /**
-     * Obtiene todas las deudas externas del JSON remoto
+     * Obtiene todas las respuestas de deudas externas del JSON remoto
      */
-    List<DeudaExternaDTO> obtenerTodasLasDeudas();
+    List<ExternalDebtResponseDTO> obtenerTodasLasDeudas();
+
+    /**
+     * Obtiene los datos externos sincronizados para un documento específico
+     */
+    ExternalDebtResponseDTO obtenerDatosExternos(String tipoDoc, String numDoc);
     
     /**
      * Obtiene deudas de la BD local para un postulante por su ID

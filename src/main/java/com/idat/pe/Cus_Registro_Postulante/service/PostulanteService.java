@@ -19,4 +19,5 @@ public interface PostulanteService {
     void rechazarPostulante(Integer idPostulante, Integer idJefe, String motivo);
     void subsanarPostulante(Integer idPostulante, RegistroPostulanteDTO dto);
     PostulanteDTO buscarPorNumeroDocumento(String numero);
+    List<PostulanteConDeudasDTO> buscarPostulantesParaJefe(String tipoDoc, String numDoc);
 }

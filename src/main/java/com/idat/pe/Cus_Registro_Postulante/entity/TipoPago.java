@@ -4,21 +4,21 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "rol")
+@Table(name = "tipo_pago")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Rol {
+public class TipoPago {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_rol")
+    @Column(name = "id_tipo_pago")
     private Integer id;
 
-    @Column(name = "nombre_rol", nullable = false, unique = true, length = 100)
-    private String nombre; // ROLE_JEFE, ROLE_SOCIO
+    @Column(nullable = false, unique = true, length = 50)
+    private String nombre;
 
-    @Column(name = "descripcion", length = 255)
+    @Column(length = 255)
     private String descripcion;
 }

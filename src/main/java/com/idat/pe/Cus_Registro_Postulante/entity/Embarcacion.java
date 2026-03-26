@@ -16,19 +16,19 @@ public class Embarcacion {
     @Column(name = "id_embarcacion")
     private Integer id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "nombre_embarcacion", nullable = false, length = 100)
     private String nombre;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "tipo_embarcacion", nullable = false, length = 100)
     private String tipo;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = true, length = 50)
     private String matricula;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(nullable = false, length = 20)
+    @Column(name = "estado_embarcacion", nullable = false, length = 20)
     private String estado; // Activa, Inactiva, En mantenimiento
 
     @ManyToOne(fetch = FetchType.LAZY)

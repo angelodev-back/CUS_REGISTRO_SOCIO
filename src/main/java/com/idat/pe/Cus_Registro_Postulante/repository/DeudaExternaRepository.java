@@ -11,7 +11,7 @@ public interface DeudaExternaRepository extends JpaRepository<DeudaExterna, Inte
     /**
      * Busca deudas por ID del postulante
      */
-    List<DeudaExterna> findByIdPostulante(Integer idPostulante);
+    List<DeudaExterna> findByPostulante_Id(Integer idPostulante);
     
     /**
      * Busca deudas verificadas

@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     new AntPathRequestMatcher("/"),
                     new AntPathRequestMatcher("/login"),
+                    new AntPathRequestMatcher("/pre-registro"),
                     new AntPathRequestMatcher("/registro/**"),
                     new AntPathRequestMatcher("/api/postulantes/buscar-por-documento/**"),
                     new AntPathRequestMatcher("/css/**"),

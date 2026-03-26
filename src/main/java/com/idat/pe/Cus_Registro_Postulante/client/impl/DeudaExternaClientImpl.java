@@ -1,7 +1,7 @@
 package com.idat.pe.Cus_Registro_Postulante.client.impl;
 
 import com.idat.pe.Cus_Registro_Postulante.client.DeudaExternaClient;
-import com.idat.pe.Cus_Registro_Postulante.dto.DeudaExternaDTO;
+import com.idat.pe.Cus_Registro_Postulante.dto.ExternalDebtResponseDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import java.util.List;
@@ -25,10 +25,10 @@ public class DeudaExternaClientImpl implements DeudaExternaClient {
     }
     
     @Override
-    public List<DeudaExternaDTO> obtenerDeudas() {
+    public List<ExternalDebtResponseDTO> obtenerDeudas() {
         try {
             logger.info("Consumiendo deudas externas hacia: {}", API_URL);
-            DeudaExternaDTO[] deudas = restTemplate.getForObject(API_URL, DeudaExternaDTO[].class);
+            ExternalDebtResponseDTO[] deudas = restTemplate.getForObject(API_URL, ExternalDebtResponseDTO[].class);
             if (deudas != null) {
                 return Arrays.asList(deudas);
             }

@@ -36,6 +36,11 @@ public class WebController {
 
     @GetMapping("/")
     public String index() {
+        return "login";
+    }
+
+    @GetMapping("/pre-registro")
+    public String preRegistro() {
         return "index";
     }
 
@@ -105,11 +110,23 @@ public class WebController {
 
     // --- FLUJO JEFE ---
     @GetMapping("/jefe/dashboard")
-    public String jefeDashboard(Model model) {
+    public String jefeDashboard(@RequestParam(required = false) String tipoDoc,
+                               @RequestParam(required = false) String numDoc,
+                               Model model) {
         Usuario jefe = obtenerUsuarioActual();
         model.addAttribute("jefe", jefe);
-        List<PostulanteConDeudasDTO> pendientes = postulanteService.obtenerPostulantesPendientesConDeudas();
-        model.addAttribute("postulantes", pendientes);
+        
+        List<PostulanteConDeudasDTO> lista;
+        if ((tipoDoc != null && !tipoDoc.isEmpty() && !"TODOS".equalsIgnoreCase(tipoDoc)) 
+            || (numDoc != null && !numDoc.isEmpty())) {
+            lista = postulanteService.buscarPostulantesParaJefe(tipoDoc, numDoc);
+            model.addAttribute("searchTipo", tipoDoc);
+            model.addAttribute("searchNum", numDoc);
+        } else {
+            lista = postulanteService.obtenerPostulantesPendientesConDeudas();
+        }
+        
+        model.addAttribute("postulantes", lista);
         return "jefe/dashboard-deudas";
     }
 
@@ -159,7 +176,8 @@ public class WebController {
         try {
             PostulanteDTO guardado = postulanteService.registrarPostulante(dto);
             ra.addFlashAttribute("postulante", guardado);
-            return "redirect:/registro/exitoso";
+            ra.addFlashAttribute("mensaje", "Solicitud de registro enviada exitosamente. Por favor, espere la validación.");
+            return "redirect:/login?registered=true";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
             ra.addFlashAttribute("registroDTO", dto);
@@ -173,7 +191,8 @@ public class WebController {
             postulanteService.subsanarPostulante(id, dto);
             PostulanteDTO guardado = postulanteService.buscarPorId(id);
             ra.addFlashAttribute("postulante", guardado);
-            return "redirect:/registro/exitoso";
+            ra.addFlashAttribute("mensaje", "Subsanación completada exitosamente.");
+            return "redirect:/login?registered=true";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
             ra.addFlashAttribute("registroDTO", dto);
@@ -196,8 +215,8 @@ public class WebController {
             return "redirect:/registro/subsanar";
         }
         
-        if (!"rechazado".equalsIgnoreCase(p.getEstado())) {
-            ra.addFlashAttribute("error", "La solicitud no se encuentra en estado RECHAZADO (Estado actual: " + p.getEstado().toUpperCase() + ")");
+        if (!"rechazado".equalsIgnoreCase(p.getEstadoPostulacion())) {
+            ra.addFlashAttribute("error", "La solicitud no se encuentra en estado RECHAZADO (Estado actual: " + p.getEstadoPostulacion().toUpperCase() + ")");
             return "redirect:/registro/subsanar";
         }
 
@@ -210,7 +229,7 @@ public class WebController {
                 .apellidoPaterno(p.getApellidoPaterno())
                 .apellidoMaterno(p.getApellidoMaterno())
                 .razonSocial(p.getRazonSocial())
-                .correo(p.getCorreo())
+                .correo(p.getCorreoElectronico())
                 .telefono(p.getTelefono())
                 .direccion(p.getDireccion())
                 .ciudad(p.getCiudad())
@@ -218,8 +237,8 @@ public class WebController {
                 .build();
 
         ra.addFlashAttribute("registroDTO", dto);
-        ra.addFlashAttribute("idPostulante", p.getId());
-        return "redirect:/registro/subsanar/formulario/" + p.getId();
+        ra.addFlashAttribute("idPostulante", p.getIdPostulante());
+        return "redirect:/registro/subsanar/formulario/" + p.getIdPostulante();
     }
 
     @GetMapping("/registro/subsanar/formulario/{id}")
@@ -237,8 +256,8 @@ public class WebController {
             PostulanteDTO p = postulanteService.buscarPorNumeroDocumento(dto.getNumeroDocumento());
             if (p == null) throw new RuntimeException("Postulante no encontrado");
             
-            postulanteService.subsanarPostulante(p.getId(), dto);
-            ra.addFlashAttribute("postulante", postulanteService.buscarPorId(p.getId()));
+            postulanteService.subsanarPostulante(p.getIdPostulante(), dto);
+            ra.addFlashAttribute("postulante", postulanteService.buscarPorId(p.getIdPostulante()));
             ra.addFlashAttribute("mensaje", "Solicitud subsanada correctamente. Ha vuelto a estado PENDIENTE.");
             return "redirect:/registro/exitoso";
         } catch (Exception e) {

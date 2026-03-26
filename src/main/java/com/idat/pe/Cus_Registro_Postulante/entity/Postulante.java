@@ -57,7 +57,7 @@ public class Postulante {
     private LocalDate fechaRegistro;
 
     @Convert(converter = EstadoPostulanteConverter.class)
-    @Column(name = "estado_postulacion", nullable = false)
+    @Column(name = "estado_postulacion", nullable = false, length = 20)
     private EstadoPostulante estado;
 
     @PrePersist

@@ -53,14 +53,14 @@ public class PostulanteMapper {
         if (entity == null) return null;
 
         return PostulanteDTO.builder()
-                .id(entity.getId())
+                .idPostulante(entity.getId())
                 .tipoDocumento(entity.getTipoDocumento().name())
                 .numeroDocumento(entity.getNumeroDocumento())
                 .nombres(entity.getNombres())
                 .apellidoPaterno(entity.getApellidoPaterno())
                 .apellidoMaterno(entity.getApellidoMaterno())
                 .razonSocial(entity.getRazonSocial())
-                .correo(entity.getCorreoElectronico())
+                .correoElectronico(entity.getCorreoElectronico())
                 .telefono(entity.getTelefono())
                 .direccion(entity.getDireccion())
                 .ciudad(entity.getCiudad())
@@ -68,7 +68,7 @@ public class PostulanteMapper {
                 .tipoInteres(entity.getTipoInteres())
                 .codigoPostal(entity.getCodigoPostal())
                 .fechaRegistro(entity.getFechaRegistro())
-                .estado(entity.getEstado() != null ? entity.getEstado().name().toLowerCase() : null)
+                .estadoPostulacion(entity.getEstado() != null ? entity.getEstado().name().toLowerCase() : null)
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.idat.pe.Cus_Registro_Postulante.serviceImpl;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteConDeudasDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.DeudaExternaDTO;
+import com.idat.pe.Cus_Registro_Postulante.dto.ExternalDebtResponseDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.RegistroPostulanteDTO;
 import com.idat.pe.Cus_Registro_Postulante.entity.*;
 import com.idat.pe.Cus_Registro_Postulante.mapper.PostulanteMapper;
@@ -22,8 +23,12 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación del servicio de postulantes con sincronización externa y búsqueda
+ */
 @Service
 public class PostulanteServiceImpl implements PostulanteService {
     
@@ -137,9 +142,7 @@ public class PostulanteServiceImpl implements PostulanteService {
         }
 
         Postulante actualizado = postulanteRepository.save(postulante);
-
         registrarHistorial(actualizado, estadoAnterior, "Cambio de estado manual", obtenerIdUsuarioActual());
-
         return postulanteMapper.toDTO(actualizado);
     }
 
@@ -150,8 +153,10 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulantes.addAll(postulanteRepository.findByEstado(EstadoPostulante.PENDIENTE));
         postulantes.addAll(postulanteRepository.findByEstado(EstadoPostulante.SUBSANADO));
         
+        List<ExternalDebtResponseDTO> extData = deudaExternaService.obtenerTodasLasDeudas();
+        
         return postulantes.stream()
-                .map(this::mapearPostulanteBasico)
+                .map(p -> mapearPostulanteBasicoSync(p, extData))
                 .collect(Collectors.toList());
     }
 
@@ -164,30 +169,29 @@ public class PostulanteServiceImpl implements PostulanteService {
         List<DeudaExternaDTO> deudas = new ArrayList<>();
         String clasificacion = "Sin datos";
         try {
-            deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
-            clasificacion = deudaExternaService.clasificarPostulante(deudas);
+            // SYNC REAL-TIME
+            ExternalDebtResponseDTO ext = deudaExternaService.obtenerDatosExternos(
+                postulante.getTipoDocumento().toString(), 
+                postulante.getNumeroDocumento()
+            );
+            
+            if (ext != null) {
+                deudas = ext.getDeudas();
+                clasificacion = ext.getClasificacionSugerida();
+            } else {
+                deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
+                clasificacion = deudaExternaService.clasificarPostulante(deudas);
+            }
         } catch (Exception e) {
             logger.warn("No se pudieron obtener deudas para postulante {}: {}", idPostulante, e.getMessage());
+            deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
+            clasificacion = deudaExternaService.clasificarPostulante(deudas);
         }
         
-        return PostulanteConDeudasDTO.builder()
-                .idPostulante(postulante.getId())
-                .tipoDocumento(postulante.getTipoDocumento().toString())
-                .numeroDocumento(postulante.getNumeroDocumento())
-                .nombres(postulante.getNombres())
-                .apellidoPaterno(postulante.getApellidoPaterno())
-                .apellidoMaterno(postulante.getApellidoMaterno())
-                .razonSocial(postulante.getRazonSocial())
-                .correoElectronico(postulante.getCorreoElectronico())
-                .telefono(postulante.getTelefono())
-                .direccion(postulante.getDireccion())
-                .fechaNacimiento(postulante.getFechaNacimiento() != null ? postulante.getFechaNacimiento().toString() : null)
-                .tipoInteres(postulante.getTipoInteres())
-                .fechaRegistro(postulante.getFechaRegistro() != null ? postulante.getFechaRegistro().toString() : null)
-                .estadoPostulacion(postulante.getEstado() != null ? postulante.getEstado().name().toLowerCase() : "pendiente")
-                .deudas(deudas)
-                .clasificacion(clasificacion)
-                .build();
+        PostulanteConDeudasDTO dto = mapearPostulanteBasico(postulante);
+        dto.setDeudas(deudas);
+        dto.setClasificacion(clasificacion);
+        return dto;
     }
 
     @Override
@@ -202,12 +206,14 @@ public class PostulanteServiceImpl implements PostulanteService {
             Rol rolSocio = rolRepository.findByNombre("SOCIO")
                     .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
             
+            boolean isRuc = postulante.getTipoDocumento() == TipoDocumento.RUC;
+            
             Usuario usuario = Usuario.builder()
                     .rol(rolSocio)
                     .dni(postulante.getNumeroDocumento())
-                    .nombres(postulante.getNombres())
-                    .apellidoPaterno(postulante.getApellidoPaterno())
-                    .apellidoMaterno(postulante.getApellidoMaterno())
+                    .nombres(isRuc ? postulante.getRazonSocial() : postulante.getNombres())
+                    .apellidoPaterno(isRuc ? " " : postulante.getApellidoPaterno())
+                    .apellidoMaterno(isRuc ? " " : postulante.getApellidoMaterno())
                     .correoElectronico(postulante.getCorreoElectronico())
                     .username(postulante.getNumeroDocumento())
                     .password(passwordEncoder.encode("123456"))
@@ -289,10 +295,53 @@ public class PostulanteServiceImpl implements PostulanteService {
                 .orElse(null);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostulanteConDeudasDTO> buscarPostulantesParaJefe(String tipoDoc, String numDoc) {
+        List<Postulante> result = new ArrayList<>();
+        if ((tipoDoc == null || tipoDoc.isEmpty() || "TODOS".equalsIgnoreCase(tipoDoc)) 
+            && (numDoc == null || numDoc.isEmpty())) {
+            return obtenerPostulantesPendientesConDeudas();
+        }
+        
+        if (numDoc != null && !numDoc.isEmpty()) {
+            if (tipoDoc != null && !tipoDoc.isEmpty() && !"TODOS".equalsIgnoreCase(tipoDoc)) {
+                TipoDocumento td = "RUC".equalsIgnoreCase(tipoDoc) ? TipoDocumento.RUC : TipoDocumento.DNI;
+                postulanteRepository.findByTipoDocumentoAndNumeroDocumento(td, numDoc).ifPresent(result::add);
+            } else {
+                postulanteRepository.findByNumeroDocumento(numDoc).ifPresent(result::add);
+            }
+        }
+        
+        List<ExternalDebtResponseDTO> extData = deudaExternaService.obtenerTodasLasDeudas();
+        return result.stream()
+                .map(p -> mapearPostulanteBasicoSync(p, extData))
+                .collect(Collectors.toList());
+    }
+
+    private PostulanteConDeudasDTO mapearPostulanteBasicoSync(Postulante p, List<ExternalDebtResponseDTO> extData) {
+        ExternalDebtResponseDTO ext = extData.stream()
+            .filter(e -> e.getTipoDocumento() != null && e.getTipoDocumento().equalsIgnoreCase(p.getTipoDocumento().name()) 
+                      && e.getNumeroDocumento() != null && e.getNumeroDocumento().equals(p.getNumeroDocumento()))
+            .findFirst()
+            .orElse(null);
+        
+        String clasificacion = (ext != null) ? ext.getClasificacionSugerida() : "Sin datos";
+        
+        PostulanteConDeudasDTO dto = mapearPostulanteBasico(p);
+        dto.setClasificacion(clasificacion);
+        return dto;
+    }
+
     private void registrarHistorial(Postulante p, EstadoPostulante anterior, String motivo, Integer idJefe) {
+        Usuario jefe = null;
+        if (idJefe != null && idJefe > 0) {
+            jefe = usuarioRepository.findById(idJefe).orElse(null);
+        }
+
         HistorialEstadoPostulante h = HistorialEstadoPostulante.builder()
                 .postulante(p)
-                .idJefe(idJefe != null ? idJefe : 0)
+                .jefe(jefe)
                 .fechaCambio(LocalDate.now())
                 .estadoAnterior(anterior != null ? anterior.name().toLowerCase() : "pendiente")
                 .estadoNuevo(p.getEstado().name().toLowerCase())

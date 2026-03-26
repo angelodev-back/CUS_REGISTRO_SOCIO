@@ -47,5 +47,5 @@ public class Usuario {
     private String password;
 
     @Column(name = "estado_usuario", nullable = false, length = 20)
-    private String estado; // ACTIVO, INACTIVO
+    private String estado; // activo, inactivo, suspendido
 }

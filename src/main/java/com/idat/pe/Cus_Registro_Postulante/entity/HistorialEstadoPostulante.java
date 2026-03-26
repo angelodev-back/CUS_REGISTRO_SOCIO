@@ -27,8 +27,9 @@ public class HistorialEstadoPostulante {
     @JoinColumn(name = "id_postulante", nullable = false)
     private Postulante postulante;
 
-    @Column(name = "id_jefe", nullable = false)
-    private Integer idJefe;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_jefe", nullable = false)
+    private Usuario jefe;
 
     @Column(name = "fecha_cambio", nullable = false)
     private LocalDate fechaCambio;
@@ -41,7 +42,4 @@ public class HistorialEstadoPostulante {
 
     @Column(name = "motivo", columnDefinition = "TEXT")
     private String motivo;
-
-    @Transient
-    private Usuario jefe;
 }

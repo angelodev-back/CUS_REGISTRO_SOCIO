@@ -6,11 +6,14 @@
     <title>Club Náutico Neptuno — Acceso</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/neptuno.css}">
     <style>
         /* Ajustes rápidos para mejorar el diseño sin depender de login.js */
         .alert-error { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; display: flex; align-items: center; gap: 8px; border: 1px solid #ef4444; }
         .alert-logout { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; border: 1px solid #10b981; }
+        .btn-outline-primary-custom { border: 2px solid #0094bc; color: #0094bc; font-weight: 600; }
+        .btn-outline-primary-custom:hover { background: #0094bc; color: white; }
     </style>
 </head>
 <body>
@@ -36,42 +39,59 @@
     </div>
 
     <div class="panel-right">
-        <div class="welcome-card">
+        <!-- Vista de Selección -->
+        <div class="welcome-card" id="selection-view" th:style="${param.error != null or param.form != null} ? 'display: none;' : 'display: block;'">
+            <h2>Bienvenido</h2>
+            <p class="desc">Selecciona una opción para continuar.</p>
+
+            <div th:if="${mensaje}" class="alert alert-logout" style="background: #dcfce7; color: #166534; border-color: #86efac; margin-bottom: 24px;">
+                <svg viewBox="0 0 20 20" style="width:18px; height:18px; fill:currentColor; margin-right:8px;"><circle cx="10" cy="10" r="8"/><polyline points="6,10 9,13 14,7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                <span th:text="${mensaje}">Operación exitosa</span>
+            </div>
+
+            <div class="selection-buttons d-flex flex-column gap-3 mt-4">
+                <a th:href="@{/login(form=true)}" class="btn-submit text-decoration-none d-inline-flex align-items-center justify-content-center" style="background: #0094bc; border: none; height: 52px; font-weight: 600;">
+                    <svg viewBox="0 0 24 24" style="width:20px; height:20px; margin-right:8px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                    Ingresar
+                </a>
+                <a th:href="@{/pre-registro}" class="btn-submit btn-outline-primary-custom text-decoration-none d-inline-flex align-items-center justify-content-center" style="background: transparent; height: 52px;">
+                    <svg viewBox="0 0 24 24" style="width:20px; height:20px; margin-right:8px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm12 0v6m-3-3h6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                    Registrarse
+                </a>
+            </div>
+        </div>
+
+        <!-- Formulario de Login -->
+        <div class="welcome-card" id="login-form-view" th:style="${param.error != null or param.form != null} ? 'display: block;' : 'display: none;'">
+            <a th:href="@{/login}" style="background:none; border:none; color:#5a6a80; cursor:pointer; display:flex; align-items:center; gap:6px; margin-bottom:20px; padding:0; font-size:14px; font-weight:500; text-decoration:none;">
+                <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                Volver
+            </a>
             <h2>Iniciar sesión</h2>
             <p class="desc">Ingresa tus credenciales para continuar.</p>
 
             <!-- Mensajes de Error o Logout -->
             <div th:if="${param.error}" class="alert alert-error">
-                <span>Usuario o contraseña incorrectos. Por favor, intente de nuevo.</span>
+                <span>Usuario o contraseña incorrectos.</span>
             </div>
-            <div th:if="${param.logout}" class="alert alert-logout">
-                <span>Has cerrado sesión correctamente.</span>
-            </div>
-
-            <!-- Formulario estándar de Spring Security -->
-            <form th:action="@{/login}" method="post" style="margin-top: 28px;">
-                <div class="frow" style="margin-bottom: 16px;">
-                    <div class="fg">
-                        <label for="username">Usuario o Correo</label>
-                        <input type="text" id="username" name="username" class="fi" placeholder="Usuario" required />
-                    </div>
+            
+            <form th:action="@{/login}" method="post" class="mt-4">
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-bold small text-secondary">Usuario</label>
+                    <input type="text" id="username" name="username" class="form-control fi" placeholder="Usuario" required />
                 </div>
-                <div class="frow" style="margin-bottom: 24px;">
-                    <div class="fg">
-                        <label for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" class="fi" placeholder="********" required />
-                    </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label fw-bold small text-secondary">Contraseña</label>
+                    <input type="password" id="password" name="password" class="form-control fi" placeholder="********" required />
                 </div>
-                <button type="submit" class="btn-submit" style="width:100%; justify-content:center;">
+                <button type="submit" class="btn-submit w-100 justify-content-center">
                     Acceder
                 </button>
             </form>
-            
-            <p style="text-align:center; margin-top:24px; font-size:13px; color:#5a6a80;">
-                ¿Eres nuevo socio? <a href="/registro" style="color:#0094bc; text-decoration:none; font-weight:600;">Registrate aquí</a>
-            </p>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

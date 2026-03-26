@@ -24,8 +24,9 @@ public class DeudaExterna {
     @Column(name = "id_deuda")
     private Integer id;
 
-    @Column(name = "id_postulante", nullable = false)
-    private Integer idPostulante;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_postulante", nullable = false)
+    private Postulante postulante;
 
     @Column(name = "nombre_club_origen", nullable = false, length = 100)
     private String nombreClubOrigen;
@@ -45,17 +46,10 @@ public class DeudaExterna {
     @Column(name = "fecha_verificacion")
     private LocalDate fechaVerificacion;
 
-    @Column(name = "id_verificador")
-    private Integer idVerificador;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_verificador")
+    private Usuario verificador;
 
     @Column(name = "observaciones_verificacion", columnDefinition = "TEXT")
     private String observacionesVerificacion;
-
-    // Relación con Postulante (no eagerly loaded)
-    @Transient
-    private Postulante postulante;
-
-    // Relación con Usuario verificador
-    @Transient
-    private Usuario verificador;
 }

@@ -6,133 +6,172 @@
     <title>Jefe Dashboard | Neptuno</title>
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #0ea5e9;
             --primary-dark: #0284c7;
+            --primary-light: #e0f2fe;
+            --secondary: #6366f1;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --info: #06b6d4;
             --bg-main: #f8fafc;
             --sidebar-bg: #0f172a;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --glass: rgba(255, 255, 255, 0.7);
             --border: #e2e8f0;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         /* Sidebar Styling */
-        .sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 24px; transition: all 0.3s ease; }
-        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
-        .brand-logo { width: 40px; height: 40px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 0 20px rgba(14, 165, 233, 0.3); }
-        .brand-name { font-weight: 700; font-size: 18px; letter-spacing: -0.025em; }
+        .sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 32px 24px; position: relative; overflow-y: auto; transition: var(--transition); z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 48px; padding: 0 8px; }
+        .brand-logo { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); color: #fff; }
+        .brand-name { font-weight: 800; font-size: 20px; letter-spacing: -0.04em; }
 
-        .nav-group { margin-bottom: 32px; }
-        .nav-label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 12px 12px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; color: #94a3b8; text-decoration: none; border-radius: var(--radius); transition: all 0.2s; font-weight: 500; font-size: 14px; margin-bottom: 4px; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; }
-        .nav-item.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); }
+        .nav-group { margin-bottom: 40px; }
+        .nav-label { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 12px 16px; opacity: 0.6; }
+        .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; color: #94a3b8; text-decoration: none; border-radius: var(--radius-md); transition: var(--transition); font-weight: 600; font-size: 14px; margin-bottom: 6px; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(4px); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.05) 100%); color: var(--primary); border-color: rgba(14, 165, 233, 0.2); position: relative; }
+        .nav-item.active::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; background: var(--primary); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--primary); }
+        .nav-item i { font-size: 18px; width: 24px; text-align: center; }
 
-        .btn-logout { margin-top: auto; background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); width: 100%; border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-family: inherit; transition: all 0.2s; }
-        .btn-logout:hover { background: #ef4444; color: #fff; }
+        .btn-logout { margin-top: auto; background: rgba(239, 68, 68, 0.05); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.1); width: 100%; border-radius: var(--radius-md); padding: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; transition: var(--transition); }
+        .btn-logout:hover { background: var(--danger); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2); }
 
         /* Main Content Styling */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { height: 80px; padding: 0 40px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); z-index: 10; }
-        .page-title h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.025em; }
-        .page-title p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .topbar { height: 90px; padding: 0 48px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); z-index: 50; position: sticky; top: 0; }
+        .page-title h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; color: var(--text-main); }
+        .page-title p { font-size: 14px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
-        .user-profile { display: flex; align-items: center; gap: 16px; }
+        .user-profile { display: flex; align-items: center; gap: 16px; padding: 6px 6px 6px 16px; background: rgba(255,255,255,0.5); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; transition: var(--transition); }
+        .user-profile:hover { background: #fff; border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow); }
         .user-info { text-align: right; }
-        .user-name { font-weight: 600; font-size: 14px; display: block; }
-        .user-role { font-size: 12px; color: var(--primary); font-weight: 500; }
-        .user-avatar { width: 40px; height: 40px; background: #e0f2fe; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .user-name { font-weight: 700; font-size: 14px; display: block; color: var(--text-main); }
+        .user-role { font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); }
 
-        .content { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
+        .content { flex: 1; padding: 48px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
 
-        /* Stats Section */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px; }
-        .stat-card { background: #fff; padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
-        .stat-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-        .stat-value { font-size: 28px; font-weight: 800; color: var(--text-main); letter-spacing: -0.025em; }
+        /* Advanced Filter Bar */
+        .filter-container { background: #fff; border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border); margin-bottom: 40px; box-shadow: var(--shadow); border-left: 6px solid var(--primary); position: relative; overflow: hidden; animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .filter-container::after { content: ''; position: absolute; right: -50px; bottom: -50px; width: 200px; height: 200px; background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%); opacity: 0.4; pointer-events: none; }
+        .filter-label { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .filter-label i { color: var(--primary); font-size: 16px; }
+        
+        .input-glass { background: #f8fafc; border: 2px solid #f1f5f9; border-radius: var(--radius-md); padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-main); transition: var(--transition); width: 100%; outline: none; }
+        .input-glass:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+        
+        .select-glass { appearance: none; cursor: pointer; padding-right: 40px !important; }
+        .select-wrapper { position: relative; }
+        .select-wrapper i { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
 
-        /* Table Card Container */
-        .data-card { background: #fff; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
-        .card-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .card-header h3 { font-size: 16px; font-weight: 700; }
+        .btn-premium { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: #fff; border: none; border-radius: var(--radius-md); padding: 14px 28px; font-weight: 800; font-size: 14px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4); }
+        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(14, 165, 233, 0.5); filter: brightness(1.1); }
+        .btn-premium:active { transform: translateY(0); }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 16px 32px; background: #f8fafc; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
-        td { padding: 20px 32px; font-size: 14px; border-bottom: 1px solid var(--border); transition: all 0.2s; }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 48px; }
+        .stat-card { background: #fff; padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--border); transition: var(--transition); position: relative; overflow: hidden; animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .stat-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08); }
+        .stat-icon { width: 48px; height: 48px; background: var(--primary-light); color: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 20px; transition: var(--transition); }
+        .stat-card:hover .stat-icon { background: var(--primary); color: #fff; transform: rotate(10deg); }
+        .stat-info .stat-label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-info .stat-value { font-size: 32px; font-weight: 800; color: var(--text-main); margin-top: 4px; letter-spacing: -0.04em; }
+
+        /* Data Card & Table */
+        .data-card { background: #fff; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .card-header { padding: 32px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+        .card-header h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; display: flex; align-items: center; gap: 12px; }
+        .card-header h3 i { color: var(--primary); }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { text-align: left; padding: 20px 40px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; background: #fff; border-bottom: 1px solid var(--border); }
+        td { padding: 28px 40px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: var(--transition); }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #fbfcfd; }
+        tr { transition: opacity 0.3s ease, transform 0.3s ease; }
+        tr:hover td { background: #f8fafc; cursor: pointer; }
+        
+        .applicant-cell { display: flex; align-items: center; gap: 16px; }
+        .applicant-avatar { width: 44px; height: 44px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #64748b; transition: var(--transition); }
+        tr:hover .applicant-avatar { background: var(--primary-light); color: var(--primary); transform: scale(1.1); }
+        .applicant-info b { display: block; font-size: 15px; color: var(--text-main); margin-bottom: 4px; font-weight: 700; }
+        .applicant-info span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
 
-        .user-cell { display: flex; align-items: center; gap: 12px; }
-        .user-icon { width: 36px; height: 36px; background: #f1f5f9; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #64748b; }
-        .user-details b { display: block; font-size: 14px; color: var(--text-main); }
-        .user-details span { font-size: 12px; color: var(--text-muted); }
+        /* Capsule Badges */
+        .badge { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; gap: 8px; border: 1.5px solid transparent; }
+        .badge i { font-size: 14px; }
+        .badge-success { background: #ecfdf5; color: #059669; border-color: #d1fae5; }
+        .badge-warning { background: #fffbeb; color: #d97706; border-color: #fef3c7; }
+        .badge-danger { background: #fef2f2; color: #dc2626; border-color: #fee2e2; }
+        .badge-info { background: #f0f9ff; color: #0284c7; border-color: #e0f2fe; }
+        .badge-subsanado { background: #f5f3ff; color: #7c3aed; border-color: #ede9fe; }
 
-        .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; gap: 6px; }
-        .badge-success { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
-        .badge-info { background: #e0f2fe; color: #0369a1; }
-
-        .actions { display: flex; gap: 8px; }
-        .btn-action { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
-        .btn-action:hover { border-color: var(--primary); color: var(--primary); background: #f0f9ff; }
+        /* Action Buttons */
+        .actions { display: flex; gap: 10px; }
+        .btn-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; cursor: pointer; transition: var(--transition); color: var(--text-muted); font-size: 16px; }
+        .btn-circle:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-view:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
         .btn-approve:hover { border-color: var(--success); color: var(--success); background: #ecfdf5; }
         .btn-reject:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
 
-        /* Custom Modals Styling */
-        .sc-modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s ease; }
-        .sc-modal { background: #fff; width: 440px; border-radius: 20px; padding: 32px; position: relative; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); transform: translateY(20px); transition: transform 0.3s ease; }
-        .sc-modal.active { transform: translateY(0); }
+        /* Custom Modal System */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.4s ease; padding: 24px; }
+        .modal-card { background: #fff; width: 100%; max-width: 680px; border-radius: var(--radius-lg); overflow: hidden; position: relative; box-shadow: 0 25px 70px -12px rgba(0,0,0,0.25); transform: scale(0.95); opacity: 0; transition: var(--transition); }
+        .modal-card.active { transform: scale(1); opacity: 1; }
         
-        .sc-modal-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 24px; }
-        .icon-approve { background: #ecfdf5; color: var(--success); }
-        .icon-reject { background: #fef2f2; color: var(--danger); }
+        .modal-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px; color: #fff; position: relative; overflow: hidden; }
+        .modal-header::before { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.3), transparent 70%); }
+        .modal-head-container { position: relative; display: flex; align-items: center; gap: 24px; z-index: 1; }
+        .modal-avatar { width: 72px; height: 72px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; }
+        .modal-title-area h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 4px; }
+        .modal-title-area p { font-size: 14px; opacity: 0.7; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         
-        .sc-modal-title { font-size: 19px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.025em; }
-        .sc-modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+        .modal-body { padding: 40px; max-height: 60vh; overflow-y: auto; }
+        .section-label-modern { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        .section-label-modern::after { content: ''; flex: 1; height: 2px; background: #f1f5f9; }
         
-        .sc-modal-textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-family: inherit; font-size: 14px; margin-bottom: 24px; resize: none; outline: none; height: 100px; }
-        .sc-modal-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+        .info-grid-modern { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px; }
+        .info-card { display: flex; gap: 16px; align-items: center; }
+        .info-card-icon { width: 44px; height: 44px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; border: 1px solid #f1f5f9; }
+        .info-card-text label { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+        .info-card-text span { font-size: 14px; font-weight: 700; color: var(--text-main); }
         
-        .sc-modal-actions { display: flex; gap: 12px; }
-        .sc-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; }
-        .sc-btn-cancel { background: #f1f5f9; color: #475569; }
-        .sc-btn-confirm { color: #fff; }
-        .btn-confirm-approve { background: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
-        .btn-confirm-reject { background: var(--danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
-
-        /* Notifications Toasts */
-        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 12px; }
-        .toast { background: #fff; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); border-left: 4px solid var(--primary); min-width: 300px; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
-        .toast.show { transform: translateX(0); }
-        .toast-success { border-color: var(--success); }
-        .toast-error { border-color: var(--danger); }
-        .toast-icon { font-size: 18px; }
-        .toast-success i { color: var(--success); }
-        .toast-error i { color: var(--danger); }
-        .toast-msg { font-size: 14px; font-weight: 500; }
-
+        .external-debt-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); }
+        .external-debt-card:hover { transform: translateX(8px); border-color: var(--primary); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.05); }
+        .debt-details-main b { display: block; font-size: 15px; color: var(--text-main); font-weight: 700; }
+        .debt-details-main span { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUpFade { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeInScale { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        /* Empty State */
-        .empty-state { padding: 60px 0; text-align: center; color: var(--text-muted); }
-        .empty-icon { font-size: 48px; color: #e2e8f0; margin-bottom: 16px; }
+        .modal-footer { padding: 32px 40px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+        .btn-close-modal { background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+        .btn-close-modal:hover { background: #e2e8f0; }
 
-        ::-webkit-scrollbar { width: 8px; }
+        /* Toast UI */
+        .toast-premium { border-left: 5px solid var(--primary); animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 3px solid var(--bg-main); }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
@@ -152,30 +191,30 @@
                 Revisión Postulantes
             </a>
             <a href="#" class="nav-item">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-users-gear"></i>
                 Gestión de Socios
             </a>
             <a href="#" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                Reportes Generales
+                <i class="fas fa-chart-pie"></i>
+                Reportes Avanzados
             </a>
         </nav>
 
         <nav class="nav-group">
             <div class="nav-label">Operaciones</div>
             <a href="#" class="nav-item">
-                <i class="fas fa-ship"></i>
-                Embarcaciones
+                <i class="fas fa-ferry"></i>
+                Gestión Marinas
             </a>
             <a href="#" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                Deudas y Pagos
+                <i class="fas fa-wallet"></i>
+                Caja y Finanzas
             </a>
         </nav>
 
         <form th:action="@{/logout}" method="post">
             <button type="submit" class="btn-logout">
-                <i class="fas fa-sign-out-alt"></i>
+                <i class="fas fa-power-off"></i>
                 Cerrar Sesión
             </button>
         </form>
@@ -186,14 +225,14 @@
         <!-- Topbar -->
         <header class="topbar">
             <div class="page-title">
-                <h1>Solicitudes Pendientes</h1>
-                <p>Gestiona y aprueba las nuevas postulaciones del club</p>
+                <h1>Panel de Aprobación</h1>
+                <p>Verificación proactiva de nuevos aspirantes</p>
             </div>
 
             <div class="user-profile">
                 <div class="user-info">
                     <span class="user-name" th:text="${jefe != null ? jefe.nombres + ' ' + jefe.apellidoPaterno : 'Administrador'}">Nombre del Jefe</span>
-                    <span class="user-role">Jefe de Área de Ventas</span>
+                    <span class="user-role">Sales Director · Admin</span>
                 </div>
                 <div class="user-avatar" th:text="${jefe != null ? #strings.substring(jefe.nombres, 0, 1) + #strings.substring(jefe.apellidoPaterno, 0, 1) : 'AD'}">JD</div>
             </div>
@@ -201,105 +240,130 @@
 
         <!-- Content Area -->
         <main class="content">
-            
-            <!-- Quick Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-label">Total Pendientes</span>
-                    <span class="stat-value" th:text="${#lists.size(postulantes)}">0</span>
+            <!-- Filter Bar -->
+            <div class="filter-container" style="padding: 40px; margin-bottom: 48px;">
+                <div class="filter-label" style="margin-bottom: 24px;"><i class="fas fa-search-dollar"></i> Centro de Búsqueda de Postulantes</div>
+                <form id="searchForm" th:action="@{/jefe/dashboard}" method="get" class="d-flex flex-wrap align-items-end" style="gap: 24px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label class="form-label" style="font-size: 11px; font-weight: 800; color: #94a3b8; margin-bottom: 12px; display: block; letter-spacing: 0.05em;">TIPO DE ENTIDAD</label>
+                        <div class="select-wrapper">
+                            <select name="tipoDoc" id="selectTipo" class="input-glass select-glass">
+                                <option value="TODOS" th:selected="${searchTipo == 'TODOS'}">Todos los Registros</option>
+                                <option value="DNI" th:selected="${searchTipo == 'DNI'}">Persona Natural (DNI)</option>
+                                <option value="RUC" th:selected="${searchTipo == 'RUC'}">Empresa Jurídica (RUC)</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div style="flex: 2; min-width: 300px;">
+                        <label class="form-label" style="font-size: 11px; font-weight: 800; color: #94a3b8; margin-bottom: 12px; display: block; letter-spacing: 0.05em;">BÚSQUEDA DINÁMICA DE DOCUMENTOS</label>
+                        <div style="position: relative;">
+                            <i class="fas fa-fingerprint" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 18px;"></i>
+                            <input type="text" name="numDoc" id="searchInput" class="input-glass" placeholder="Digita DNI o RUC para filtrar al instante..." th:value="${searchNum}" style="padding-left: 54px; height: 52px; font-size: 15px;">
+                        </div>
+                    </div>
+                    <div style="flex: 0 0 240px;">
+                        <button type="submit" class="btn-premium w-100" style="height: 52px; border-radius: 12px;">
+                            <i class="fas fa-sync-alt"></i> Sincronizar Datos
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid" style="margin-top: 48px;">
+                <div class="stat-card" style="animation-delay: 0.1s">
+                    <div class="stat-icon"><i class="fas fa-users-viewfinder"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Resultados</span>
+                        <div class="stat-value" id="stats-count" th:text="${#lists.size(postulantes)}">0</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-label">Revisados Hoy</span>
-                    <span class="stat-value">12</span>
+                <div class="stat-card" style="animation-delay: 0.2s">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i class="fas fa-check-double"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Revisados Mes</span>
+                        <div class="stat-value">142</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-label">Promedio de Respuesta</span>
-                    <span class="stat-value">24h</span>
+                <div class="stat-card" style="animation-delay: 0.3s">
+                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--secondary);"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">SLA Promedio</span>
+                        <div class="stat-value">2.4h</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="data-card">
+            <!-- Table Card -->
+            <div class="data-card" style="margin-top: 48px;">
                 <div class="card-header">
-                    <h3>Cola de Aprobación</h3>
-                    <div style="font-size: 13px; color: var(--text-muted);">
-                        Mostrando <span th:text="${#lists.size(postulantes)}">0</span> registros
+                    <h3><i class="fas fa-list-check"></i> Cola de Validaciones</h3>
+                    <div class="badge badge-info shadow-none" style="padding: 8px 16px;">
+                        <i class="fas fa-database"></i> Datos Sincronizados
                     </div>
                 </div>
 
-                <table>
+                <table id="applicantsTable">
                     <thead>
                         <tr>
-                            <th>Postulante</th>
-                            <th>Documento</th>
-                            <th>Calificación</th>
-                            <th>Estado</th>
+                            <th>Identidad del Postulante</th>
+                            <th>N° Documento</th>
+                            <th>Finanzas Externas</th>
+                            <th>Status Actual</th>
                             <th style="text-align: right;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="p : ${postulantes}">
+                        <tr th:each="p, iter : ${postulantes}" class="applicant-row" th:data-doc="${p.numeroDocumento}" th:data-tipo="${p.tipoDocumento}" style="animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;" th:styleappend="'animation-delay:' + ${iter.index * 0.1 + 0.2} + 's'">
                             <td>
-                                <div class="user-cell">
-                                    <div class="user-icon"><i class="fas fa-user"></i></div>
-                                    <div class="user-details">
+                                <div class="applicant-cell">
+                                    <div class="applicant-avatar"><i class="fas fa-user-tie"></i></div>
+                                    <div class="applicant-info">
                                         <b th:text="${p.nombres != null ? p.nombres + ' ' + p.apellidoPaterno : p.razonSocial}">Nombre</b>
                                         <span th:text="${p.correoElectronico}">correo@ejemplo.com</span>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span style="font-weight: 600; font-size: 13px;" th:text="${p.numeroDocumento}">00000000</span>
-                                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;" th:text="${p.tipoDocumento}">DNI</div>
+                                <div style="font-weight: 800; color: var(--text-main); font-size: 14px;" th:text="${p.numeroDocumento}">0000</div>
+                                <div class="badge badge-info" style="font-size: 10px; margin-top: 4px; padding: 2px 8px;" th:text="${p.tipoDocumento}">DNI</div>
                             </td>
                             <td>
-                                <span th:if="${p.clasificacion == 'PAGADOR'}" class="badge badge-success">
-                                    <i class="fas fa-check-circle"></i> Buen Pagador
-                                </span>
-                                <span th:if="${p.clasificacion == 'ESPORADICO'}" class="badge badge-warning">
-                                    <i class="fas fa-clock"></i> Esporádico
-                                </span>
-                                <span th:if="${p.clasificacion == 'RENUENTE'}" class="badge badge-danger">
-                                    <i class="fas fa-exclamation-triangle"></i> Renuente
-                                </span>
-                                <span th:if="${p.clasificacion == null or p.clasificacion == 'Sin datos'}" class="badge badge-info" style="opacity: 0.6">
-                                    <i class="fas fa-minus"></i> Sin datos
-                                </span>
+                                <span th:if="${p.clasificacion == 'SOCIO_PAGADOR'}" class="badge badge-success"><i class="fas fa-check-circle"></i> Socio Pagador</span>
+                                <span th:if="${p.clasificacion == 'SOCIO_PAGADOR_ESPORADICO'}" class="badge badge-warning"><i class="fas fa-clock-rotate-left"></i> Esporádico</span>
+                                <span th:if="${p.clasificacion == 'SOCIO_RENUENTE_PAGO'}" class="badge badge-danger"><i class="fas fa-triangle-exclamation"></i> Renuente</span>
+                                <span th:if="${p.clasificacion == null or p.clasificacion == 'Sin datos' or p.clasificacion == 'Sin historial'}" class="badge badge-info" style="opacity: 0.6"><i class="fas fa-circle-minus"></i> Sin datos</span>
                             </td>
                             <td>
                                 <span th:if="${p.estadoPostulacion == 'pendiente'}" class="badge badge-warning">PENDIENTE</span>
                                 <span th:if="${p.estadoPostulacion == 'subsanado'}" class="badge badge-subsanado">SUBSANADO</span>
-                                <span th:if="${p.estadoPostulacion == 'rechazado'}" class="badge badge-rechazado">RECHAZADO</span>
+                                <span th:if="${p.estadoPostulacion == 'rechazado'}" class="badge badge-danger">RECHAZADO</span>
                                 <span th:if="${p.estadoPostulacion == 'aprobado'}" class="badge badge-success">APROBADO</span>
                             </td>
                             <td style="text-align: right;">
                                 <div class="actions" style="justify-content: flex-end;">
-                                    <button class="btn-action" title="Revisar Detalles y Deudas" 
-                                            th:data-id="${p.idPostulante}"
-                                            onclick="abrirModalRevision(this.getAttribute('data-id'))">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn-action btn-approve" title="Aprobar Solicitud" 
-                                            th:data-id="${p.idPostulante}" 
-                                            th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}"
-                                            onclick="confirmarAprobacion(this.getAttribute('data-id'), this.getAttribute('data-name'))">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button class="btn-action btn-reject" title="Rechazar con Observación" 
-                                            th:data-id="${p.idPostulante}" 
-                                            th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}"
-                                            onclick="abrirModalRechazo(this.getAttribute('data-id'), this.getAttribute('data-name'))">
-                                        <i class="fas fa-xmark"></i>
-                                    </button>
+                                    <button class="btn-circle btn-view" title="Ver Expediente" th:data-id="${p.idPostulante}" onclick="abrirModalRevision(this.getAttribute('data-id'))"><i class="fas fa-file-invoice"></i></button>
+                                    <button class="btn-circle btn-approve" title="Aprobación Directa" th:data-id="${p.idPostulante}" th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}" onclick="confirmarAprobacion(this.getAttribute('data-id'), this.getAttribute('data-name'))"><i class="fas fa-thumbs-up"></i></button>
+                                    <button class="btn-circle btn-reject" title="Solicitar Corrección" th:data-id="${p.idPostulante}" th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}" onclick="abrirModalRechazo(this.getAttribute('data-id'), this.getAttribute('data-name'))"><i class="fas fa-reply-all"></i></button>
                                 </div>
                             </td>
                         </tr>
-                        <!-- Empty State Row -->
-                        <tr th:if="${#lists.isEmpty(postulantes)}">
+                        <tr id="emptyRow" th:if="${#lists.isEmpty(postulantes)}" style="display: table-row;">
                             <td colspan="5">
-                                <div class="empty-state">
-                                    <div class="empty-icon"><i class="fas fa-clipboard-check"></i></div>
-                                    <h4>¡Todo al día por aquí!</h4>
-                                    <p>No tienes postulaciones pendientes de revisión en este momento.</p>
+                                <div class="empty-state" style="padding: 100px 0; text-align: center;">
+                                    <div class="empty-icon" style="font-size: 64px; color: var(--primary-light);"><i class="fas fa-folder-open"></i></div>
+                                    <h4 style="font-size: 20px; font-weight: 800; margin-top: 24px;">No hay postulantes pendientes</h4>
+                                    <p style="color: var(--text-muted); margin-top: 8px;">Todos los registros han sido procesados correctamente.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="noResultsRow" style="display: none;">
+                            <td colspan="5">
+                                <div class="empty-state" style="padding: 80px 0; text-align: center;">
+                                    <i class="fas fa-search-minus" style="font-size: 48px; color: var(--border); margin-bottom: 20px; display: block;"></i>
+                                    <h4 style="font-size: 18px; font-weight: 700;">No se encontraron coincidencias</h4>
+                                    <p style="color: #94a3b8;">Prueba con otros criterios o pulsa "Sincronizar" para buscar en la nube.</p>
                                 </div>
                             </td>
                         </tr>
@@ -309,136 +373,207 @@
         </main>
     </div>
 
-    <!-- Modals -->
-    <!-- Revision Modal (Nueva) -->
-    <div id="modalReview" class="sc-modal-overlay">
-        <div class="sc-modal" style="width: 700px; max-width: 95%;">
-            <div class="sc-modal-icon icon-approve" style="background: #f0f9ff; color: #0ea5e9;">
-                <i class="fas fa-microscope"></i>
+    <!-- Reimagined Modal Revision -->
+    <div id="modalReview" class="modal-overlay">
+        <div class="modal-card">
+            <!-- Loader State -->
+            <div id="modalLoader" style="padding: 100px; text-align: center;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 48px; color: var(--primary);"></i>
+                <p style="margin-top: 24px; font-weight: 700; color: var(--text-muted);">Sincronizando con base de datos externa...</p>
             </div>
-            <h3 class="sc-modal-title">Revisión de Postulante</h3>
-            <p class="sc-modal-text">Datos detallados y deudas encontradas en el sistema.</p>
-            
-            <div id="reviewContent" style="text-align: left; max-height: 400px; overflow-y: auto; padding-right: 10px;">
-                <!-- Cargando... -->
-                <div style="text-align:center; padding: 20px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary);"></i>
+            <!-- Dynamic Content Area -->
+            <div id="modalDynamicContent" style="display: none;">
+                <!-- Header Component -->
+                <div class="modal-header">
+                    <div class="modal-head-container">
+                        <div class="modal-avatar" id="dyn_avatar"></div>
+                        <div class="modal-title-area">
+                            <h3 id="dyn_name">Cargando...</h3>
+                            <p id="dyn_ids"></p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="sc-modal-actions" style="margin-top: 24px;">
-                <button type="button" class="sc-btn sc-btn-cancel" onclick="cerrarModal('modalReview')">Cerrar</button>
+                <!-- Body Component -->
+                <div class="modal-body">
+                    <div class="section-label-modern">Información de Perfil</div>
+                    <div class="info-grid-modern">
+                        <div class="info-card"><div class="info-card-icon"><i class="fas fa-envelope-open"></i></div><div class="info-card-text"><label>E-mail Corporativo</label><span id="dyn_email"></span></div></div>
+                        <div class="info-card"><div class="info-card-icon"><i class="fas fa-mobile-screen-button"></i></div><div class="info-card-text"><label>Teléfono Directo</label><span id="dyn_phone"></span></div></div>
+                        <div class="info-card"><div class="info-card-icon"><i class="fas fa-map-location-dot"></i></div><div class="info-card-text"><label>Ciudad Residencial</label><span id="dyn_city"></span></div></div>
+                        <div class="info-card"><div class="info-card-icon" id="dyn_class_icon"><i class="fas fa-ranking-star"></i></div><div class="info-card-text"><label>Scoring Externo</label><span id="dyn_scoring"></span></div></div>
+                    </div>
+                    
+                    <div class="section-label-modern">Compromisos Externos Encontrados</div>
+                    <div id="dyn_debts_container">
+                        <!-- Debt cards here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-close-modal" onclick="cerrarModal('modalReview')">Cerrar Expediente</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Approval Modal -->
-    <div id="modalApprove" class="sc-modal-overlay">
-        <div class="sc-modal">
-            <div class="sc-modal-icon icon-approve">
-                <i class="fas fa-user-check"></i>
+    <!-- Confirm Aprobacion Modal -->
+    <div id="modalApprove" class="modal-overlay">
+        <div class="modal-card" style="max-width: 440px;">
+            <div style="padding: 40px; text-align: center;">
+                <div class="stat-icon" style="width: 80px; height: 80px; margin: 0 auto 24px; font-size: 32px; background: #ecfdf5; color: var(--success);"><i class="fas fa-user-plus"></i></div>
+                <h3 style="font-size: 22px; font-weight: 800; letter-spacing: -0.04em;">¿Confirmar Aprobación?</h3>
+                <p style="margin: 16px 0 32px; color: var(--text-muted); line-height: 1.6;">Estás por habilitar a <b id="approveName" style="color: var(--text-main);"></b> como socio oficial. Se le enviará una notificación de bienvenida.</p>
+                <form id="formApprove" method="post" class="actions" style="gap: 16px;">
+                    <button type="button" class="btn-close-modal w-100" onclick="cerrarModal('modalApprove')">No, volver</button>
+                    <button type="submit" class="btn-premium w-100" style="padding: 12px;">Sí, Aprobar</button>
+                </form>
             </div>
-            <h3 class="sc-modal-title">¿Aprobar Postulante?</h3>
-            <p class="sc-modal-text">Estás a punto de dar de alta a <span id="approveName" style="font-weight: 700; color: var(--text-main);"></span> como nuevo socio el Club Neptuno. Se le enviarán sus credenciales por correo.</p>
-            <form id="formApprove" method="post">
-                <div class="sc-modal-actions">
-                    <button type="button" class="sc-btn sc-btn-cancel" onclick="cerrarModal('modalApprove')">Cancelar</button>
-                    <button type="submit" class="sc-btn sc-btn-confirm btn-confirm-approve">Sí, Aprobar Socio</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <!-- Reject Modal -->
-    <div id="modalReject" class="sc-modal-overlay">
-        <div class="sc-modal">
-            <div class="sc-modal-icon icon-reject">
-                <i class="fas fa-user-xmark"></i>
+    <div id="modalReject" class="modal-overlay">
+        <div class="modal-card" style="max-width: 460px;">
+            <div style="padding: 40px;">
+                <div class="stat-icon" style="width: 64px; height: 64px; background: #fef2f2; color: var(--danger); font-size: 24px;"><i class="fas fa-file-circle-exclamation"></i></div>
+                <h3 style="font-size: 22px; font-weight: 800; margin: 16px 0 8px;">Rechazar para Subsanación</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Indica la observación técnica para <b id="rejectName"></b>.</p>
+                <form th:action="@{/jefe/rechazar}" method="post">
+                    <input type="hidden" name="idPostulante" id="idPostulanteRechazo">
+                    <textarea name="motivo" class="input-glass" style="height: 120px; resize: none; margin-bottom: 24px;" placeholder="Ej: El documento proporcionado no es legible..." required></textarea>
+                    <div class="actions" style="gap: 16px;">
+                        <button type="button" class="btn-close-modal w-100" onclick="cerrarModal('modalReject')">Cancelar</button>
+                        <button type="submit" class="btn-premium w-100" style="background: var(--danger); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);">Enviar Observación</button>
+                    </div>
+                </form>
             </div>
-            <h3 class="sc-modal-title">Rechazar para Subsanación</h3>
-            <p class="sc-modal-text">Indica el motivo por el cual <span id="rejectName" style="font-weight: 700; color: var(--text-main);"></span> no pudo ser aprobado.</p>
-            <form th:action="@{/jefe/rechazar}" method="post">
-                <input type="hidden" name="idPostulante" id="idPostulanteRechazo">
-                <textarea name="motivo" class="sc-modal-textarea" placeholder="Ej: Dirección incompleta o deudas en otros clubes..." required></textarea>
-                <div class="sc-modal-actions">
-                    <button type="button" class="sc-btn sc-btn-cancel" onclick="cerrarModal('modalReject')">Volver</button>
-                    <button type="submit" class="sc-btn sc-btn-confirm btn-confirm-reject">Confirmar Rechazo</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <!-- Notification Toasts -->
-    <div class="toast-container" id="toastContainer">
-        <div th:if="${mensaje}" class="toast toast-success" id="successToast">
-            <div class="toast-icon"><i class="fas fa-circle-check"></i></div>
-            <div class="toast-msg" th:text="${mensaje}">Operación exitosa</div>
+    <!-- Notification Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-4" style="z-index: 2000;">
+        <div th:if="${mensaje}" class="toast toast-premium show bg-white shadow-lg overflow-hidden" style="border-radius: 16px; min-width: 320px;">
+            <div class="d-flex p-3 align-items-center">
+                <div class="stat-icon me-3 mb-0" style="width: 40px; height: 40px; background: #ecfdf5; color: var(--success); font-size: 16px;"><i class="fas fa-circle-check"></i></div>
+                <div class="toast-body p-0 fw-bold text-main" th:text="${mensaje}"></div>
+            </div>
         </div>
-        <div th:if="${error}" class="toast toast-error" id="errorToast">
-            <div class="toast-icon"><i class="fas fa-circle-exclamation"></i></div>
-            <div class="toast-msg" th:text="${error}">Ha ocurrido un error</div>
+        <div th:if="${error}" class="toast toast-premium show bg-white shadow-lg overflow-hidden" style="border-radius: 16px; min-width: 320px; border-left-color: var(--danger);">
+            <div class="d-flex p-3 align-items-center">
+                <div class="stat-icon me-3 mb-0" style="width: 40px; height: 40px; background: #fef2f2; color: var(--danger); font-size: 16px;"><i class="fas fa-circle-exclamation"></i></div>
+                <div class="toast-body p-0 fw-bold text-main" th:text="${error}"></div>
+            </div>
         </div>
     </div>
 
     <script th:inline="javascript">
-        // Manejo de Modales Modernos
-        function abrirModalRevision(id) {
-            abrirModal('modalReview');
-            const content = document.getElementById('reviewContent');
-            content.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary);"></i></div>';
+        // Real-time Filtering Logic
+        const searchInput = document.getElementById('searchInput');
+        const selectTipo = document.getElementById('selectTipo');
+        const tableRows = document.querySelectorAll('.applicant-row');
+        const noResultsRow = document.getElementById('noResultsRow');
+        const statsCount = document.getElementById('stats-count');
+
+        function filterTable() {
+            const query = searchInput.value.toLowerCase();
+            const tipo = selectTipo.value;
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const doc = row.getAttribute('data-doc').toLowerCase();
+                const rowTipo = row.getAttribute('data-tipo');
+                
+                const matchesQuery = doc.includes(query);
+                const matchesTipo = (tipo === 'TODOS' || rowTipo === tipo);
+
+                if (matchesQuery && matchesTipo) {
+                    row.style.display = 'table-row';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0 && tableRows.length > 0) {
+                noResultsRow.style.display = 'table-row';
+            } else {
+                noResultsRow.style.display = 'none';
+            }
             
+            if(statsCount) statsCount.innerText = visibleCount;
+        }
+
+        searchInput.addEventListener('input', filterTable);
+        selectTipo.addEventListener('change', filterTable);
+
+        // Auto-submit for EXACT match or ENTER if desired, but user asked for filtering as they type
+        // The "Sincronizar" button will still do the full backend sync for that document.
+
+        function abrirModalRevision(id) {
+            const loader = document.getElementById('modalLoader');
+            const content = document.getElementById('modalDynamicContent');
+            const overlay = document.getElementById('modalReview');
+            
+            loader.style.display = 'block';
+            content.style.display = 'none';
+            abrirModal('modalReview');
+
             fetch('/api/deudas/detalle-postulante/' + id)
                 .then(res => res.json())
                 .then(data => {
-                    let html = `
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; background: #f8fafc; padding: 16px; border-radius: 12px;">
-                            <div><span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Postulante</span><br><b>${data.nombres ? data.nombres + ' ' + data.apellidoPaterno : data.razonSocial}</b></div>
-                            <div><span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Documento</span><br><b>${data.tipoDocumento} ${data.numeroDocumento}</b></div>
-                            <div><span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Clasificación</span><br><b style="color:${data.clasificacion.includes('Renuente') ? 'var(--danger)' : 'var(--success)'}">${data.clasificacion}</b></div>
-                            <div><span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Interés</span><br><b>${data.tipoInteres}</b></div>
-                        </div>
-                        <h4 style="font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:8px;"><i class="fas fa-receipt" style="color:var(--primary)"></i> Historial de Deudas Externas</h4>
-                    `;
+                    const isRuc = data.tipoDocumento === 'RUC';
+                    const mainName = data.nombres ? (data.nombres + ' ' + data.apellidoPaterno) : data.razonSocial;
+                    const initial = mainName.charAt(0).toUpperCase();
 
-                    if (!data.deudas || data.deudas.length === 0) {
-                        html += '<div style="padding:16px; text-align:center; color:#64748b; font-size:13px; background:#f1f5f9; border-radius:8px;">No se registraron deudas externas.</div>';
-                    } else {
-                        html += '<div style="display:flex; flex-direction:column; gap:8px;">';
-                        data.deudas.forEach(d => {
-                            const isVerificada = d.verificada;
-                            html += `
-                                <div style="padding:12px; border:1px solid #e2e8f0; border-radius:10px; display:flex; justify-content:space-between; align-items:center; background:${isVerificada ? '#f0fdf4' : '#fff'}">
-                                    <div style="font-size:13px;">
-                                        <b style="color:var(--text-main)">${d.nombre_club_origen}</b><br>
-                                        <span style="color:#64748b">Monto: S/ ${d.monto_deuda} · Status: <b>${d.estado}</b></span>
-                                    </div>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        ${isVerificada ? 
-                                            '<span style="color:#10b981; font-size:12px; font-weight:600;"><i class="fas fa-check-circle"></i> Verificada</span>' : 
-                                            `<button onclick="verificarDeuda(${d.id}, this)" style="padding:4px 12px; font-size:12px; background:var(--primary); color:#fff; border:none; border-radius:6px; cursor:pointer;">Verificar</button>`
-                                        }
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        html += '</div>';
-                    }
-                    content.innerHTML = html;
+                    document.getElementById('dyn_avatar').innerHTML = isRuc ? '<i class="fas fa-building"></i>' : initial;
+                    document.getElementById('dyn_name').innerText = mainName;
+                    document.getElementById('dyn_ids').innerHTML = `<i class="fas fa-id-card"></i> ${data.tipoDocumento} ${data.numeroDocumento} · <i class="fas fa-ship"></i> Gestión Náutica`;
+                    document.getElementById('dyn_email').innerText = data.correoElectronico || '---';
+                    document.getElementById('dyn_phone').innerText = data.telefono || '---';
+                    document.getElementById('dyn_city').innerText = data.ciudad || 'Lima, PE';
+                    
+                    const scoringEl = document.getElementById('dyn_scoring');
+                    scoringEl.innerText = data.clasificacion;
+                    scoringEl.style.color = data.clasificacion.includes('PAGADOR') ? 'var(--success)' : (data.clasificacion.includes('Renuente') ? 'var(--danger)' : 'var(--warning)');
+                    
+                    document.getElementById('dyn_debts_container').innerHTML = generarHtmlDeudas(data.deudas);
+                    
+                    loader.style.display = 'none';
+                    content.style.display = 'block';
                 });
         }
 
+        function generarHtmlDeudas(deudas) {
+            if (!deudas || deudas.length === 0) {
+                return `<div style="padding:48px; text-align:center; background:#f8fafc; border: 2px dashed #e2e8f0; border-radius:20px;">
+                            <i class="fas fa-shield-heart" style="font-size:40px; color:#10b981; margin-bottom:16px; display:block; opacity:0.5;"></i>
+                            <p style="font-size:14px; font-weight:700; color:#64748b; margin:0;">Perfil Financiero Limpio</p>
+                            <span style="font-size:12px; color:#94a3b8;">No se encontraron registros de deudas vigentes.</span>
+                        </div>`;
+            }
+            return deudas.map((d, index) => `
+                <div class="external-debt-card" style="animation: slideUpFade 0.5s ease forwards; animation-delay: ${0.2 + (index * 0.1)}s">
+                    <div class="debt-details-main">
+                        <b>${d.nombre_club_origen}</b>
+                        <span>Referencia: S/ ${d.monto_deuda}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <span class="badge ${d.estado === 'PAGADO' ? 'badge-success' : 'badge-danger'}" style="padding: 4px 10px; font-size: 10px;">${d.estado}</span>
+                        ${d.verificada ? '<i class="fas fa-circle-check" style="color:#10b981; font-size:20px;"></i>' : `<button onclick="verificarDeuda(${d.id}, this)" class="btn-circle btn-view" style="width:32px; height:32px; font-size:14px;"><i class="fas fa-check"></i></button>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function verificarDeuda(idDeuda, btn) {
-            btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            fetch('/api/deudas/verificar/' + idDeuda, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ observaciones: 'Verificación manual desde dashboard' })
+            btn.disabled = true;
+            fetch('/api/deudas/verificar/' + idDeuda, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ observaciones: 'Validado por Jefe de Ventas' }) 
             })
             .then(res => res.json())
-            .then(data => {
-                btn.parentElement.innerHTML = '<span style="color:#10b981; font-size:12px; font-weight:600;"><i class="fas fa-check-circle"></i> Verificada</span>';
+            .then(() => { 
+                btn.parentElement.innerHTML = '<i class="fas fa-circle-check" style="color:#10b981; font-size:20px; animation: fadeInScale 0.3s ease;"></i>'; 
             });
         }
 
@@ -456,44 +591,24 @@
 
         function abrirModal(id) {
             const overlay = document.getElementById(id);
-            if (!overlay) return;
             overlay.style.display = 'flex';
             setTimeout(() => {
-                overlay.querySelector('.sc-modal').classList.add('active');
+                const card = overlay.querySelector('.modal-card');
+                card.style.display = 'block';
+                card.classList.add('active');
             }, 10);
         }
 
         function cerrarModal(id) {
             const overlay = document.getElementById(id);
-            if (!overlay) return;
-            overlay.querySelector('.sc-modal').classList.remove('active');
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 300);
+            const card = overlay.querySelector('.modal-card');
+            card.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
         }
 
-        window.onclick = function(event) {
-            if (event.target.classList.contains('sc-modal-overlay')) {
-                cerrarModal(event.target.id);
-            }
-        }
-
-        window.onload = function() {
-            const sToast = document.getElementById('successToast');
-            const eToast = document.getElementById('errorToast');
-            if (sToast) {
-                setTimeout(() => sToast.classList.add('show'), 100);
-                setTimeout(() => { sToast.classList.remove('show'); setTimeout(() => sToast.remove(), 400); }, 5000);
-            }
-            if (eToast) {
-                setTimeout(() => eToast.classList.add('show'), 100);
-                setTimeout(() => { eToast.classList.remove('show'); setTimeout(() => eToast.remove(), 400); }, 6000);
-            }
-        }
+        window.onclick = e => { if (e.target.classList.contains('modal-overlay')) cerrarModal(e.target.id); }
     </script>
 </body>
 </html>
-t>
-
 </body>
 </html>
