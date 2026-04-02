@@ -22,7 +22,7 @@ public class AuthController {
             if (authority.getAuthority().equals("ROLE_JEFE")) {
                 return "redirect:/jefe/dashboard";
             } else if (authority.getAuthority().equals("ROLE_SOCIO")) {
-                return "redirect:/socio/dashboard";
+                return "redirect:/consultar-estado-socio";
             }
         }
         

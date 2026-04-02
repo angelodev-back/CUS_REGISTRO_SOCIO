@@ -9,6 +9,7 @@ import java.time.LocalDate;
  * Entidad de Historial de Estado del Postulante
  * Mapea la tabla: historial_estado_postulante
  * Registra los cambios de estado del postulante con motivo
+ * Ahora apunta a Empleado (no Usuario) para registrar qué empleado hizo el cambio
  */
 @Entity
 @Table(name = "historial_estado_postulante")
@@ -28,8 +29,8 @@ public class HistorialEstadoPostulante {
     private Postulante postulante;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_jefe", nullable = false)
-    private Usuario jefe;
+    @JoinColumn(name = "id_empleado", nullable = false)
+    private Empleado empleado;
 
     @Column(name = "fecha_cambio", nullable = false)
     private LocalDate fechaCambio;

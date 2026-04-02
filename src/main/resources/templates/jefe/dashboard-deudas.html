@@ -1,601 +1,441 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html class="light" lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jefe Dashboard | Neptuno</title>
-    <!-- Modern Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #0ea5e9;
-            --primary-dark: #0284c7;
-            --primary-light: #e0f2fe;
-            --secondary: #6366f1;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --bg-main: #f8fafc;
-            --sidebar-bg: #0f172a;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --glass: rgba(255, 255, 255, 0.7);
-            --border: #e2e8f0;
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Club Neptuno | Panel de Aprobacion</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-container": "#515159",
+                        "secondary-container": "#e3e1ec",
+                        "on-primary-fixed": "#403f3f",
+                        "secondary-fixed-dim": "#d4d3dd",
+                        "surface": "#f9f9f9",
+                        "primary-container": "#e5e2e1",
+                        "primary-dim": "#535252",
+                        "tertiary-fixed-dim": "#e5e5e5",
+                        "error-dim": "#4e0309",
+                        "error-container": "#fe8983",
+                        "surface-container-high": "#e4e9ea",
+                        "on-secondary-fixed-variant": "#5a5b63",
+                        "on-surface-variant": "#5a6061",
+                        "primary-fixed": "#e5e2e1",
+                        "on-surface": "#2d3435",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#5a5c5c",
+                        "tertiary": "#5e5f5f",
+                        "tertiary-dim": "#525354",
+                        "secondary": "#5e5e67",
+                        "on-error-container": "#752121",
+                        "surface-variant": "#dde4e5",
+                        "surface-bright": "#f9f9f9",
+                        "background": "#f9f9f9",
+                        "secondary-dim": "#52525b",
+                        "error": "#9f403d",
+                        "inverse-on-surface": "#9c9d9d",
+                        "outline": "#757c7d",
+                        "surface-container-low": "#f2f4f4",
+                        "on-tertiary": "#f9f9f9",
+                        "tertiary-container": "#f4f3f3",
+                        "on-background": "#2d3435",
+                        "surface-dim": "#d4dbdd",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "primary": "#5f5e5e",
+                        "inverse-surface": "#0c0f0f",
+                        "on-tertiary-fixed-variant": "#656667",
+                        "on-error": "#fff7f6",
+                        "surface-tint": "#5f5e5e",
+                        "inverse-primary": "#ffffff",
+                        "surface-container": "#ebeeef",
+                        "secondary-fixed": "#e3e1ec",
+                        "on-primary-container": "#525151",
+                        "on-tertiary-fixed": "#484a4a",
+                        "on-primary": "#faf7f6",
+                        "surface-container-highest": "#dde4e5",
+                        "on-secondary-fixed": "#3e3f47",
+                        "outline-variant": "#adb3b4",
+                        "on-secondary": "#faf8ff",
+                        "primary-fixed-dim": "#d4d3dd",
+                        "tertiary-fixed": "#f4f3f3"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"}
+                }
+            }
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
-
-        /* Sidebar Styling */
-        .sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 32px 24px; position: relative; overflow-y: auto; transition: var(--transition); z-index: 100; }
-        .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 48px; padding: 0 8px; }
-        .brand-logo { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); color: #fff; }
-        .brand-name { font-weight: 800; font-size: 20px; letter-spacing: -0.04em; }
-
-        .nav-group { margin-bottom: 40px; }
-        .nav-label { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 12px 16px; opacity: 0.6; }
-        .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; color: #94a3b8; text-decoration: none; border-radius: var(--radius-md); transition: var(--transition); font-weight: 600; font-size: 14px; margin-bottom: 6px; border: 1px solid transparent; }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(4px); }
-        .nav-item.active { background: linear-gradient(90deg, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.05) 100%); color: var(--primary); border-color: rgba(14, 165, 233, 0.2); position: relative; }
-        .nav-item.active::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; background: var(--primary); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--primary); }
-        .nav-item i { font-size: 18px; width: 24px; text-align: center; }
-
-        .btn-logout { margin-top: auto; background: rgba(239, 68, 68, 0.05); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.1); width: 100%; border-radius: var(--radius-md); padding: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; transition: var(--transition); }
-        .btn-logout:hover { background: var(--danger); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2); }
-
-        /* Main Content Styling */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .topbar { height: 90px; padding: 0 48px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); z-index: 50; position: sticky; top: 0; }
-        .page-title h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; color: var(--text-main); }
-        .page-title p { font-size: 14px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
-
-        .user-profile { display: flex; align-items: center; gap: 16px; padding: 6px 6px 6px 16px; background: rgba(255,255,255,0.5); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; transition: var(--transition); }
-        .user-profile:hover { background: #fff; border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow); }
-        .user-info { text-align: right; }
-        .user-name { font-weight: 700; font-size: 14px; display: block; color: var(--text-main); }
-        .user-role { font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); }
-
-        .content { flex: 1; padding: 48px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
-
-        /* Advanced Filter Bar */
-        .filter-container { background: #fff; border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border); margin-bottom: 40px; box-shadow: var(--shadow); border-left: 6px solid var(--primary); position: relative; overflow: hidden; animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .filter-container::after { content: ''; position: absolute; right: -50px; bottom: -50px; width: 200px; height: 200px; background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%); opacity: 0.4; pointer-events: none; }
-        .filter-label { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .filter-label i { color: var(--primary); font-size: 16px; }
-        
-        .input-glass { background: #f8fafc; border: 2px solid #f1f5f9; border-radius: var(--radius-md); padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text-main); transition: var(--transition); width: 100%; outline: none; }
-        .input-glass:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
-        
-        .select-glass { appearance: none; cursor: pointer; padding-right: 40px !important; }
-        .select-wrapper { position: relative; }
-        .select-wrapper i { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
-
-        .btn-premium { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: #fff; border: none; border-radius: var(--radius-md); padding: 14px 28px; font-weight: 800; font-size: 14px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4); }
-        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(14, 165, 233, 0.5); filter: brightness(1.1); }
-        .btn-premium:active { transform: translateY(0); }
-
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 48px; }
-        .stat-card { background: #fff; padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--border); transition: var(--transition); position: relative; overflow: hidden; animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-        .stat-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08); }
-        .stat-icon { width: 48px; height: 48px; background: var(--primary-light); color: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 20px; transition: var(--transition); }
-        .stat-card:hover .stat-icon { background: var(--primary); color: #fff; transform: rotate(10deg); }
-        .stat-info .stat-label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        .stat-info .stat-value { font-size: 32px; font-weight: 800; color: var(--text-main); margin-top: 4px; letter-spacing: -0.04em; }
-
-        /* Data Card & Table */
-        .data-card { background: #fff; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .card-header { padding: 32px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
-        .card-header h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; display: flex; align-items: center; gap: 12px; }
-        .card-header h3 i { color: var(--primary); }
-        
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th { text-align: left; padding: 20px 40px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; background: #fff; border-bottom: 1px solid var(--border); }
-        td { padding: 28px 40px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: var(--transition); }
-        tr:last-child td { border-bottom: none; }
-        tr { transition: opacity 0.3s ease, transform 0.3s ease; }
-        tr:hover td { background: #f8fafc; cursor: pointer; }
-        
-        .applicant-cell { display: flex; align-items: center; gap: 16px; }
-        .applicant-avatar { width: 44px; height: 44px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #64748b; transition: var(--transition); }
-        tr:hover .applicant-avatar { background: var(--primary-light); color: var(--primary); transform: scale(1.1); }
-        .applicant-info b { display: block; font-size: 15px; color: var(--text-main); margin-bottom: 4px; font-weight: 700; }
-        .applicant-info span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-
-        /* Capsule Badges */
-        .badge { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; gap: 8px; border: 1.5px solid transparent; }
-        .badge i { font-size: 14px; }
-        .badge-success { background: #ecfdf5; color: #059669; border-color: #d1fae5; }
-        .badge-warning { background: #fffbeb; color: #d97706; border-color: #fef3c7; }
-        .badge-danger { background: #fef2f2; color: #dc2626; border-color: #fee2e2; }
-        .badge-info { background: #f0f9ff; color: #0284c7; border-color: #e0f2fe; }
-        .badge-subsanado { background: #f5f3ff; color: #7c3aed; border-color: #ede9fe; }
-
-        /* Action Buttons */
-        .actions { display: flex; gap: 10px; }
-        .btn-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; cursor: pointer; transition: var(--transition); color: var(--text-muted); font-size: 16px; }
-        .btn-circle:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-view:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-        .btn-approve:hover { border-color: var(--success); color: var(--success); background: #ecfdf5; }
-        .btn-reject:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
-
-        /* Custom Modal System */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.4s ease; padding: 24px; }
-        .modal-card { background: #fff; width: 100%; max-width: 680px; border-radius: var(--radius-lg); overflow: hidden; position: relative; box-shadow: 0 25px 70px -12px rgba(0,0,0,0.25); transform: scale(0.95); opacity: 0; transition: var(--transition); }
-        .modal-card.active { transform: scale(1); opacity: 1; }
-        
-        .modal-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px; color: #fff; position: relative; overflow: hidden; }
-        .modal-header::before { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.3), transparent 70%); }
-        .modal-head-container { position: relative; display: flex; align-items: center; gap: 24px; z-index: 1; }
-        .modal-avatar { width: 72px; height: 72px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; }
-        .modal-title-area h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 4px; }
-        .modal-title-area p { font-size: 14px; opacity: 0.7; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        
-        .modal-body { padding: 40px; max-height: 60vh; overflow-y: auto; }
-        .section-label-modern { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
-        .section-label-modern::after { content: ''; flex: 1; height: 2px; background: #f1f5f9; }
-        
-        .info-grid-modern { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px; }
-        .info-card { display: flex; gap: 16px; align-items: center; }
-        .info-card-icon { width: 44px; height: 44px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; border: 1px solid #f1f5f9; }
-        .info-card-text label { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
-        .info-card-text span { font-size: 14px; font-weight: 700; color: var(--text-main); }
-        
-        .external-debt-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); }
-        .external-debt-card:hover { transform: translateX(8px); border-color: var(--primary); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.05); }
-        .debt-details-main b { display: block; font-size: 15px; color: var(--text-main); font-weight: 700; }
-        .debt-details-main span { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-        
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideUpFade { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeInScale { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        .modal-footer { padding: 32px 40px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
-        .btn-close-modal { background: #f1f5f9; color: #475569; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
-        .btn-close-modal:hover { background: #e2e8f0; }
-
-        /* Toast UI */
-        .toast-premium { border-left: 5px solid var(--primary); animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important; }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 3px solid var(--bg-main); }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.58);
+            z-index: 70;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; }
     </style>
 </head>
-<body>
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-logo"><i class="fas fa-anchor"></i></div>
-            <div class="brand-name">Club Neptuno</div>
+<body class="bg-surface text-on-surface antialiased">
+<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#f2f4f4] font-['Inter'] text-sm tracking-tight flex flex-col p-4 space-y-2 border-r border-outline-variant/20">
+    <div class="flex items-center space-x-3 mb-8 px-2">
+        <div class="w-8 h-8 rounded bg-primary-dim flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary text-lg">water_drop</span>
         </div>
+        <div>
+            <h1 class="text-lg font-bold tracking-tighter text-[#1A1A1A]">Club Neptuno</h1>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Management Portal</p>
+        </div>
+    </div>
 
-        <nav class="nav-group">
-            <div class="nav-label">Administración</div>
-            <a th:href="@{/jefe/dashboard}" class="nav-item active">
-                <i class="fas fa-id-card-clip"></i>
-                Revisión Postulantes
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-users-gear"></i>
-                Gestión de Socios
-            </a>
+    <nav class="flex-1 space-y-1">
+        <a class="bg-white text-slate-900 font-medium shadow-sm rounded-md px-3 py-2 flex items-center transition-transform active:scale-[0.98]" th:href="@{/jefe/dashboard}">
+            <span class="material-symbols-outlined mr-3">dashboard</span>
+            <span>Revision de Postulantes</span>
+        </a>
+        <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/socios-aprobados}">
+            <span class="material-symbols-outlined mr-3">group</span>
+            <span>Gestion de Socios</span>
+        </a>
+    </nav>
 
-        </nav>
-
-
-
+    <div class="pt-4 border-t border-slate-200 space-y-1">
         <form th:action="@{/logout}" method="post">
-            <button type="submit" class="btn-logout">
-                <i class="fas fa-power-off"></i>
-                Cerrar Sesión
+            <button class="w-full flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 rounded-md transition-all duration-150 ease-out active:scale-[0.98]" type="submit">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span>Log out</span>
             </button>
         </form>
-    </aside>
+    </div>
+</aside>
 
-    <!-- Main Wrapper -->
-    <div class="main-wrapper">
-        <!-- Topbar -->
-        <header class="topbar">
-            <div class="page-title">
-                <h1>Panel de Aprobación</h1>
-                <p>Verificación proactiva de nuevos aspirantes</p>
+<main class="ml-64 min-h-screen flex flex-col">
+    <header class="sticky top-0 w-full z-30 bg-[#f9f9f9]/90 backdrop-blur-md flex items-center justify-between px-8 h-16 font-['Inter'] text-sm border-b border-outline-variant/15">
+        <div class="flex items-center space-x-4">
+            <span class="text-on-surface font-semibold text-base">Revision de Postulantes</span>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="h-6 w-px bg-slate-200"></div>
+            <div class="flex items-center space-x-3">
+                <span class="text-right">
+                    <p class="text-xs font-bold text-on-surface" th:text="${jefeNombre}">Administrador</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Jefe</p>
+                </span>
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center" th:text="${jefeIniciales}">JP</div>
             </div>
+        </div>
+    </header>
 
-            <div class="user-profile">
-                <div class="user-info">
-                    <span class="user-name" th:text="${jefe != null ? jefe.nombres + ' ' + jefe.apellidoPaterno : 'Administrador'}">Nombre del Jefe</span>
-                    <span class="user-role">Sales Director · Admin</span>
-                </div>
-                <div class="user-avatar" th:text="${jefe != null ? #strings.substring(jefe.nombres, 0, 1) + #strings.substring(jefe.apellidoPaterno, 0, 1) : 'AD'}">JD</div>
-            </div>
-        </header>
+    <div class="p-8 max-w-7xl w-full mx-auto space-y-8">
+        <div th:if="${mensaje}" class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700" th:text="${mensaje}"></div>
+        <div th:if="${error}" class="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700" th:text="${error}"></div>
 
-        <!-- Content Area -->
-        <main class="content">
-            <!-- Filter Bar -->
-            <div class="filter-container" style="padding: 40px; margin-bottom: 48px;">
-                <div class="filter-label" style="margin-bottom: 24px;"><i class="fas fa-search-dollar"></i> Centro de Búsqueda de Postulantes</div>
-                <form id="searchForm" th:action="@{/jefe/dashboard}" method="get" class="d-flex flex-wrap align-items-end" style="gap: 24px;">
-                    <div style="flex: 1; min-width: 200px;">
-                        <label class="form-label" style="font-size: 11px; font-weight: 800; color: #94a3b8; margin-bottom: 12px; display: block; letter-spacing: 0.05em;">TIPO DE ENTIDAD</label>
-                        <div class="select-wrapper">
-                            <select name="tipoDoc" id="selectTipo" class="input-glass select-glass">
-                                <option value="TODOS" th:selected="${searchTipo == 'TODOS'}">Todos los Registros</option>
-                                <option value="DNI" th:selected="${searchTipo == 'DNI'}">Persona Natural (DNI)</option>
-                                <option value="RUC" th:selected="${searchTipo == 'RUC'}">Empresa Jurídica (RUC)</option>
+        <div class="space-y-1">
+            <h2 class="text-2xl font-semibold tracking-tight text-on-surface">Validacion de Postulantes</h2>
+            <p class="text-on-surface-variant max-w-2xl leading-relaxed">Gestion de identidad y flujos de aprobacion para nuevos registros de membresia.</p>
+        </div>
+
+        <section class="bg-surface-container-low p-1 rounded-xl">
+            <form class="bg-surface-container-lowest p-6 rounded-full shadow-sm flex items-center space-x-6" method="get" th:action="@{/jefe/dashboard}">
+                <div class="flex-1 flex items-center space-x-4">
+                    <div class="flex flex-col space-y-1 flex-shrink-0">
+                        <label class="text-[10px] uppercase tracking-widest text-outline font-bold ml-1">Tipo de Entidad</label>
+                        <div class="relative">
+                            <select class="appearance-none bg-surface-container-low border-none rounded-lg text-sm px-4 py-2 pr-10 focus:ring-1 focus:ring-primary/40 min-w-[180px] font-medium cursor-pointer" name="tipoDoc">
+                                <option value="TODOS" th:selected="${searchTipo == null or searchTipo == 'TODOS'}">Todos los Registros</option>
+                                <option value="DNI" th:selected="${searchTipo == 'DNI'}">Persona Natural</option>
+                                <option value="RUC" th:selected="${searchTipo == 'RUC'}">Empresa Juridica</option>
                             </select>
-                            <i class="fas fa-chevron-down"></i>
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
                         </div>
                     </div>
-                    <div style="flex: 2; min-width: 300px;">
-                        <label class="form-label" style="font-size: 11px; font-weight: 800; color: #94a3b8; margin-bottom: 12px; display: block; letter-spacing: 0.05em;">BÚSQUEDA DINÁMICA DE DOCUMENTOS</label>
-                        <div style="position: relative;">
-                            <i class="fas fa-fingerprint" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 18px;"></i>
-                            <input type="text" name="numDoc" id="searchInput" class="input-glass" placeholder="Digita DNI o RUC para filtrar al instante..." th:value="${searchNum}" style="padding-left: 54px; height: 52px; font-size: 15px;">
+                    <div class="h-8 w-px bg-slate-100 mt-4"></div>
+                    <div class="flex flex-col space-y-1 flex-1">
+                        <label class="text-[10px] uppercase tracking-widest text-outline font-bold ml-1">Busqueda rapida</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input class="w-full bg-surface-container-low border-none rounded-lg text-sm px-10 py-2 focus:ring-1 focus:ring-primary/40 placeholder:text-slate-400" name="numDoc" placeholder="Digita DNI o RUC..." th:value="${searchNum}" type="text"/>
                         </div>
                     </div>
-                    <div style="flex: 0 0 240px;">
-                        <button type="submit" class="btn-premium w-100" style="height: 52px; border-radius: 12px;">
-                            <i class="fas fa-sync-alt"></i> Sincronizar Datos
-                        </button>
-                    </div>
-                </form>
+                </div>
+                <button class="mt-4 bg-primary text-on-primary px-6 py-2 rounded-lg font-medium hover:bg-primary-dim transition-colors active:scale-95" type="submit">
+                    Filtrar
+                </button>
+            </form>
+        </section>
+
+        <section class="space-y-4">
+            <div class="flex items-center justify-between px-2">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-primary">list_alt</span>
+                    Cola de Validaciones
+                </h3>
+                <span class="text-xs text-slate-400" th:text="${#lists.size(postulantes)} + ' registros pendientes'">0 registros pendientes</span>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="stats-grid" style="margin-top: 48px;">
-                <div class="stat-card" style="animation-delay: 0.1s">
-                    <div class="stat-icon"><i class="fas fa-users-viewfinder"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-label">Resultados</span>
-                        <div class="stat-value" id="stats-count" th:text="${#lists.size(postulantes)}">0</div>
-                    </div>
-                </div>
-                <div class="stat-card" style="animation-delay: 0.2s">
-                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i class="fas fa-check-double"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-label">Revisados Mes</span>
-                        <div class="stat-value">142</div>
-                    </div>
-                </div>
-                <div class="stat-card" style="animation-delay: 0.3s">
-                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--secondary);"><i class="fas fa-hourglass-half"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-label">SLA Promedio</span>
-                        <div class="stat-value">2.4h</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Table Card -->
-            <div class="data-card" style="margin-top: 48px;">
-                <div class="card-header">
-                    <h3><i class="fas fa-list-check"></i> Cola de Validaciones</h3>
-                    <div class="badge badge-info shadow-none" style="padding: 8px 16px;">
-                        <i class="fas fa-database"></i> Datos Sincronizados
-                    </div>
-                </div>
-
-                <table id="applicantsTable">
+            <div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(45,52,53,0.08)] border border-outline-variant/10">
+                <table class="w-full text-left border-collapse min-w-[980px]">
                     <thead>
-                        <tr>
-                            <th>Identidad del Postulante</th>
-                            <th>N° Documento</th>
-                            <th>Finanzas Externas</th>
-                            <th>Status Actual</th>
-                            <th style="text-align: right;">Acciones</th>
-                        </tr>
+                    <tr class="bg-surface-container-high/30">
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-outline">Identidad del Postulante</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-outline">N Documento</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-outline">Finanzas Externas</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-outline">Status Actual</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-right">Acciones</th>
+                    </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="p, iter : ${postulantes}" class="applicant-row" th:data-doc="${p.numeroDocumento}" th:data-tipo="${p.tipoDocumento}" style="animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;" th:styleappend="'animation-delay:' + ${iter.index * 0.1 + 0.2} + 's'">
-                            <td>
-                                <div class="applicant-cell">
-                                    <div class="applicant-avatar"><i class="fas fa-user-tie"></i></div>
-                                    <div class="applicant-info">
-                                        <b th:text="${p.nombres != null ? p.nombres + ' ' + p.apellidoPaterno : p.razonSocial}">Nombre</b>
-                                        <span th:text="${p.correoElectronico}">correo@ejemplo.com</span>
-                                    </div>
+                    <tbody class="divide-y divide-slate-100">
+                    <tr th:if="${#lists.isEmpty(postulantes)}">
+                        <td class="px-6 py-10 text-center text-on-surface-variant" colspan="5">No hay postulantes pendientes.</td>
+                    </tr>
+
+                    <tr class="hover:bg-surface/50 transition-colors group" th:each="p : ${postulantes}">
+                        <td class="px-6 py-5">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-semibold" th:text="${p.nombres != null ? #strings.substring(p.nombres, 0, 1) : 'J'}">A</div>
+                                <div>
+                                    <p class="text-sm font-semibold text-on-surface" th:text="${p.nombres != null ? p.nombres + ' ' + p.apellidoPaterno : p.razonSocial}">Nombre</p>
+                                    <p class="text-xs text-slate-400" th:text="${p.correoElectronico}">correo@dominio.com</p>
                                 </div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 800; color: var(--text-main); font-size: 14px;" th:text="${p.numeroDocumento}">0000</div>
-                                <div class="badge badge-info" style="font-size: 10px; margin-top: 4px; padding: 2px 8px;" th:text="${p.tipoDocumento}">DNI</div>
-                            </td>
-                            <td>
-                                <span th:if="${p.clasificacion == 'SOCIO_PAGADOR'}" class="badge badge-success"><i class="fas fa-check-circle"></i> Socio Pagador</span>
-                                <span th:if="${p.clasificacion == 'SOCIO_PAGADOR_ESPORADICO'}" class="badge badge-warning"><i class="fas fa-clock-rotate-left"></i> Esporádico</span>
-                                <span th:if="${p.clasificacion == 'SOCIO_RENUENTE_PAGO'}" class="badge badge-danger"><i class="fas fa-triangle-exclamation"></i> Renuente</span>
-                                <span th:if="${p.clasificacion == null or p.clasificacion == 'Sin datos' or p.clasificacion == 'Sin historial'}" class="badge badge-info" style="opacity: 0.6"><i class="fas fa-circle-minus"></i> Sin datos</span>
-                            </td>
-                            <td>
-                                <span th:if="${p.estadoPostulacion == 'pendiente'}" class="badge badge-warning">PENDIENTE</span>
-                                <span th:if="${p.estadoPostulacion == 'subsanado'}" class="badge badge-subsanado">SUBSANADO</span>
-                                <span th:if="${p.estadoPostulacion == 'rechazado'}" class="badge badge-danger">RECHAZADO</span>
-                                <span th:if="${p.estadoPostulacion == 'aprobado'}" class="badge badge-success">APROBADO</span>
-                            </td>
-                            <td style="text-align: right;">
-                                <div class="actions" style="justify-content: flex-end;">
-                                    <button class="btn-circle btn-view" title="Ver Expediente" th:data-id="${p.idPostulante}" onclick="abrirModalRevision(this.getAttribute('data-id'))"><i class="fas fa-file-invoice"></i></button>
-                                    <button class="btn-circle btn-approve" title="Aprobación Directa" th:data-id="${p.idPostulante}" th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}" onclick="confirmarAprobacion(this.getAttribute('data-id'), this.getAttribute('data-name'))"><i class="fas fa-thumbs-up"></i></button>
-                                    <button class="btn-circle btn-reject" title="Solicitar Corrección" th:data-id="${p.idPostulante}" th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}" onclick="abrirModalRechazo(this.getAttribute('data-id'), this.getAttribute('data-name'))"><i class="fas fa-reply-all"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr id="emptyRow" th:if="${#lists.isEmpty(postulantes)}" style="display: table-row;">
-                            <td colspan="5">
-                                <div class="empty-state" style="padding: 100px 0; text-align: center;">
-                                    <div class="empty-icon" style="font-size: 64px; color: var(--primary-light);"><i class="fas fa-folder-open"></i></div>
-                                    <h4 style="font-size: 20px; font-weight: 800; margin-top: 24px;">No hay postulantes pendientes</h4>
-                                    <p style="color: var(--text-muted); margin-top: 8px;">Todos los registros han sido procesados correctamente.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr id="noResultsRow" style="display: none;">
-                            <td colspan="5">
-                                <div class="empty-state" style="padding: 80px 0; text-align: center;">
-                                    <i class="fas fa-search-minus" style="font-size: 48px; color: var(--border); margin-bottom: 20px; display: block;"></i>
-                                    <h4 style="font-size: 18px; font-weight: 700;">No se encontraron coincidencias</h4>
-                                    <p style="color: #94a3b8;">Prueba con otros criterios o pulsa "Sincronizar" para buscar en la nube.</p>
-                                </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="text-sm font-medium text-on-surface-variant" th:text="${p.numeroDocumento}">00000000</span>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2 h-2 rounded-full" th:classappend="${p.clasificacion != null and #strings.containsIgnoreCase(p.clasificacion,'Renuente')} ? 'bg-rose-500' : (${p.clasificacion != null and #strings.containsIgnoreCase(p.clasificacion,'Espor')} ? 'bg-amber-500' : 'bg-emerald-500')"></span>
+                                <span class="text-xs font-medium" th:text="${p.clasificacion != null ? p.clasificacion : 'Sin datos'}">Sin datos</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter"
+                                  th:classappend="${p.estadoPostulacion == 'aprobado'} ? ' bg-green-100 text-green-700' : (${p.estadoPostulacion == 'rechazado'} ? ' bg-rose-100 text-rose-700' : (${p.estadoPostulacion == 'subsanado'} ? ' bg-violet-100 text-violet-700' : ' bg-surface-variant text-on-surface-variant'))"
+                                  th:text="${p.estadoPostulacion}">pendiente</span>
+                        </td>
+                        <td class="px-6 py-5 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <button class="text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 transition-colors px-2 py-1 underline-offset-4 hover:underline"
+                                        th:data-id="${p.idPostulante}" onclick="abrirModalRevision(this.getAttribute('data-id'))">
+                                    Ver expediente
+                                </button>
+                                <button class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 transition-colors px-2 py-1 rounded"
+                                        th:data-id="${p.idPostulante}"
+                                        th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}"
+                                        onclick="confirmarAprobacion(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+                                    Aprobar postulante
+                                </button>
+                                <button class="text-[11px] font-bold uppercase tracking-wider text-rose-500 hover:bg-rose-50 transition-colors px-2 py-1 rounded"
+                                        th:data-id="${p.idPostulante}"
+                                        th:data-name="${p.nombres != null ? (p.nombres + ' ' + p.apellidoPaterno) : p.razonSocial}"
+                                        onclick="abrirModalRechazo(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+                                    Rechazar postulante
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
-        </main>
+        </section>
     </div>
+</main>
 
-    <!-- Reimagined Modal Revision -->
-    <div id="modalReview" class="modal-overlay">
-        <div class="modal-card">
-            <!-- Loader State -->
-            <div id="modalLoader" style="padding: 100px; text-align: center;">
-                <i class="fas fa-circle-notch fa-spin" style="font-size: 48px; color: var(--primary);"></i>
-                <p style="margin-top: 24px; font-weight: 700; color: var(--text-muted);">Sincronizando con base de datos externa...</p>
+<div class="modal-overlay" id="modalReview" onclick="cerrarModalEnOverlay(event, 'modalReview')">
+    <div class="bg-white w-full max-w-3xl rounded-xl overflow-hidden border border-outline-variant/10">
+        <div class="px-6 py-4 border-b border-outline-variant/15 flex items-center justify-between">
+            <h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Expediente de postulante</h4>
+            <button class="text-slate-500 hover:text-slate-700" onclick="cerrarModal('modalReview')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="px-6 py-10 text-center text-sm text-on-surface-variant" id="modalLoader">Cargando expediente...</div>
+        <div class="hidden px-6 py-5 space-y-5" id="modalDynamicContent">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div><span class="text-on-surface-variant">Nombre:</span> <span class="font-semibold" id="dyn_name">-</span></div>
+                <div><span class="text-on-surface-variant">Documento:</span> <span class="font-semibold" id="dyn_ids">-</span></div>
+                <div><span class="text-on-surface-variant">Correo:</span> <span class="font-semibold" id="dyn_email">-</span></div>
+                <div><span class="text-on-surface-variant">Telefono:</span> <span class="font-semibold" id="dyn_phone">-</span></div>
+                <div><span class="text-on-surface-variant">Ciudad:</span> <span class="font-semibold" id="dyn_city">-</span></div>
+                <div><span class="text-on-surface-variant">Clasificacion:</span> <span class="font-semibold" id="dyn_scoring">-</span></div>
             </div>
-            <!-- Dynamic Content Area -->
-            <div id="modalDynamicContent" style="display: none;">
-                <!-- Header Component -->
-                <div class="modal-header">
-                    <div class="modal-head-container">
-                        <div class="modal-avatar" id="dyn_avatar"></div>
-                        <div class="modal-title-area">
-                            <h3 id="dyn_name">Cargando...</h3>
-                            <p id="dyn_ids"></p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Body Component -->
-                <div class="modal-body">
-                    <div class="section-label-modern">Información de Perfil</div>
-                    <div class="info-grid-modern">
-                        <div class="info-card"><div class="info-card-icon"><i class="fas fa-envelope-open"></i></div><div class="info-card-text"><label>E-mail Corporativo</label><span id="dyn_email"></span></div></div>
-                        <div class="info-card"><div class="info-card-icon"><i class="fas fa-mobile-screen-button"></i></div><div class="info-card-text"><label>Teléfono Directo</label><span id="dyn_phone"></span></div></div>
-                        <div class="info-card"><div class="info-card-icon"><i class="fas fa-map-location-dot"></i></div><div class="info-card-text"><label>Ciudad Residencial</label><span id="dyn_city"></span></div></div>
-                        <div class="info-card"><div class="info-card-icon" id="dyn_class_icon"><i class="fas fa-ranking-star"></i></div><div class="info-card-text"><label>Scoring Externo</label><span id="dyn_scoring"></span></div></div>
-                    </div>
-                    
-                    <div class="section-label-modern">Compromisos Externos Encontrados</div>
-                    <div id="dyn_debts_container">
-                        <!-- Debt cards here -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-close-modal" onclick="cerrarModal('modalReview')">Cerrar Expediente</button>
-                </div>
+            <div>
+                <h5 class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-2">Deudas externas</h5>
+                <div class="space-y-2" id="dyn_debts_container"></div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Confirm Aprobacion Modal -->
-    <div id="modalApprove" class="modal-overlay">
-        <div class="modal-card" style="max-width: 440px;">
-            <div style="padding: 40px; text-align: center;">
-                <div class="stat-icon" style="width: 80px; height: 80px; margin: 0 auto 24px; font-size: 32px; background: #ecfdf5; color: var(--success);"><i class="fas fa-user-plus"></i></div>
-                <h3 style="font-size: 22px; font-weight: 800; letter-spacing: -0.04em;">¿Confirmar Aprobación?</h3>
-                <p style="margin: 16px 0 32px; color: var(--text-muted); line-height: 1.6;">Estás por habilitar a <b id="approveName" style="color: var(--text-main);"></b> como socio oficial. Se le enviará una notificación de bienvenida.</p>
-                <form id="formApprove" method="post" class="actions" style="gap: 16px;">
-                    <button type="button" class="btn-close-modal w-100" onclick="cerrarModal('modalApprove')">No, volver</button>
-                    <button type="submit" class="btn-premium w-100" style="padding: 12px;">Sí, Aprobar</button>
-                </form>
-            </div>
-        </div>
+<div class="modal-overlay" id="modalApprove" onclick="cerrarModalEnOverlay(event, 'modalApprove')">
+    <div class="bg-white w-full max-w-md rounded-xl p-6 border border-outline-variant/10">
+        <h4 class="text-base font-bold text-on-surface">Confirmar aprobacion</h4>
+        <p class="text-sm text-on-surface-variant mt-2">Se aprobara a <span class="font-semibold" id="approveName">postulante</span>.</p>
+        <form class="mt-5 flex justify-end gap-2" id="formApprove" method="post">
+            <button class="px-4 py-2 rounded-md border border-outline-variant/30 text-on-surface-variant" onclick="cerrarModal('modalApprove')" type="button">Cancelar</button>
+            <button class="px-4 py-2 rounded-md bg-emerald-600 text-white font-semibold hover:bg-emerald-700" type="submit">Aprobar</button>
+        </form>
     </div>
+</div>
 
-    <div id="modalReject" class="modal-overlay">
-        <div class="modal-card" style="max-width: 460px;">
-            <div style="padding: 40px;">
-                <div class="stat-icon" style="width: 64px; height: 64px; background: #fef2f2; color: var(--danger); font-size: 24px;"><i class="fas fa-file-circle-exclamation"></i></div>
-                <h3 style="font-size: 22px; font-weight: 800; margin: 16px 0 8px;">Rechazar para Subsanación</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Indica la observación técnica para <b id="rejectName"></b>.</p>
-                <form th:action="@{/jefe/rechazar}" method="post">
-                    <input type="hidden" name="idPostulante" id="idPostulanteRechazo">
-                    <textarea name="motivo" class="input-glass" style="height: 120px; resize: none; margin-bottom: 24px;" placeholder="Ej: El documento proporcionado no es legible..." required></textarea>
-                    <div class="actions" style="gap: 16px;">
-                        <button type="button" class="btn-close-modal w-100" onclick="cerrarModal('modalReject')">Cancelar</button>
-                        <button type="submit" class="btn-premium w-100" style="background: var(--danger); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);">Enviar Observación</button>
-                    </div>
-                </form>
+<div class="modal-overlay" id="modalReject" onclick="cerrarModalEnOverlay(event, 'modalReject')">
+    <div class="bg-white w-full max-w-md rounded-xl p-6 border border-outline-variant/10">
+        <h4 class="text-base font-bold text-on-surface">Rechazar para subsanacion</h4>
+        <p class="text-sm text-on-surface-variant mt-2">Ingresa observacion para <span class="font-semibold" id="rejectName">postulante</span>.</p>
+        <form class="mt-4 space-y-3" method="post" th:action="@{/jefe/rechazar}">
+            <input id="idPostulanteRechazo" name="idPostulante" type="hidden">
+            <textarea class="w-full rounded-md border-outline-variant/30 text-sm" name="motivo" placeholder="Motivo de rechazo" required rows="4"></textarea>
+            <div class="flex justify-end gap-2">
+                <button class="px-4 py-2 rounded-md border border-outline-variant/30 text-on-surface-variant" onclick="cerrarModal('modalReject')" type="button">Cancelar</button>
+                <button class="px-4 py-2 rounded-md bg-rose-600 text-white font-semibold hover:bg-rose-700" type="submit">Enviar</button>
             </div>
-        </div>
+        </form>
     </div>
+</div>
 
-    <!-- Notification Toast -->
-    <div class="toast-container position-fixed top-0 end-0 p-4" style="z-index: 2000;">
-        <div th:if="${mensaje}" class="toast toast-premium show bg-white shadow-lg overflow-hidden" style="border-radius: 16px; min-width: 320px;">
-            <div class="d-flex p-3 align-items-center">
-                <div class="stat-icon me-3 mb-0" style="width: 40px; height: 40px; background: #ecfdf5; color: var(--success); font-size: 16px;"><i class="fas fa-circle-check"></i></div>
-                <div class="toast-body p-0 fw-bold text-main" th:text="${mensaje}"></div>
-            </div>
-        </div>
-        <div th:if="${error}" class="toast toast-premium show bg-white shadow-lg overflow-hidden" style="border-radius: 16px; min-width: 320px; border-left-color: var(--danger);">
-            <div class="d-flex p-3 align-items-center">
-                <div class="stat-icon me-3 mb-0" style="width: 40px; height: 40px; background: #fef2f2; color: var(--danger); font-size: 16px;"><i class="fas fa-circle-exclamation"></i></div>
-                <div class="toast-body p-0 fw-bold text-main" th:text="${error}"></div>
-            </div>
-        </div>
-    </div>
+<script>
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('open');
+    }
 
-    <script th:inline="javascript">
-        // Real-time Filtering Logic
-        const searchInput = document.getElementById('searchInput');
-        const selectTipo = document.getElementById('selectTipo');
-        const tableRows = document.querySelectorAll('.applicant-row');
-        const noResultsRow = document.getElementById('noResultsRow');
-        const statsCount = document.getElementById('stats-count');
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
 
-        function filterTable() {
-            const query = searchInput.value.toLowerCase();
-            const tipo = selectTipo.value;
-            let visibleCount = 0;
-
-            tableRows.forEach(row => {
-                const doc = row.getAttribute('data-doc').toLowerCase();
-                const rowTipo = row.getAttribute('data-tipo');
-                
-                const matchesQuery = doc.includes(query);
-                const matchesTipo = (tipo === 'TODOS' || rowTipo === tipo);
-
-                if (matchesQuery && matchesTipo) {
-                    row.style.display = 'table-row';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            if (visibleCount === 0 && tableRows.length > 0) {
-                noResultsRow.style.display = 'table-row';
-            } else {
-                noResultsRow.style.display = 'none';
-            }
-            
-            if(statsCount) statsCount.innerText = visibleCount;
+    function cerrarModalEnOverlay(event, id) {
+        if (event.target.id === id) {
+            cerrarModal(id);
         }
+    }
 
-        searchInput.addEventListener('input', filterTable);
-        selectTipo.addEventListener('change', filterTable);
+    function confirmarAprobacion(id, nombre) {
+        document.getElementById('approveName').innerText = nombre || 'postulante';
+        document.getElementById('formApprove').action = '/jefe/aprobar/' + id;
+        abrirModal('modalApprove');
+    }
 
-        // Auto-submit for EXACT match or ENTER if desired, but user asked for filtering as they type
-        // The "Sincronizar" button will still do the full backend sync for that document.
+    function abrirModalRechazo(id, nombre) {
+        document.getElementById('rejectName').innerText = nombre || 'postulante';
+        document.getElementById('idPostulanteRechazo').value = id;
+        abrirModal('modalReject');
+    }
 
-        function abrirModalRevision(id) {
-            const loader = document.getElementById('modalLoader');
-            const content = document.getElementById('modalDynamicContent');
-            const overlay = document.getElementById('modalReview');
-            
-            loader.style.display = 'block';
-            content.style.display = 'none';
-            abrirModal('modalReview');
+    function abrirModalRevision(id) {
+        document.getElementById('modalLoader').classList.remove('hidden');
+        document.getElementById('modalDynamicContent').classList.add('hidden');
+        abrirModal('modalReview');
 
-            fetch('/api/deudas/detalle-postulante/' + id)
-                .then(res => res.json())
-                .then(data => {
-                    const isRuc = data.tipoDocumento === 'RUC';
-                    const mainName = data.nombres ? (data.nombres + ' ' + data.apellidoPaterno) : data.razonSocial;
-                    const initial = mainName.charAt(0).toUpperCase();
-
-                    document.getElementById('dyn_avatar').innerHTML = isRuc ? '<i class="fas fa-building"></i>' : initial;
-                    document.getElementById('dyn_name').innerText = mainName;
-                    document.getElementById('dyn_ids').innerHTML = `<i class="fas fa-id-card"></i> ${data.tipoDocumento} ${data.numeroDocumento} · <i class="fas fa-ship"></i> Gestión Náutica`;
-                    document.getElementById('dyn_email').innerText = data.correoElectronico || '---';
-                    document.getElementById('dyn_phone').innerText = data.telefono || '---';
-                    document.getElementById('dyn_city').innerText = data.ciudad || 'Lima, PE';
-                    
-                    const scoringEl = document.getElementById('dyn_scoring');
-                    scoringEl.innerText = data.clasificacion;
-                    scoringEl.style.color = data.clasificacion.includes('PAGADOR') ? 'var(--success)' : (data.clasificacion.includes('Renuente') ? 'var(--danger)' : 'var(--warning)');
-                    
-                    document.getElementById('dyn_debts_container').innerHTML = generarHtmlDeudas(data.deudas);
-                    
-                    loader.style.display = 'none';
-                    content.style.display = 'block';
-                });
-        }
-
-        function generarHtmlDeudas(deudas) {
-            if (!deudas || deudas.length === 0) {
-                return `<div style="padding:48px; text-align:center; background:#f8fafc; border: 2px dashed #e2e8f0; border-radius:20px;">
-                            <i class="fas fa-shield-heart" style="font-size:40px; color:#10b981; margin-bottom:16px; display:block; opacity:0.5;"></i>
-                            <p style="font-size:14px; font-weight:700; color:#64748b; margin:0;">Perfil Financiero Limpio</p>
-                            <span style="font-size:12px; color:#94a3b8;">No se encontraron registros de deudas vigentes.</span>
-                        </div>`;
-            }
-            return deudas.map((d, index) => `
-                <div class="external-debt-card" style="animation: slideUpFade 0.5s ease forwards; animation-delay: ${0.2 + (index * 0.1)}s">
-                    <div class="debt-details-main">
-                        <b>${d.nombre_club_origen}</b>
-                        <span>Referencia: S/ ${d.monto_deuda}</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:16px;">
-                        <span class="badge ${d.estado === 'PAGADO' ? 'badge-success' : 'badge-danger'}" style="padding: 4px 10px; font-size: 10px;">${d.estado}</span>
-                        ${d.verificada ? '<i class="fas fa-circle-check" style="color:#10b981; font-size:20px;"></i>' : `<button onclick="verificarDeuda(${d.id}, this)" class="btn-circle btn-view" style="width:32px; height:32px; font-size:14px;"><i class="fas fa-check"></i></button>`}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function verificarDeuda(idDeuda, btn) {
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-            fetch('/api/deudas/verificar/' + idDeuda, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ observaciones: 'Validado por Jefe de Ventas' }) 
-            })
+        fetch('/api/deudas/detalle-postulante/' + id)
             .then(res => res.json())
-            .then(() => { 
-                btn.parentElement.innerHTML = '<i class="fas fa-circle-check" style="color:#10b981; font-size:20px; animation: fadeInScale 0.3s ease;"></i>'; 
+            .then(data => {
+                document.getElementById('dyn_name').innerText = (data.nombres ? (data.nombres + ' ' + (data.apellidoPaterno || '')) : (data.razonSocial || '-')).trim();
+                document.getElementById('dyn_ids').innerText = (data.tipoDocumento || '-') + ' ' + (data.numeroDocumento || '-');
+                document.getElementById('dyn_email').innerText = data.correoElectronico || '-';
+                document.getElementById('dyn_phone').innerText = data.telefono || '-';
+                document.getElementById('dyn_city').innerText = data.ciudad || '-';
+                document.getElementById('dyn_scoring').innerText = data.clasificacion || 'Sin datos';
+                document.getElementById('dyn_debts_container').innerHTML = generarHtmlDeudas(data.deudas);
+                document.getElementById('modalLoader').classList.add('hidden');
+                document.getElementById('modalDynamicContent').classList.remove('hidden');
+            })
+            .catch(() => {
+                document.getElementById('dyn_debts_container').innerHTML = '<div class="text-sm text-rose-600">No se pudo cargar el detalle.</div>';
+                document.getElementById('modalLoader').classList.add('hidden');
+                document.getElementById('modalDynamicContent').classList.remove('hidden');
             });
+    }
+
+    function generarHtmlDeudas(deudas) {
+        if (!deudas || deudas.length === 0) {
+            return '<div class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3">No se encontraron deudas en el JSON externo.</div>';
         }
 
-        function confirmarAprobacion(id, nombre) {
-            document.getElementById('approveName').innerText = nombre;
-            document.getElementById('formApprove').action = '/jefe/aprobar/' + id;
-            abrirModal('modalApprove');
-        }
+        return deudas.map(d => {
+            const id = d.id;
+            const nombre = d.nombre_club_origen || d.nombreClubOrigen || 'Entidad externa';
+            const monto = d.monto_deuda || d.montoDeuda || 0;
+            const estado = (d.estado || 'sin_dato').toString().toUpperCase();
+            const verificada = !!d.verificada;
 
-        function abrirModalRechazo(id, nombre) {
-            document.getElementById('rejectName').innerText = nombre;
-            document.getElementById('idPostulanteRechazo').value = id;
-            abrirModal('modalReject');
-        }
+            const estadoClass = estado.includes('PEND')
+                ? 'bg-amber-100 text-amber-700'
+                : estado.includes('VENC')
+                    ? 'bg-rose-100 text-rose-700'
+                    : 'bg-emerald-100 text-emerald-700';
 
-        function abrirModal(id) {
-            const overlay = document.getElementById(id);
-            overlay.style.display = 'flex';
-            setTimeout(() => {
-                const card = overlay.querySelector('.modal-card');
-                card.style.display = 'block';
-                card.classList.add('active');
-            }, 10);
-        }
+            const botonVerificar = verificada
+                ? '<span class="text-xs font-bold text-emerald-700">Verificada</span>'
+                : (id
+                    ? `<button class="px-2.5 py-1 rounded-lg border border-sky-300 bg-sky-50 text-sky-700 text-xs font-semibold hover:bg-sky-100" onclick="verificarDeuda(${id}, this)">Verificar</button>`
+                    : '<span class="text-xs text-slate-500">Sin id externo</span>');
 
-        function cerrarModal(id) {
-            const overlay = document.getElementById(id);
-            const card = overlay.querySelector('.modal-card');
-            card.classList.remove('active');
-            setTimeout(() => overlay.style.display = 'none', 300);
-        }
+            return `
+                <div class="rounded-xl border border-slate-200 px-3 py-3 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="font-semibold text-slate-800">${nombre}</p>
+                        <p class="text-xs text-slate-500">Monto: S/ ${monto}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-bold ${estadoClass}">${estado}</span>
+                        ${botonVerificar}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
-        window.onclick = e => { if (e.target.classList.contains('modal-overlay')) cerrarModal(e.target.id); }
-    </script>
-</body>
-</html>
+    function verificarDeuda(idDeuda, btn) {
+        btn.disabled = true;
+        btn.innerText = 'Procesando...';
+
+        fetch('/api/deudas/verificar/' + idDeuda, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ observaciones: 'Verificado por jefe en panel' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                btn.disabled = false;
+                btn.innerText = 'Verificar';
+                alert(data.error);
+                return;
+            }
+            btn.outerHTML = '<span class="text-xs font-bold text-emerald-700">Verificada</span>';
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerText = 'Verificar';
+            alert('No se pudo completar la verificacion.');
+        });
+    }
+</script>
 </body>
 </html>

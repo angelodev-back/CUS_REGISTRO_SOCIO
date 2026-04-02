@@ -22,7 +22,7 @@ public interface DeudaExternaService {
     ExternalDebtResponseDTO obtenerDatosExternos(String tipoDoc, String numDoc);
     
     /**
-     * Obtiene deudas de la BD local para un postulante por su ID
+        * Obtiene deudas de la API externa para un postulante por su ID
      */
     List<DeudaExternaDTO> obtenerDeudasPorPostulante(Integer idPostulante);
     

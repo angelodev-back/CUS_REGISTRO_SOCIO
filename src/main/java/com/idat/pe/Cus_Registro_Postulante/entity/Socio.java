@@ -28,7 +28,7 @@ public class Socio {
     private Postulante postulante;
 
     @OneToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @JoinColumn(name = "id_usuario", nullable = true)
     private Usuario usuario;
 
     @Column(name = "tipo_socio", nullable = false, length = 20)

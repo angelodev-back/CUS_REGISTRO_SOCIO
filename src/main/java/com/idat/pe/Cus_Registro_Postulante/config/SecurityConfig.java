@@ -26,13 +26,17 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/pre-registro"),
                     new AntPathRequestMatcher("/registro/**"),
                     new AntPathRequestMatcher("/api/postulantes/buscar-por-documento/**"),
+                    new AntPathRequestMatcher("/consultar-estado-socio"),
+                    new AntPathRequestMatcher("/api/socios/consultar-publico/**"),
                     new AntPathRequestMatcher("/css/**"),
                     new AntPathRequestMatcher("/js/**"),
                     new AntPathRequestMatcher("/images/**"),
                     new AntPathRequestMatcher("/error")
                 ).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/jefe/**")).hasRole("JEFE")
-                .requestMatchers(new AntPathRequestMatcher("/socio/**")).hasRole("SOCIO")
+                .requestMatchers(new AntPathRequestMatcher("/api/deudas/**")).hasRole("JEFE")
+                .requestMatchers(new AntPathRequestMatcher("/api/socios/aprobados")).hasRole("JEFE")
+                .requestMatchers(new AntPathRequestMatcher("/api/socios/generar-cuenta/**")).hasRole("JEFE")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

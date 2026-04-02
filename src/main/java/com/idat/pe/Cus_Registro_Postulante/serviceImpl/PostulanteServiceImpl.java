@@ -14,7 +14,6 @@ import com.idat.pe.Cus_Registro_Postulante.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.slf4j.Logger;
@@ -47,19 +46,16 @@ public class PostulanteServiceImpl implements PostulanteService {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private EmpleadoRepository empleadoRepository;
+
+    @Autowired
     private SocioRepository socioRepository;
 
     @Autowired
     private HistorialEstadoPostulanteRepository historialRepository;
 
     @Autowired
-    private RolRepository rolRepository;
-
-    @Autowired
     private EmailService emailService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -142,7 +138,7 @@ public class PostulanteServiceImpl implements PostulanteService {
         }
 
         Postulante actualizado = postulanteRepository.save(postulante);
-        registrarHistorial(actualizado, estadoAnterior, "Cambio de estado manual", obtenerIdUsuarioActual());
+        registrarHistorial(actualizado, estadoAnterior, "Cambio de estado manual", obtenerIdEmpleadoActual());
         return postulanteMapper.toDTO(actualizado);
     }
 
@@ -169,19 +165,16 @@ public class PostulanteServiceImpl implements PostulanteService {
         List<DeudaExternaDTO> deudas = new ArrayList<>();
         String clasificacion = "Sin datos";
         try {
-            // SYNC REAL-TIME
             ExternalDebtResponseDTO ext = deudaExternaService.obtenerDatosExternos(
-                postulante.getTipoDocumento().toString(), 
-                postulante.getNumeroDocumento()
+                    postulante.getTipoDocumento().toString(),
+                    postulante.getNumeroDocumento()
             );
-            
-            if (ext != null) {
-                deudas = ext.getDeudas();
-                clasificacion = ext.getClasificacionSugerida();
-            } else {
-                deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
-                clasificacion = deudaExternaService.clasificarPostulante(deudas);
-            }
+
+            // Siempre tomar deudas desde el servicio API-only para conservar el estado temporal de verificación.
+            deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
+            clasificacion = (ext != null && ext.getClasificacionSugerida() != null)
+                    ? ext.getClasificacionSugerida()
+                    : deudaExternaService.clasificarPostulante(deudas);
         } catch (Exception e) {
             logger.warn("No se pudieron obtener deudas para postulante {}: {}", idPostulante, e.getMessage());
             deudas = deudaExternaService.obtenerDeudasPorPostulante(postulante.getId());
@@ -196,48 +189,27 @@ public class PostulanteServiceImpl implements PostulanteService {
 
     @Override
     @Transactional
-    public void aprobarPostulante(Integer idPostulante, Integer idJefe) {
+    public void aprobarPostulante(Integer idPostulante, Integer idEmpleado) {
         Postulante postulante = postulanteRepository.findById(idPostulante)
                 .orElseThrow(() -> new RuntimeException("Postulante no encontrado"));
         
         EstadoPostulante estadoAnterior = postulante.getEstado();
         
         try {
-            Rol rolSocio = rolRepository.findByNombre("SOCIO")
-                    .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
-            
-            boolean isRuc = postulante.getTipoDocumento() == TipoDocumento.RUC;
-            
-            Usuario usuario = Usuario.builder()
-                    .rol(rolSocio)
-                    .dni(postulante.getNumeroDocumento())
-                    .nombres(isRuc ? postulante.getRazonSocial() : postulante.getNombres())
-                    .apellidoPaterno(isRuc ? " " : postulante.getApellidoPaterno())
-                    .apellidoMaterno(isRuc ? " " : postulante.getApellidoMaterno())
-                    .correoElectronico(postulante.getCorreoElectronico())
-                    .username(postulante.getNumeroDocumento())
-                    .password(passwordEncoder.encode("123456"))
-                    .estado("activo")
-                    .build();
-            
-            Usuario usuarioCreado = usuarioRepository.save(usuario);
-            
-            Socio socio = Socio.builder()
+            Socio socio = socioRepository.findByPostulante(postulante)
+                .orElse(Socio.builder()
                     .postulante(postulante)
-                    .usuario(usuarioCreado)
-                    .tipoSocio("NAUTICO".equalsIgnoreCase(postulante.getTipoInteres()) ? "Nautico" : "Social")
-                    .estadoSocio("activo")
-                    .fechaActivacion(LocalDate.now())
-                    .build();
-            
+                    .build());
+
+            socio.setTipoSocio("NAUTICO".equalsIgnoreCase(postulante.getTipoInteres()) ? "Nautico" : "Social");
+            socio.setEstadoSocio("aprobado");
+            socio.setFechaActivacion(socio.getFechaActivacion() == null ? LocalDate.now() : socio.getFechaActivacion());
             socioRepository.save(socio);
             
             postulante.setEstado(EstadoPostulante.APROBADO);
             postulanteRepository.save(postulante);
             
-            registrarHistorial(postulante, estadoAnterior, "Postulante aprobado - Creacion de Socio", idJefe);
-            
-            emailService.enviarCredenciales(postulante.getCorreoElectronico(), postulante.getNumeroDocumento(), "123456");
+            registrarHistorial(postulante, estadoAnterior, "Postulante aprobado - Pendiente de generación de cuenta", idEmpleado);
 
         } catch (Exception e) {
             throw new RuntimeException("Error al aprobar: " + e.getMessage());
@@ -246,7 +218,7 @@ public class PostulanteServiceImpl implements PostulanteService {
 
     @Override
     @Transactional
-    public void rechazarPostulante(Integer idPostulante, Integer idJefe, String motivo) {
+    public void rechazarPostulante(Integer idPostulante, Integer idEmpleado, String motivo) {
         Postulante postulante = postulanteRepository.findById(idPostulante)
                 .orElseThrow(() -> new RuntimeException("Postulante no encontrado"));
         
@@ -254,7 +226,7 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setEstado(EstadoPostulante.RECHAZADO);
         postulanteRepository.save(postulante);
         
-        registrarHistorial(postulante, estadoAnterior, motivo, idJefe);
+        registrarHistorial(postulante, estadoAnterior, motivo, idEmpleado);
         
         emailService.enviarNotificacionSubsanacion(postulante.getCorreoElectronico(), motivo);
     }
@@ -333,15 +305,15 @@ public class PostulanteServiceImpl implements PostulanteService {
         return dto;
     }
 
-    private void registrarHistorial(Postulante p, EstadoPostulante anterior, String motivo, Integer idJefe) {
-        Usuario jefe = null;
-        if (idJefe != null && idJefe > 0) {
-            jefe = usuarioRepository.findById(idJefe).orElse(null);
+    private void registrarHistorial(Postulante p, EstadoPostulante anterior, String motivo, Integer idEmpleado) {
+        Empleado empleado = null;
+        if (idEmpleado != null && idEmpleado > 0) {
+            empleado = empleadoRepository.findById(idEmpleado).orElse(null);
         }
 
         HistorialEstadoPostulante h = HistorialEstadoPostulante.builder()
                 .postulante(p)
-                .jefe(jefe)
+                .empleado(empleado)
                 .fechaCambio(LocalDate.now())
                 .estadoAnterior(anterior != null ? anterior.name().toLowerCase() : "pendiente")
                 .estadoNuevo(p.getEstado().name().toLowerCase())
@@ -369,13 +341,20 @@ public class PostulanteServiceImpl implements PostulanteService {
                 .build();
     }
 
-    private Integer obtenerIdUsuarioActual() {
+    private Integer obtenerIdEmpleadoActual() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return 0;
+            return null;
         }
-        return usuarioRepository.findByUsername(auth.getName())
-                .map(Usuario::getId)
-                .orElse(0);
+        
+        // Obtener usuario actual
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(auth.getName());
+        if (usuarioOpt.isEmpty()) {
+            return null;
+        }
+        
+        // Obtener empleado asociado
+        Optional<Empleado> empleadoOpt = empleadoRepository.findByUsuario(usuarioOpt.get());
+        return empleadoOpt.map(Empleado::getId).orElse(null);
     }
 }

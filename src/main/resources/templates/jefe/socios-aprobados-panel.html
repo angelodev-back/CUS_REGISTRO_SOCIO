@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="light" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Gestion de Socios - Club Neptuno</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#f4f3f3",
+                        "on-tertiary-fixed": "#484a4a",
+                        "error-container": "#fe8983",
+                        "outline-variant": "#adb3b4",
+                        "error-dim": "#4e0309",
+                        "on-primary": "#faf7f6",
+                        "surface-container-low": "#f2f4f4",
+                        "on-surface-variant": "#5a6061",
+                        "on-primary-fixed": "#403f3f",
+                        "tertiary-fixed-dim": "#e5e5e5",
+                        "primary-fixed": "#e5e2e1",
+                        "background": "#f9f9f9",
+                        "on-error-container": "#752121",
+                        "on-secondary-container": "#515159",
+                        "tertiary": "#5e5f5f",
+                        "primary": "#5f5e5e",
+                        "primary-dim": "#535252",
+                        "surface-container-highest": "#dde4e5",
+                        "on-tertiary-fixed-variant": "#656667",
+                        "on-tertiary": "#f9f9f9",
+                        "tertiary-fixed": "#f4f3f3",
+                        "secondary-container": "#e3e1ec",
+                        "on-error": "#fff7f6",
+                        "inverse-primary": "#ffffff",
+                        "secondary-fixed": "#e3e1ec",
+                        "inverse-on-surface": "#9c9d9d",
+                        "tertiary-dim": "#525354",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d4dbdd",
+                        "surface-variant": "#dde4e5",
+                        "on-background": "#2d3435",
+                        "surface-container": "#ebeeef",
+                        "on-secondary-fixed": "#3e3f47",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "outline": "#757c7d",
+                        "on-secondary": "#faf8ff",
+                        "primary-fixed-dim": "#d6d4d3",
+                        "surface": "#f9f9f9",
+                        "surface-container-high": "#e4e9ea"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"}
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.58);
+            z-index: 70;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#f2f4f4] font-['Inter'] text-sm tracking-tight flex flex-col p-4 space-y-2 border-r border-outline-variant/20">
+    <div class="flex items-center space-x-3 mb-8 px-2">
+        <div class="w-8 h-8 rounded bg-primary-dim flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary text-lg">water_drop</span>
+        </div>
+        <div>
+            <h1 class="text-lg font-bold tracking-tighter text-[#1A1A1A]">Club Neptuno</h1>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Management Portal</p>
+        </div>
+    </div>
+
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/dashboard}">
+            <span class="material-symbols-outlined mr-3">dashboard</span>
+            <span>Revision de Postulantes</span>
+        </a>
+        <a class="bg-white text-slate-900 font-medium shadow-sm rounded-md px-3 py-2 flex items-center transition-transform active:scale-[0.98]" th:href="@{/jefe/socios-aprobados}">
+            <span class="material-symbols-outlined mr-3">group</span>
+            <span>Gestion de Socios</span>
+        </a>
+    </nav>
+
+    <div class="pt-4 border-t border-slate-200 space-y-1">
+        <form th:action="@{/logout}" method="post">
+            <button class="w-full flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 rounded-md transition-all duration-150 ease-out active:scale-[0.98]" type="submit">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span>Log out</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="ml-64 min-h-screen flex flex-col">
+    <header class="sticky top-0 w-full z-30 bg-[#f9f9f9]/90 backdrop-blur-md flex items-center justify-between px-8 h-16 font-['Inter'] text-sm border-b border-outline-variant/15">
+        <div class="flex items-center space-x-4">
+            <span class="text-on-surface font-semibold text-base">Gestion de Socios</span>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="h-6 w-px bg-slate-200"></div>
+            <div class="flex items-center space-x-3">
+                <span class="text-right">
+                    <p class="text-xs font-bold text-on-surface" th:text="${jefeNombre}">Administrador</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Jefe</p>
+                </span>
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center" th:text="${jefeIniciales}">JP</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+        <div id="toast" class="hidden px-4 py-3 rounded-md text-sm font-medium"></div>
+
+        <div class="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-end">
+            <div>
+                <h2 class="text-2xl font-semibold tracking-tight text-on-surface mb-1">Socios Aprobados</h2>
+                <p class="text-on-surface-variant max-w-2xl leading-relaxed">
+                    Listado oficial de miembros validados para la temporada actual. Administre credenciales y accesos desde este portal centralizado.
+                </p>
+            </div>
+            <div class="flex flex-col gap-2 w-full lg:w-auto lg:flex-row lg:items-center">
+                <div class="relative w-full lg:w-80">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                    <input class="w-full bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary/40 placeholder:text-on-surface-variant/50"
+                           id="searchInput" placeholder="Buscar por nombre, documento o correo..." type="text"/>
+                </div>
+                <button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant/20 text-on-surface rounded-md text-xs font-medium hover:bg-surface-container-low transition-colors flex items-center gap-2" onclick="cargarSociosAprobados()">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-6">
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-[0_10px_30px_-10px_rgba(45,52,53,0.04)]">
+                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Total Socios</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-bold text-on-background" id="totalSocios">0</span>
+                </div>
+            </div>
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-[0_10px_30px_-10px_rgba(45,52,53,0.04)]">
+                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Con Cuenta</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-bold text-on-background" id="totalConCuenta">0</span>
+                </div>
+            </div>
+            <div class="col-span-2 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-[0_10px_30px_-10px_rgba(45,52,53,0.04)] flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Estado del Sistema</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span class="text-sm font-medium text-on-background">Sincronizacion en tiempo real activa</span>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-surface-container-highest text-4xl">cloud_done</span>
+            </div>
+        </div>
+
+        <div class="bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="tablaSocios">
+                    <thead>
+                    <tr class="bg-surface-container-high/50">
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Nombre</th>
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Documento</th>
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Email</th>
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Estado</th>
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold text-right">Accion</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/5 bg-surface-container-lowest" id="bodyAprobados">
+                    <tr>
+                        <td class="px-6 py-8 text-sm text-on-surface-variant text-center" colspan="5">Cargando socios aprobados...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant/10 bg-surface-container-low/50">
+                <p class="text-xs text-on-surface-variant">Mostrando <span class="font-bold" id="mostrandoCount">0</span> socios aprobados</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalGenerate" onclick="cerrarModalEnOverlay(event, 'modalGenerate')">
+    <div class="bg-white w-full max-w-md rounded-xl border border-outline-variant/20 shadow-xl p-6">
+        <h3 class="text-lg font-bold text-on-background">Generar cuenta de socio</h3>
+        <p class="text-sm text-on-surface-variant mt-2">
+            Se crearan credenciales para <span class="font-semibold" id="nombreSocioModal">socio</span>.
+        </p>
+        <div class="mt-6 flex justify-end gap-2">
+            <button class="px-4 py-2 rounded-md border border-outline-variant/20 text-on-surface-variant" onclick="cerrarModal('modalGenerate')" type="button">Cancelar</button>
+            <button class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700" id="btnConfirmarGenerar" type="button">Generar cuenta</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const bodyAprobados = document.getElementById('bodyAprobados');
+    const searchInput = document.getElementById('searchInput');
+    const toast = document.getElementById('toast');
+    const totalSocios = document.getElementById('totalSocios');
+    const totalConCuenta = document.getElementById('totalConCuenta');
+    const mostrandoCount = document.getElementById('mostrandoCount');
+    const btnConfirmarGenerar = document.getElementById('btnConfirmarGenerar');
+
+    let sociosState = [];
+    let socioSeleccionado = null;
+
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('open');
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    function cerrarModalEnOverlay(event, id) {
+        if (event.target.id === id) {
+            cerrarModal(id);
+        }
+    }
+
+    function showToast(message, ok = true) {
+        toast.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'border', 'border-green-200', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
+        toast.classList.add('border');
+
+        if (ok) {
+            toast.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+        } else {
+            toast.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+        }
+
+        toast.textContent = message;
+        setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function renderSocios(list) {
+        if (!list.length) {
+            bodyAprobados.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-sm text-on-surface-variant text-center">No hay socios para mostrar.</td></tr>';
+            mostrandoCount.textContent = '0';
+            totalSocios.textContent = '0';
+            totalConCuenta.textContent = '0';
+            return;
+        }
+
+        const activos = list.filter(s => s.tieneAcceso).length;
+        totalSocios.textContent = String(list.length);
+        totalConCuenta.textContent = String(activos);
+        mostrandoCount.textContent = String(list.length);
+
+        bodyAprobados.innerHTML = list.map(s => {
+            const estadoClass = s.tieneAcceso
+                ? 'bg-green-100 text-green-700'
+                : 'bg-amber-100 text-amber-700';
+            const estadoText = s.tieneAcceso ? 'Activo' : 'Aprobado';
+
+            const accion = s.tieneAcceso
+                ? '<button class="px-3 py-1.5 bg-slate-200 text-slate-500 rounded text-[11px] font-semibold cursor-not-allowed" disabled>Cuenta generada</button>'
+                : `<button class="px-3 py-1.5 bg-blue-600 text-white rounded text-[11px] font-semibold hover:bg-blue-700 transition-colors shadow-sm active:scale-95" onclick="abrirModalGenerar(${s.socioId}, '${(s.nombre || '').replace(/'/g, "&#39;")}')">Generar cuenta</button>`;
+
+            return `
+                <tr class="hover:bg-surface-container-low/30 transition-colors group">
+                    <td class="px-6 py-4 text-sm font-medium text-on-background">${s.nombre || '-'}</td>
+                    <td class="px-6 py-4 text-sm text-on-surface-variant font-mono">${s.numeroDocumento || '-'}</td>
+                    <td class="px-6 py-4 text-sm text-on-surface-variant">${s.email || '-'}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold tracking-tight ${estadoClass} uppercase">${estadoText}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">${accion}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function cargarSociosAprobados() {
+        try {
+            const res = await fetch('/api/socios/aprobados');
+            const data = await res.json();
+
+            if (!res.ok) {
+                bodyAprobados.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-sm text-on-surface-variant text-center">No se pudo cargar la lista.</td></tr>';
+                showToast(data.error || 'Error al cargar socios aprobados', false);
+                return;
+            }
+
+            sociosState = Array.isArray(data) ? data : [];
+            renderSocios(sociosState);
+        } catch (e) {
+            bodyAprobados.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-sm text-on-surface-variant text-center">Error de conexion al cargar socios.</td></tr>';
+            showToast('Error de conexion al cargar socios', false);
+        }
+    }
+
+    function abrirModalGenerar(socioId, nombre) {
+        socioSeleccionado = socioId;
+        document.getElementById('nombreSocioModal').textContent = nombre || 'socio';
+        abrirModal('modalGenerate');
+    }
+
+    async function generarCuentaSocio() {
+        if (!socioSeleccionado) {
+            return;
+        }
+
+        btnConfirmarGenerar.disabled = true;
+        btnConfirmarGenerar.textContent = 'Procesando...';
+
+        try {
+            const res = await fetch(`/api/socios/generar-cuenta/${socioSeleccionado}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                showToast(data.error || 'No se pudo generar la cuenta', false);
+                return;
+            }
+
+            showToast(data.mensaje || 'Cuenta generada exitosamente', true);
+            cerrarModal('modalGenerate');
+            await cargarSociosAprobados();
+        } catch (e) {
+            showToast('Error de conexion al generar la cuenta', false);
+        } finally {
+            btnConfirmarGenerar.disabled = false;
+            btnConfirmarGenerar.textContent = 'Generar cuenta';
+        }
+    }
+
+    function filtrarSociosLocal() {
+        const q = (searchInput.value || '').trim().toLowerCase();
+        if (!q) {
+            renderSocios(sociosState);
+            return;
+        }
+
+        const filtrados = sociosState.filter(s => {
+            const nombre = (s.nombre || '').toLowerCase();
+            const doc = (s.numeroDocumento || '').toLowerCase();
+            const email = (s.email || '').toLowerCase();
+            return nombre.includes(q) || doc.includes(q) || email.includes(q);
+        });
+
+        renderSocios(filtrados);
+    }
+
+    btnConfirmarGenerar.addEventListener('click', generarCuentaSocio);
+    searchInput.addEventListener('input', filtrarSociosLocal);
+
+    cargarSociosAprobados();
+</script>
+</body>
+</html>

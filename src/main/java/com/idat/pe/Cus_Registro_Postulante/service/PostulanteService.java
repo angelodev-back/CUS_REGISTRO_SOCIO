@@ -15,8 +15,8 @@ public interface PostulanteService {
     // Métodos para flujo JEFE
     List<PostulanteConDeudasDTO> obtenerPostulantesPendientesConDeudas();
     PostulanteConDeudasDTO obtenerPostulanteConDeudasDetalle(Integer idPostulante);
-    void aprobarPostulante(Integer idPostulante, Integer idJefe);
-    void rechazarPostulante(Integer idPostulante, Integer idJefe, String motivo);
+    void aprobarPostulante(Integer idPostulante, Integer idEmpleado);
+    void rechazarPostulante(Integer idPostulante, Integer idEmpleado, String motivo);
     void subsanarPostulante(Integer idPostulante, RegistroPostulanteDTO dto);
     PostulanteDTO buscarPorNumeroDocumento(String numero);
     List<PostulanteConDeudasDTO> buscarPostulantesParaJefe(String tipoDoc, String numDoc);

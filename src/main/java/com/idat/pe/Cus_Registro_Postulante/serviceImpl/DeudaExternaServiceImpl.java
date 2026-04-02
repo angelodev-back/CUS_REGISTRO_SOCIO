@@ -4,15 +4,16 @@ import com.idat.pe.Cus_Registro_Postulante.service.DeudaExternaService;
 import com.idat.pe.Cus_Registro_Postulante.client.DeudaExternaClient;
 import com.idat.pe.Cus_Registro_Postulante.dto.DeudaExternaDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.ExternalDebtResponseDTO;
-import com.idat.pe.Cus_Registro_Postulante.entity.DeudaExterna;
-import com.idat.pe.Cus_Registro_Postulante.entity.Usuario;
-import com.idat.pe.Cus_Registro_Postulante.repository.DeudaExternaRepository;
-import com.idat.pe.Cus_Registro_Postulante.repository.UsuarioRepository;
+import com.idat.pe.Cus_Registro_Postulante.entity.Postulante;
+import com.idat.pe.Cus_Registro_Postulante.repository.PostulanteRepository;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -24,16 +25,16 @@ public class DeudaExternaServiceImpl implements DeudaExternaService {
     private static final Logger logger = LoggerFactory.getLogger(DeudaExternaServiceImpl.class);
 
     private final DeudaExternaClient deudaExternaClient;
-    private final DeudaExternaRepository deudaExternaRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final PostulanteRepository postulanteRepository;
+
+    // Estado temporal en memoria para no depender de tabla local de deuda_externa.
+    private final Map<Integer, DeudaExternaDTO> deudasVerificadas = new ConcurrentHashMap<>();
 
     public DeudaExternaServiceImpl(
             DeudaExternaClient deudaExternaClient,
-            DeudaExternaRepository deudaExternaRepository,
-            UsuarioRepository usuarioRepository) {
+            PostulanteRepository postulanteRepository) {
         this.deudaExternaClient = deudaExternaClient;
-        this.deudaExternaRepository = deudaExternaRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.postulanteRepository = postulanteRepository;
     }
 
     @Override
@@ -59,38 +60,42 @@ public class DeudaExternaServiceImpl implements DeudaExternaService {
 
     @Override
     public List<DeudaExternaDTO> obtenerDeudasPorPostulante(Integer idPostulante) {
-        logger.info("Obteniendo deudas de la BD para postulante ID: {}", idPostulante);
+        logger.info("Obteniendo deudas desde API externa para postulante ID: {}", idPostulante);
 
-        List<DeudaExterna> deudas = deudaExternaRepository.findByPostulante_Id(idPostulante);
+        Postulante postulante = postulanteRepository.findById(idPostulante)
+            .orElseThrow(() -> new RuntimeException("Postulante no encontrado con id: " + idPostulante));
 
-        return deudas.stream()
-                .map(this::mapearDTO)
-                .collect(Collectors.toList());
+        ExternalDebtResponseDTO external = obtenerDatosExternos(
+            postulante.getTipoDocumento().name(),
+            postulante.getNumeroDocumento()
+        );
+
+        if (external == null || external.getDeudas() == null) {
+            return Collections.emptyList();
+        }
+
+        return external.getDeudas().stream()
+            .map(this::aplicarVerificacionTemporal)
+            .collect(Collectors.toList());
     }
 
     @Override
     public void verificarDeuda(Integer idDeuda, Integer idJefe, String observaciones) {
-        logger.info("Verificando deuda ID: {} por jefe ID: {}", idDeuda, idJefe);
+        logger.info("Marcando verificación temporal de deuda externa ID: {} por usuario ID: {}", idDeuda, idJefe);
 
-        try {
-            DeudaExterna deuda = deudaExternaRepository.findById(idDeuda)
-                    .orElseThrow(() -> new RuntimeException("Deuda no encontrada con id: " + idDeuda));
-
-            Usuario jefe = usuarioRepository.findById(idJefe)
-                    .orElseThrow(() -> new RuntimeException("Jefe no encontrado con id: " + idJefe));
-
-            deuda.setVerificada(true);
-            deuda.setFechaVerificacion(LocalDate.now());
-            deuda.setVerificador(jefe);
-            deuda.setObservacionesVerificacion(observaciones);
-
-            deudaExternaRepository.save(deuda);
-            logger.info("Deuda verificada exitosamente por jefe: {}", jefe.getUsername());
-
-        } catch (Exception e) {
-            logger.error("Error al verificar deuda: {}", e.getMessage(), e);
-            throw new RuntimeException("Error al verificar deuda: " + e.getMessage());
+        if (idDeuda == null || idDeuda <= 0) {
+            throw new RuntimeException("Identificador de deuda inválido");
         }
+
+        DeudaExternaDTO verificada = DeudaExternaDTO.builder()
+            .id(idDeuda)
+            .verificada(true)
+            .fechaVerificacion(LocalDate.now().toString())
+            .jefe(idJefe != null && idJefe > 0 ? "usuario-" + idJefe : "jefe")
+            .observacionesVerificacion(observaciones)
+            .build();
+
+        deudasVerificadas.put(idDeuda, verificada);
     }
 
     @Override
@@ -121,22 +126,28 @@ public class DeudaExternaServiceImpl implements DeudaExternaService {
         return "Socio Pagador";
     }
 
-    private DeudaExternaDTO mapearDTO(DeudaExterna entity) {
-        String nombreJefe = null;
-        if (entity.getVerificador() != null) {
-            nombreJefe = entity.getVerificador().getNombres() + " " + entity.getVerificador().getApellidoPaterno();
+    private DeudaExternaDTO aplicarVerificacionTemporal(DeudaExternaDTO deuda) {
+        if (deuda == null) {
+            return null;
         }
 
-        return DeudaExternaDTO.builder()
-                .id(entity.getId())
-                .nombreClubOrigen(entity.getNombreClubOrigen())
-                .montoDeuda(entity.getMontoDeuda())
-                .fechaRegistro(entity.getFechaRegistro() != null ? entity.getFechaRegistro().toString() : null)
-                .estado(entity.getEstado())
-                .verificada(entity.getVerificada())
-                .fechaVerificacion(entity.getFechaVerificacion() != null ? entity.getFechaVerificacion().toString() : null)
-                .jefe(nombreJefe)
-                .observacionesVerificacion(entity.getObservacionesVerificacion())
-                .build();
+        if (deuda.getId() == null) {
+            if (deuda.getVerificada() == null) {
+                deuda.setVerificada(false);
+            }
+            return deuda;
+        }
+
+        DeudaExternaDTO temporal = deudasVerificadas.get(deuda.getId());
+        if (temporal != null) {
+            deuda.setVerificada(true);
+            deuda.setFechaVerificacion(temporal.getFechaVerificacion());
+            deuda.setJefe(temporal.getJefe());
+            deuda.setObservacionesVerificacion(temporal.getObservacionesVerificacion());
+        } else if (deuda.getVerificada() == null) {
+            deuda.setVerificada(false);
+        }
+
+        return deuda;
     }
 }

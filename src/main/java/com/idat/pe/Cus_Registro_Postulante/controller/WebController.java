@@ -3,12 +3,11 @@ package com.idat.pe.Cus_Registro_Postulante.controller;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteConDeudasDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.RegistroPostulanteDTO;
-import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
-import com.idat.pe.Cus_Registro_Postulante.service.EmbarcacionService;
+import com.idat.pe.Cus_Registro_Postulante.entity.Empleado;
 import com.idat.pe.Cus_Registro_Postulante.entity.Usuario;
+import com.idat.pe.Cus_Registro_Postulante.repository.EmpleadoRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.UsuarioRepository;
-import com.idat.pe.Cus_Registro_Postulante.repository.SocioRepository;
-import com.idat.pe.Cus_Registro_Postulante.entity.Socio;
+import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class WebController {
@@ -26,13 +26,10 @@ public class WebController {
     private PostulanteService postulanteService;
 
     @Autowired
-    private EmbarcacionService embarcacionService;
-
-    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private SocioRepository socioRepository;
+    private EmpleadoRepository empleadoRepository;
 
     @GetMapping("/")
     public String index() {
@@ -58,48 +55,6 @@ public class WebController {
         return "registro/formulario-registro";
     }
 
-    @PostMapping("/socio/registrar-embarcacion")
-    public String registrarEmbarcacion(@RequestParam String nombre,
-                                     @RequestParam String tipo,
-                                     @RequestParam String matricula,
-                                     @RequestParam(required = false) String descripcion,
-                                     @RequestParam(required = false) Integer socioId, // Opcional para Staff
-                                     RedirectAttributes ra) {
-        try {
-            Usuario user = obtenerUsuarioActual();
-            Integer idParaRegistro;
-
-            if (socioId != null && !user.getRol().getNombre().equals("SOCIO")) {
-                // Registro asistido por personal
-                idParaRegistro = socioId;
-            } else {
-                // Auto-registro por el socio
-                Socio socio = socioRepository.findByUsuario(user)
-                        .orElseThrow(() -> new RuntimeException("Socio no encontrado para el usuario actual"));
-                idParaRegistro = socio.getId();
-            }
-
-            com.idat.pe.Cus_Registro_Postulante.dto.EmbarcacionDTO dto = new com.idat.pe.Cus_Registro_Postulante.dto.EmbarcacionDTO();
-            dto.setNombre(nombre);
-            dto.setTipo(tipo);
-            dto.setMatricula(matricula);
-            dto.setDescripcion(descripcion);
-            dto.setEstado("Activa");
-
-            embarcacionService.registrarEmbarcacion(dto, idParaRegistro);
-            ra.addFlashAttribute("mensaje", "Embarcación registrada correctamente.");
-            
-            if (user.getRol().getNombre().equals("SOCIO")) {
-                return "redirect:/socio/dashboard";
-            } else {
-                return "redirect:/jefe/dashboard"; // O a una vista de gestión de embarcaciones si existiera
-            }
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Error al registrar: " + e.getMessage());
-            return "redirect:/socio/registrar-embarcacion";
-        }
-    }
-
     @GetMapping("/registro/exitoso")
     public String exitoso() {
         // Tip: El objeto 'postulante' llega aquí como FlashAttribute desde el POST.
@@ -113,8 +68,7 @@ public class WebController {
     public String jefeDashboard(@RequestParam(required = false) String tipoDoc,
                                @RequestParam(required = false) String numDoc,
                                Model model) {
-        Usuario jefe = obtenerUsuarioActual();
-        model.addAttribute("jefe", jefe);
+        agregarPerfilJefe(model);
         
         List<PostulanteConDeudasDTO> lista;
         if ((tipoDoc != null && !tipoDoc.isEmpty() && !"TODOS".equalsIgnoreCase(tipoDoc)) 
@@ -133,8 +87,11 @@ public class WebController {
     @PostMapping("/jefe/aprobar/{id}")
     public String aprobarPostulante(@PathVariable Integer id, RedirectAttributes ra) {
         try {
-            Integer idJefe = obtenerUsuarioActual().getId();
-            postulanteService.aprobarPostulante(id, idJefe);
+            Integer idEmpleado = obtenerIdEmpleadoActual();
+            if (idEmpleado == null) {
+                throw new RuntimeException("No se pudo identificar al empleado autenticado");
+            }
+            postulanteService.aprobarPostulante(id, idEmpleado);
             ra.addFlashAttribute("mensaje", "Postulante aprobado correctamente.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -145,8 +102,11 @@ public class WebController {
     @PostMapping("/jefe/rechazar")
     public String rechazarPostulante(@RequestParam Integer idPostulante, @RequestParam String motivo, RedirectAttributes ra) {
         try {
-            Integer idJefe = obtenerUsuarioActual().getId();
-            postulanteService.rechazarPostulante(idPostulante, idJefe, motivo);
+            Integer idEmpleado = obtenerIdEmpleadoActual();
+            if (idEmpleado == null) {
+                throw new RuntimeException("No se pudo identificar al empleado autenticado");
+            }
+            postulanteService.rechazarPostulante(idPostulante, idEmpleado, motivo);
             ra.addFlashAttribute("mensaje", "Postulante rechazado para subsanación.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -154,21 +114,14 @@ public class WebController {
         return "redirect:/jefe/dashboard";
     }
 
-    // --- FLUJO SOCIO ---
-    @GetMapping("/socio/dashboard")
-    public String socioDashboard(Model model) {
-        Usuario user = obtenerUsuarioActual();
-        Socio socio = socioRepository.findByUsuario(user)
-                .orElseThrow(() -> new RuntimeException("Socio no encontrado"));
-        
-        model.addAttribute("socio", socio);
-        model.addAttribute("embarcaciones", embarcacionService.listarPorSocio(socio.getId()));
-        return "socio/socio-dashboard";
+    @GetMapping("/jefe/socios-aprobados")
+    public String sociosAprobadosPanel() {
+        return "jefe/socios-aprobados-panel";
     }
 
-    @GetMapping("/socio/registrar-embarcacion")
-    public String vistaRegistrarEmbarcacion(Model model) {
-        return "socio/embarcacion-registro";
+    @GetMapping("/consultar-estado-socio")
+    public String consultarEstadoPublico() {
+        return "publico/consultar-estado-socio";
     }
 
     @PostMapping("/registro/guardar")
@@ -207,7 +160,7 @@ public class WebController {
     }
 
     @PostMapping("/registro/subsanar/buscar")
-    public String buscarSubsanacion(@RequestParam String dni, RedirectAttributes ra, Model model) {
+    public String buscarSubsanacion(@RequestParam String dni, RedirectAttributes ra) {
         PostulanteDTO p = postulanteService.buscarPorNumeroDocumento(dni);
         
         if (p == null) {
@@ -272,5 +225,41 @@ public class WebController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) return null;
         return usuarioRepository.findByUsername(auth.getName()).orElse(null);
+    }
+
+    private Integer obtenerIdEmpleadoActual() {
+        Usuario usuario = obtenerUsuarioActual();
+        if (usuario == null) {
+            return null;
+        }
+        Optional<Empleado> empleado = empleadoRepository.findByUsuario(usuario);
+        return empleado.map(Empleado::getId).orElse(null);
+    }
+
+    private void agregarPerfilJefe(Model model) {
+        Usuario usuario = obtenerUsuarioActual();
+        String nombre = "Administrador";
+        String iniciales = "AD";
+
+        if (usuario != null) {
+            Optional<Empleado> empleadoOpt = empleadoRepository.findByUsuario(usuario);
+            if (empleadoOpt.isPresent()) {
+                Empleado empleado = empleadoOpt.get();
+                nombre = empleado.getNombres() + " " + empleado.getApellidoPaterno();
+                iniciales = generarIniciales(empleado.getNombres(), empleado.getApellidoPaterno());
+            } else {
+                nombre = usuario.getUsername();
+                iniciales = generarIniciales(usuario.getUsername(), "");
+            }
+        }
+
+        model.addAttribute("jefeNombre", nombre);
+        model.addAttribute("jefeIniciales", iniciales);
+    }
+
+    private String generarIniciales(String primerTexto, String segundoTexto) {
+        String primera = (primerTexto != null && !primerTexto.isBlank()) ? primerTexto.substring(0, 1).toUpperCase() : "A";
+        String segunda = (segundoTexto != null && !segundoTexto.isBlank()) ? segundoTexto.substring(0, 1).toUpperCase() : "D";
+        return primera + segunda;
     }
 }

@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario o correo no encontrado: " + input));
 
         // Validar que el usuario esté activo
-        if (usuario.getEstado() == null || !usuario.getEstado().equalsIgnoreCase("activo")) {
+        if (!Boolean.TRUE.equals(usuario.getEstadoUsuario())) {
             throw new UsernameNotFoundException("Usuario inactivo: " + input);
         }
 

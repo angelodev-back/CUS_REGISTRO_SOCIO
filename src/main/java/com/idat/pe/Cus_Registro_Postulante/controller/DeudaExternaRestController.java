@@ -1,6 +1,5 @@
 package com.idat.pe.Cus_Registro_Postulante.controller;
 
-import com.idat.pe.Cus_Registro_Postulante.dto.DeudaExternaDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteConDeudasDTO;
 import com.idat.pe.Cus_Registro_Postulante.service.DeudaExternaService;
 import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
