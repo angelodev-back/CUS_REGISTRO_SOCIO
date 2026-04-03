@@ -12,6 +12,7 @@ import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import com.idat.pe.Cus_Registro_Postulante.service.DeudaExternaService;
 import com.idat.pe.Cus_Registro_Postulante.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
@@ -57,14 +58,31 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private RolRepository rolRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     @Transactional
     public PostulanteDTO registrarPostulante(RegistroPostulanteDTO dto) {
-        if (postulanteRepository.findByNumeroDocumento(dto.getNumeroDocumento()).isPresent()) {
-            throw new RuntimeException("El documento " + dto.getNumeroDocumento() + " ya se encuentra registrado.");
+        Optional<Postulante> existingDoc = postulanteRepository.findByNumeroDocumento(dto.getNumeroDocumento());
+        if (existingDoc.isPresent()) {
+            if (existingDoc.get().getEstado() == EstadoPostulante.APROBADO) {
+                throw new RuntimeException("Usted ya se encuentra registrado en el sistema.");
+            } else {
+                throw new RuntimeException("Usted se encuentra en proceso de validación para su cuenta.");
+            }
         }
-        if (postulanteRepository.findByCorreoElectronico(dto.getCorreo()).isPresent()) {
-            throw new RuntimeException("El correo " + dto.getCorreo() + " ya se encuentra registrado.");
+
+        Optional<Postulante> existingEmail = postulanteRepository.findByCorreoElectronico(dto.getCorreo());
+        if (existingEmail.isPresent()) {
+            if (existingEmail.get().getEstado() == EstadoPostulante.APROBADO) {
+                throw new RuntimeException("Usted ya se encuentra registrado en el sistema con este correo.");
+            } else {
+                throw new RuntimeException("Usted se encuentra en proceso de validación para su cuenta con este correo.");
+            }
         }
 
         Postulante postulante = postulanteMapper.toEntity(dto);
@@ -72,6 +90,21 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setFechaRegistro(LocalDate.now());
         
         Postulante guardado = postulanteRepository.save(postulante);
+        
+        // Crear automáticamente la cuenta de usuario
+        Rol rolSocio = rolRepository.findByNombre("SOCIO")
+                .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
+
+        Usuario usuario = Usuario.builder()
+                .username(guardado.getCorreoElectronico())
+                .password(passwordEncoder.encode(guardado.getTelefono())) // Se encripta el teléfono
+                .correoElectronico(guardado.getCorreoElectronico())
+                .rol(rolSocio)
+                .estadoUsuario(true)
+                .build();
+        
+        usuarioRepository.save(usuario);
+        
         return postulanteMapper.toDTO(guardado);
     }
 
@@ -289,6 +322,16 @@ public class PostulanteServiceImpl implements PostulanteService {
         return result.stream()
                 .map(p -> mapearPostulanteBasicoSync(p, extData))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String obtenerUltimoMotivoRechazo(Integer idPostulante) {
+        return historialRepository.findByPostulante_IdOrderByFechaCambioDesc(idPostulante).stream()
+                .filter(h -> "rechazado".equalsIgnoreCase(h.getEstadoNuevo()))
+                .map(HistorialEstadoPostulante::getMotivo)
+                .findFirst()
+                .orElse("No se especificó un motivo.");
     }
 
     private PostulanteConDeudasDTO mapearPostulanteBasicoSync(Postulante p, List<ExternalDebtResponseDTO> extData) {

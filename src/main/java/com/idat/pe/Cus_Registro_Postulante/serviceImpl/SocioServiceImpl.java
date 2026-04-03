@@ -12,8 +12,10 @@ import com.idat.pe.Cus_Registro_Postulante.repository.RolRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.SocioRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.UsuarioRepository;
 import com.idat.pe.Cus_Registro_Postulante.service.EmailService;
+import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import com.idat.pe.Cus_Registro_Postulante.service.SocioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,10 @@ public class SocioServiceImpl implements SocioService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    @Lazy
+    private PostulanteService postulanteService;
+
     @Override
     @Transactional(readOnly = true)
     public List<SocioAprobadoDTO> listarSociosAprobados() {
@@ -71,23 +77,21 @@ public class SocioServiceImpl implements SocioService {
                 .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
 
         String correo = postulante.getCorreoElectronico();
-        String passwordTemporal = generarPasswordTemporal(postulante);
+        String passwordTemporal = postulante.getTelefono(); // Usar teléfono como password
 
-        if (usuarioRepository.findByUsernameOrCorreoElectronico(correo, correo).isPresent()) {
-            throw new RuntimeException("Ya existe un usuario con el correo del socio");
-        }
+        Usuario usuario = usuarioRepository.findByUsernameOrCorreoElectronico(correo, correo)
+                .orElseGet(() -> {
+                    Usuario nuevo = Usuario.builder()
+                            .username(correo)
+                            .password(passwordEncoder.encode(passwordTemporal))
+                            .correoElectronico(correo)
+                            .rol(rolSocio)
+                            .estadoUsuario(true)
+                            .build();
+                    return usuarioRepository.save(nuevo);
+                });
 
-        Usuario usuario = Usuario.builder()
-                .username(correo)
-                .password(passwordEncoder.encode(passwordTemporal))
-                .correoElectronico(correo)
-                .rol(rolSocio)
-                .estadoUsuario(true)
-                .build();
-
-        Usuario usuarioCreado = usuarioRepository.save(usuario);
-
-        socio.setUsuario(usuarioCreado);
+        socio.setUsuario(usuario);
         socio.setEstadoSocio("activo");
         socioRepository.save(socio);
 
@@ -117,6 +121,10 @@ public class SocioServiceImpl implements SocioService {
 
         String mensajeEstado = construirMensajeEstado(postulante.getEstado(), tieneAcceso);
         String nombre = construirNombreCompleto(postulante);
+        String motivoRechazo = null;
+        if (postulante.getEstado() == EstadoPostulante.RECHAZADO) {
+            motivoRechazo = postulanteService.obtenerUltimoMotivoRechazo(postulante.getId());
+        }
 
         return ConsultaEstadoDTO.builder()
                 .nombre(nombre)
@@ -125,6 +133,7 @@ public class SocioServiceImpl implements SocioService {
                 .estado(estado)
                 .tieneAcceso(tieneAcceso)
                 .mensajeEstado(mensajeEstado)
+                .motivoRechazo(motivoRechazo)
                 .build();
     }
 
@@ -147,24 +156,6 @@ public class SocioServiceImpl implements SocioService {
             return (postulante.getNombres() + " " + apellidoPaterno + " " + apellidoMaterno).trim();
         }
         return postulante.getRazonSocial() != null ? postulante.getRazonSocial() : "Postulante";
-    }
-
-    private String generarPasswordTemporal(Postulante postulante) {
-        String base;
-        if (postulante.getNombres() != null && !postulante.getNombres().isBlank()) {
-            String apellido = postulante.getApellidoPaterno() != null ? postulante.getApellidoPaterno() : "";
-            base = (postulante.getNombres() + apellido).replaceAll("\\s+", "");
-        } else {
-            base = (postulante.getRazonSocial() != null ? postulante.getRazonSocial() : "Socio")
-                    .replaceAll("\\s+", "");
-        }
-
-        String numeroDocumento = postulante.getNumeroDocumento() != null ? postulante.getNumeroDocumento() : "00";
-        String ultimosDos = numeroDocumento.length() >= 2
-                ? numeroDocumento.substring(numeroDocumento.length() - 2)
-                : "00";
-
-        return base + ultimosDos;
     }
 
     private String construirMensajeEstado(EstadoPostulante estadoPostulante, boolean tieneAcceso) {

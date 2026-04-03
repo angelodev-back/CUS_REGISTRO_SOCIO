@@ -27,8 +27,13 @@ public class DeudaExternaServiceImpl implements DeudaExternaService {
     private final DeudaExternaClient deudaExternaClient;
     private final PostulanteRepository postulanteRepository;
 
-    // Estado temporal en memoria para no depender de tabla local de deuda_externa.
+    // Almacenamiento temporal para verificaciones realizadas en la sesión actual
     private final Map<Integer, DeudaExternaDTO> deudasVerificadas = new ConcurrentHashMap<>();
+
+    // Caché temporal para evitar reintentos constantes a la API externa lenta
+    private List<ExternalDebtResponseDTO> cacheDeudas = null;
+    private long lastCacheUpdate = 0;
+    private static final long CACHE_DURATION_MS = 300000; // 5 minutos
 
     public DeudaExternaServiceImpl(
             DeudaExternaClient deudaExternaClient,
@@ -39,8 +44,24 @@ public class DeudaExternaServiceImpl implements DeudaExternaService {
 
     @Override
     public List<ExternalDebtResponseDTO> obtenerTodasLasDeudas() {
-        logger.info("Obteniendo todas las deudas externas desde API remoto");
-        return deudaExternaClient.obtenerDeudas();
+        long now = System.currentTimeMillis();
+        if (cacheDeudas != null && (now - lastCacheUpdate) < CACHE_DURATION_MS) {
+            logger.info("Retornando deudas externas desde caché (última actualización: {}s atrás)", (now - lastCacheUpdate) / 1000);
+            return cacheDeudas;
+        }
+
+        logger.info("Obteniendo todas las deudas externas desde API remoto (caché expirado o vacío)");
+        List<ExternalDebtResponseDTO> deudas = deudaExternaClient.obtenerDeudas();
+        
+        if (deudas != null && !deudas.isEmpty()) {
+            cacheDeudas = deudas;
+            lastCacheUpdate = now;
+        } else if (cacheDeudas != null) {
+            logger.warn("Fallo al obtener deudas nuevas, retornando caché anterior para mantener operatividad");
+            return cacheDeudas;
+        }
+        
+        return deudas != null ? deudas : Collections.emptyList();
     }
 
     @Override

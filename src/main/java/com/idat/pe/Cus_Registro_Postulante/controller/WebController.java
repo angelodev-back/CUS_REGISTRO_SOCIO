@@ -6,8 +6,12 @@ import com.idat.pe.Cus_Registro_Postulante.dto.RegistroPostulanteDTO;
 import com.idat.pe.Cus_Registro_Postulante.entity.Empleado;
 import com.idat.pe.Cus_Registro_Postulante.entity.Usuario;
 import com.idat.pe.Cus_Registro_Postulante.repository.EmpleadoRepository;
+import com.idat.pe.Cus_Registro_Postulante.repository.PostulanteRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.UsuarioRepository;
+import com.idat.pe.Cus_Registro_Postulante.entity.Postulante;
 import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
+import com.idat.pe.Cus_Registro_Postulante.service.SocioService;
+import com.idat.pe.Cus_Registro_Postulante.dto.ConsultaEstadoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +28,12 @@ public class WebController {
 
     @Autowired
     private PostulanteService postulanteService;
+
+    @Autowired
+    private SocioService socioService;
+
+    @Autowired
+    private PostulanteRepository postulanteRepository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -114,14 +124,97 @@ public class WebController {
         return "redirect:/jefe/dashboard";
     }
 
+    @GetMapping("/jefe/historial")
+    public String historialSolicitudes(Model model) {
+        agregarPerfilJefe(model);
+        List<com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO> todos = postulanteService.listarPostulantes();
+        // Filtrar los que terminaron proceso
+        List<com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO> historial = todos.stream()
+                .filter(p -> "aprobado".equalsIgnoreCase(p.getEstadoPostulacion()) 
+                        || "rechazado".equalsIgnoreCase(p.getEstadoPostulacion()))
+                .peek(p -> {
+                    if ("rechazado".equalsIgnoreCase(p.getEstadoPostulacion())) {
+                        p.setMotivoRechazo(postulanteService.obtenerUltimoMotivoRechazo(p.getIdPostulante()));
+                    }
+                })
+                .collect(java.util.stream.Collectors.toList());
+        
+        model.addAttribute("postulantes", historial);
+        return "jefe/historial-solicitudes";
+    }
+
     @GetMapping("/jefe/socios-aprobados")
-    public String sociosAprobadosPanel() {
+    public String sociosAprobadosPanel(Model model) {
+        agregarPerfilJefe(model);
         return "jefe/socios-aprobados-panel";
     }
 
     @GetMapping("/consultar-estado-socio")
-    public String consultarEstadoPublico() {
+    public String consultarEstadoPublico(@RequestParam(required = false) Boolean autoconsulta, Model model) {
+        if (Boolean.TRUE.equals(autoconsulta)) {
+            Usuario usuario = obtenerUsuarioActual();
+            if (usuario != null) {
+                model.addAttribute("autoDni", usuario.getUsername()); // El username es el correo/DNI en este sistema
+            }
+        }
         return "publico/consultar-estado-socio";
+    }
+
+    @GetMapping("/verificar-estado-cuenta")
+    public String verificarEstadoCuenta(Model model) {
+        Usuario usuario = obtenerUsuarioActual();
+        if (usuario == null) return "redirect:/login";
+
+        PostulanteDTO postulante = postulanteService.buscarPorNumeroDocumento(usuario.getUsername());
+        if (postulante == null) {
+            // Reintentar por correo si el username es el correo
+            postulante = postulanteRepository.findByCorreoElectronico(usuario.getUsername())
+                    .map(p -> {
+                        // Mapear manualmente si es necesario o usar el service
+                        return postulanteService.buscarPorId(p.getId());
+                    }).orElse(null);
+        }
+
+        model.addAttribute("socio", postulante);
+        return "socio/verificar-estado-cuenta";
+    }
+
+    @GetMapping("/socio/deuda-pendiente")
+    public String deudaPendiente(Model model) {
+        Usuario usuario = obtenerUsuarioActual();
+        if (usuario == null) return "redirect:/login";
+
+        PostulanteDTO postulante = postulanteService.buscarPorNumeroDocumento(usuario.getUsername());
+        if (postulante == null) {
+            postulante = postulanteRepository.findByCorreoElectronico(usuario.getUsername())
+                    .map(p -> postulanteService.buscarPorId(p.getId()))
+                    .orElse(null);
+        }
+
+        if (postulante != null) {
+            PostulanteConDeudasDTO conDeudas = postulanteService.obtenerPostulanteConDeudas(postulante.getIdPostulante());
+            model.addAttribute("socio", conDeudas);
+            model.addAttribute("motivoRechazo", postulanteService.obtenerUltimoMotivoRechazo(postulante.getIdPostulante()));
+        }
+
+        return "socio/deuda-pendiente";
+    }
+
+    @GetMapping("/socio/estado-revision")
+    public String estadoRevision(Model model) {
+        Usuario usuario = obtenerUsuarioActual();
+        if (usuario == null) return "redirect:/login";
+
+        // El username es el correo. Buscamos el postulante asociado.
+        Postulante postulante = postulanteRepository.findByCorreoElectronico(usuario.getUsername())
+                .orElse(null);
+
+        if (postulante != null) {
+            ConsultaEstadoDTO estado = socioService.consultarEstadoPublico(postulante.getNumeroDocumento());
+            model.addAttribute("resultado", estado);
+        }
+
+        return "socio/estado-revision";
     }
 
     @PostMapping("/registro/guardar")

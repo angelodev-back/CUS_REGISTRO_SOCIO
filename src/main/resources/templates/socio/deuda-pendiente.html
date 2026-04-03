@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deuda Pendiente | Club Neptuno</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(244, 63, 94, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(30, 41, 59, 0.03) 0px, transparent 50%);
+            min-height: 100vh;
+        }
+        .premium-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+        .status-rejected {
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
+    </style>
+</head>
+<body class="text-slate-900 antialiased">
+
+<nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+    <a href="/" class="flex items-center gap-2 no-underline">
+        <div class="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center text-white font-extrabold shadow-lg shadow-rose-200 uppercase">N</div>
+        <span class="font-bold text-xl tracking-tight text-slate-800">Club Neptuno</span>
+    </a>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="text-sm font-semibold text-rose-600 hover:bg-rose-50 px-4 py-2 rounded-full transition-all">Cerrar Sesión</button>
+    </form>
+</nav>
+
+<div class="max-w-4xl mx-auto px-6 py-12 space-y-8">
+    <!-- Header Postulante -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4" th:if="${socio != null}">
+        <div class="space-y-1">
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900" th:text="${'¡Hola, ' + socio.nombres + '!'}">¡Hola, Diego!</h1>
+            <p class="text-slate-500 font-medium">Hemos revisado tu solicitud de membresía.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest status-rejected">OBSERVADO / RECHAZADO</span>
+        </div>
+    </div>
+
+    <!-- Alerta Principal -->
+    <div class="premium-card rounded-3xl p-8 border-l-8 border-l-rose-500">
+        <div class="flex gap-6">
+            <div class="hidden sm:flex w-14 h-14 bg-rose-100 rounded-2xl items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-rose-600 text-3xl">warning</span>
+            </div>
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold text-slate-800">Tu solicitud requiere atención</h2>
+                <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Motivo de la Observación</p>
+                    <p class="text-slate-700 leading-relaxed font-medium italic" th:text="${motivoRechazo ?: 'No se especificó un motivo detallado, por favor contacte a administración.'}">"Usted presenta deudas vigentes en el sistema financiero que deben ser regularizadas antes de proceder con el registro de socio."</p>
+                </div>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Hemos detectado obligaciones pendientes que impiden completar la aprobación en este momento. Deberá regularizar estas deudas para poder continuar con el proceso.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Deudas -->
+    <div class="space-y-4" th:if="${socio != null && !#lists.isEmpty(socio.deudas)}">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-800 px-2">Lista de Deudas Pendientes</h3>
+            <span class="text-[10px] font-bold text-slate-400 uppercase" th:text="${#lists.size(socio.deudas) + ' registros encontrados'}">2 registros encontrados</span>
+        </div>
+        
+        <div class="premium-card rounded-3xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Entidad / Concepto</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Documento</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Estado</th>
+                        <th class="px-6 py-4 text-right text-[10px] font-bold text-slate-400 uppercase">Monto</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <tr th:each="deuda : ${socio.deudas}" class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-bold text-slate-800" th:text="${deuda.entidad}">Banco BCP</p>
+                            <p class="text-[11px] text-slate-400" th:text="${deuda.fechaVencimiento}">Vence el 2024-05-15</p>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 font-medium" th:text="${deuda.numeroRecibo}">REC-987654</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600" th:text="${deuda.estado}">VENCIDO</span>
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-extrabold text-slate-900" th:text="${'S/ ' + (deuda.monto ?: '0.00')}">S/ 450.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Seccion de Ayuda y Siguiente Paso -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="premium-card rounded-3xl p-6 flex flex-col justify-between">
+            <div class="space-y-2 mb-6">
+                <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-rose-500">info</span>
+                    ¿Qué debo hacer?
+                </h4>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Debe cancelar sus deudas pendientes y luego realizar una nueva consulta para verificar si su estado ha cambiado. Si lo prefiere, puede visitarnos en nuestras oficinas corporativas.
+                </p>
+            </div>
+            <a th:href="@{/consultar-estado-socio}" class="block w-full py-3 bg-slate-900 text-white text-center rounded-2xl text-sm font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all">Ir a Consulta de Estado</a>
+        </div>
+        
+        <div class="premium-card rounded-3xl p-6 bg-slate-50/50 border-dashed">
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-500">support_agent</span>
+                    Soporte Técnico
+                </h4>
+                <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                    Si cree que hay un error en esta información, por favor contacte a nuestro equipo de atención al cliente.
+                </p>
+                <div class="flex items-center gap-3 text-slate-600">
+                    <div class="flex -space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-rose-200 border-2 border-white"></div>
+                        <div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white"></div>
+                    </div>
+                    <span class="text-[11px] font-bold">2 agentes en línea</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-12 text-slate-400 text-xs font-medium">
+    &copy; 2026 Club Neptuno - Todos los derechos reservados.
+</footer>
+
+</body>
+</html>

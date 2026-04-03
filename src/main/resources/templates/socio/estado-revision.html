@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de Solicitud | Club Neptuno</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(30, 41, 59, 0.03) 0px, transparent 50%);
+            min-height: 100vh;
+        }
+        .premium-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-pending {
+            background: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+    </style>
+</head>
+<body class="text-slate-900 antialiased">
+
+<nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+    <a href="/" class="flex items-center gap-2 no-underline">
+        <div class="w-8 h-8 bg-sky-600 rounded-lg flex items-center justify-center text-white font-extrabold shadow-lg shadow-sky-200 uppercase">N</div>
+        <span class="font-bold text-xl tracking-tight text-slate-800">Club Neptuno</span>
+    </a>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="text-sm font-semibold text-slate-500 hover:text-sky-600 hover:bg-sky-50 px-4 py-2 rounded-full transition-all">Cerrar Sesión</button>
+    </form>
+</nav>
+
+<div class="max-w-3xl mx-auto px-6 py-16 space-y-10">
+    <!-- Bienvenida -->
+    <div class="text-center space-y-3" th:if="${resultado != null}">
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900" th:text="${'¡Hola, ' + resultado.nombre + '!'}">¡Hola, Camila!</h1>
+        <p class="text-slate-500 font-medium">Gracias por tu interés en ser parte de nuestro distinguido club.</p>
+    </div>
+
+    <!-- Card de Estado -->
+    <div class="premium-card rounded-[32px] p-8 md:p-12 relative overflow-hidden">
+        <!-- Decoracion de fondo -->
+        <div class="absolute -right-12 -top-12 w-48 h-48 bg-sky-50 rounded-full blur-3xl opacity-50"></div>
+        
+        <div class="relative z-10 flex flex-col items-center text-center space-y-8" th:if="${resultado != null}">
+            <div class="space-y-4">
+                <span class="status-badge status-pending" th:text="${resultado.estado}">PENDIENTE</span>
+                <h2 class="text-2xl font-bold text-slate-800">Estado de tu Solicitud</h2>
+            </div>
+
+            <!-- Box Informativo Principal -->
+            <div class="bg-sky-50/50 border border-sky-100 rounded-2xl p-6 w-full max-w-lg">
+                <div class="flex items-center justify-center gap-3 text-sky-700 mb-2">
+                    <span class="material-symbols-outlined text-2xl">event_repeat</span>
+                    <span class="font-bold text-sm uppercase tracking-wide">Actualización de Revisión</span>
+                </div>
+                <p class="text-slate-600 font-medium leading-relaxed" th:text="${resultado.mensajeEstado}">
+                    Tu solicitud está en revisión. Te contactaremos cuando finalice la evaluación.
+                </p>
+            </div>
+
+            <!-- Grid de Detalles -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                <div class="bg-white/50 border border-slate-100 rounded-2xl p-4 text-left">
+                    <p class="text-[10px] font-bold text-slate-400 font-mono uppercase tracking-widest mb-1">Documento de Identidad</p>
+                    <p class="text-sm font-bold text-slate-700" th:text="${resultado.numeroDocumento}">73621840</p>
+                </div>
+                <div class="bg-white/50 border border-slate-100 rounded-2xl p-4 text-left">
+                    <p class="text-[10px] font-bold text-slate-400 font-mono uppercase tracking-widest mb-1">Correo Registrado</p>
+                    <p class="text-sm font-bold text-slate-700 truncate" th:text="${resultado.email}">camila.torres@mockmail.com</p>
+                </div>
+            </div>
+
+            <!-- Timeline Simulado -->
+            <div class="w-full pt-6 border-t border-slate-100">
+                <div class="flex items-center justify-between px-2">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs ring-4 ring-sky-50">
+                            <span class="material-symbols-outlined text-sm">check</span>
+                        </div>
+                        <span class="text-[9px] font-bold uppercase text-slate-400">Registro</span>
+                    </div>
+                    <div class="h-0.5 flex-1 bg-sky-200 mx-2"></div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs animate-pulse ring-4 ring-sky-100">
+                            <span class="material-symbols-outlined text-sm">visibility</span>
+                        </div>
+                        <span class="text-[9px] font-bold uppercase text-sky-600">Revisión</span>
+                    </div>
+                    <div class="h-0.5 flex-1 bg-slate-100 mx-2"></div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
+                            <span class="material-symbols-outlined text-sm">lock</span>
+                        </div>
+                        <span class="text-[9px] font-bold uppercase text-slate-300">Activación</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ayuda Extra -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" th:if="${resultado != null}">
+        <div class="flex items-start gap-4 p-4">
+            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-slate-400">mail</span>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold text-slate-800">Notificación por Email</h4>
+                <p class="text-xs text-slate-500 leading-relaxed">Recibirás un correo electrónico automático apenas el Jefe de Atención finalice la validación.</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-4 p-4">
+            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-slate-400">support</span>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold text-slate-800">¿Dudas o Consultas?</h4>
+                <p class="text-xs text-slate-500 leading-relaxed">Si necesitas realizar cambios en tu información registrada, contacta a soporte corporativo.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-12 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+    &copy; 2026 Club Neptuno - Gestión de Postulantes
+</footer>
+
+</body>
+</html>

@@ -531,23 +531,22 @@
                 
                 if (clubData.body) {
                     const p = clubData.body;
-                    if (p.estadoPostulacion === 'rechazado') {
-                        this.showModal({
-                            title: "Solicitud Existente (Rechazada)",
-                            text: "Hemos detectado una solicitud anterior que requiere subsanación. Sus datos se han cargado para que los actualice.",
+                    const estado = (p.estado_postulacion || '').toLowerCase();
+
+                    if (estado === 'aprobado') {
+                         this.showModal({
+                            title: "Registro Existente",
+                            text: "Usted ya se encuentra registrado en el sistema.",
                             type: "confirm",
-                            confirmText: "Cargar para Subsanar",
-                            onConfirm: () => {
-                                this.fillFormFromClub(p);
-                                this.form.action = `/registro/subsanar/${p.idPostulante}`;
-                                // No necesitamos cambiar el método a PUT porque el controlador usa POST
-                            }
+                            confirmText: "Ir al Login",
+                            onConfirm: () => window.location.href = '/login'
                         });
                         return;
                     } else {
+                         // Pendiente, Subsanado o Rechazado (Desaprobado)
                          this.showModal({
                             title: "Solicitud en Proceso",
-                            text: `Ya tienes una solicitud en estado: ${p.estadoPostulacion.toUpperCase()}. No puedes registrarte de nuevo aún.`,
+                            text: "Usted se encuentra en proceso de validación para su cuenta.",
                             type: "alert"
                         });
                         return;
@@ -575,7 +574,7 @@
                 }
             } catch (error) {
                 console.error("Error:", error);
-                this.showModal({ title: "Error de Conexión", text: "No se pudo establecer contacto con el servicio de validación.", type: "error" });
+                this.showModal({ title: "Error de Conexión", text: "Hubo un problema al procesar la validación. Verifique los datos o intente más tarde.", type: "error" });
             } finally {
                 this.btnValidar.innerText = "Validar";
                 this.btnValidar.disabled = false;
@@ -584,11 +583,11 @@
 
         fillFormFromClub(data) {
             this.fields.nombre.value = data.nombres || "";
-            this.fields.apellidoPaterno.value = data.apellidoPaterno || "";
-            this.fields.apellidoMaterno.value = data.apellidoMaterno || "";
-            this.fields.razonSocial.value = data.razonSocial || "";
-            this.fields.fechaNacimiento.value = data.fechaNacimiento || "";
-            this.fields.correo.value = data.correoElectronico || "";
+            this.fields.apellidoPaterno.value = data.apellido_paterno || "";
+            this.fields.apellidoMaterno.value = data.apellido_materno || "";
+            this.fields.razonSocial.value = data.razon_social || "";
+            this.fields.fechaNacimiento.value = data.fecha_nacimiento || "";
+            this.fields.correo.value = data.correo_electronico || "";
             this.fields.telefono.value = data.telefono || "";
             this.fields.direccion.value = data.direccion || "";
             this.fields.ciudad.value = data.ciudad || "";

@@ -48,15 +48,35 @@
             <div class="label">Acceso al sistema</div>
             <div id="rAcceso" class="value">-</div>
             <div id="rMensaje" class="message"></div>
+
+            <div id="rRechazoBox" style="display: none; margin-top: 15px; border-top: 2px solid #fee2e2; padding-top: 15px;">
+                <div class="label" style="color: #b91c1c;">Motivo del Rechazo / Observación</div>
+                <div id="rMotivo" class="value" style="color: #991b1b; padding: 8px 0; font-style: italic;"></div>
+                <div style="margin-top: 15px;">
+                    <a id="btnSubsanar" href="/registro/subsanar" style="display: inline-block; background: #e11d48; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 14px;">
+                        Subsanar Solicitud Ahora
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    const autoDni = /*[[${autoDni}]]*/ null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (autoDni) {
+            document.getElementById('docInput').value = autoDni;
+            consultarEstado();
+        }
+    });
+
     async function consultarEstado() {
         const docInput = document.getElementById('docInput');
         const error = document.getElementById('error');
         const resultado = document.getElementById('resultado');
+        const rechazoBox = document.getElementById('rRechazoBox');
 
         const documento = docInput.value.trim();
         if (!documento) {
@@ -67,6 +87,7 @@
         }
 
         error.style.display = 'none';
+        rechazoBox.style.display = 'none';
 
         try {
             const res = await fetch(`/api/socios/consultar-publico/${documento}`);
@@ -85,6 +106,13 @@
             document.getElementById('rEstado').textContent = (data.estado || '-').toUpperCase();
             document.getElementById('rAcceso').textContent = data.tieneAcceso ? 'SI' : 'NO';
             document.getElementById('rMensaje').textContent = data.mensajeEstado || '';
+            
+            if (data.estado && data.estado.toLowerCase() === 'rechazado') {
+                rechazoBox.style.display = 'block';
+                document.getElementById('rMotivo').textContent = data.motivoRechazo || "No se especificó un motivo.";
+                // Opcional: Si tenemos el ID podríamos ir directo al form de subsanar
+            }
+
             resultado.style.display = 'block';
         } catch (e) {
             error.style.display = 'block';

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="light" lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Historial de Solicitudes | Club Neptuno</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5f5e5e",
+                        "primary-dim": "#535252",
+                        "surface": "#f9f9f9",
+                        "on-surface": "#2d3435",
+                        "on-surface-variant": "#5a6061",
+                        "outline-variant": "#adb3b4",
+                        "surface-container-low": "#f2f4f4",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .filter-btn.active {
+            background-color: white;
+            color: #2d3435;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#f2f4f4] font-['Inter'] text-sm tracking-tight flex flex-col p-4 space-y-2 border-r border-outline-variant/20">
+    <div class="flex items-center space-x-3 mb-8 px-2">
+        <div class="w-8 h-8 rounded bg-primary-dim flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-lg">water_drop</span>
+        </div>
+        <div>
+            <h1 class="text-lg font-bold tracking-tighter text-[#1A1A1A]">Club Neptuno</h1>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Management Portal</p>
+        </div>
+    </div>
+
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/dashboard}">
+            <span class="material-symbols-outlined mr-3">dashboard</span>
+            <span>Revision de Postulantes</span>
+        </a>
+        <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/socios-aprobados}">
+            <span class="material-symbols-outlined mr-3">group</span>
+            <span>Gestion de Socios</span>
+        </a>
+        <a class="bg-white text-slate-900 font-medium shadow-sm rounded-md px-3 py-2 flex items-center transition-transform active:scale-[0.98]" th:href="@{/jefe/historial}">
+            <span class="material-symbols-outlined mr-3 text-slate-900">history</span>
+            <span>Historial</span>
+        </a>
+    </nav>
+
+    <div class="pt-4 border-t border-slate-200 space-y-1">
+        <form th:action="@{/logout}" method="post">
+            <button class="w-full flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 rounded-md transition-all duration-150 ease-out active:scale-[0.98]" type="submit">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span>Log out</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="ml-64 min-h-screen flex flex-col">
+    <header class="sticky top-0 w-full z-30 bg-[#f9f9f9]/90 backdrop-blur-md flex items-center justify-between px-8 h-16 font-['Inter'] text-sm border-b border-outline-variant/15">
+        <div class="flex items-center space-x-4">
+            <span class="text-on-surface font-semibold text-base">Historial de Solicitudes</span>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="h-6 w-px bg-slate-200"></div>
+            <div class="flex items-center space-x-3">
+                <span class="text-right">
+                    <p class="text-xs font-bold text-on-surface" th:text="${jefeNombre}">Administrador</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Jefe</p>
+                </span>
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center" th:text="${jefeIniciales}">JP</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 max-w-7xl w-full mx-auto space-y-8">
+        <div class="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-end">
+            <div class="space-y-1">
+                <h2 class="text-2xl font-semibold tracking-tight text-on-surface">Historial General</h2>
+                <p class="text-on-surface-variant max-w-2xl leading-relaxed">Registro histórico sincronizado desde la base de datos.</p>
+            </div>
+            <div class="flex flex-col gap-2 w-full lg:w-auto lg:flex-row lg:items-center">
+                <div class="relative w-full lg:w-80">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                    <input class="w-full bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary/40 placeholder:text-on-surface-variant/50"
+                           id="searchInput" placeholder="Filtrar por nombre o documento..." type="text"/>
+                </div>
+                <button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant/20 text-on-surface rounded-md text-xs font-medium hover:bg-surface-container-low transition-colors flex items-center gap-2" onclick="window.location.reload()">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-6">
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-sm">
+                <p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 font-bold leading-none">Total Registros</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-bold text-on-background" th:text="${#lists.size(postulantes)}">0</span>
+                </div>
+            </div>
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-sm">
+                <p class="text-[10px] uppercase tracking-widest text-emerald-600 mb-2 font-bold leading-none">Aprobados</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-bold text-emerald-600" th:text="${#lists.size(postulantes.?[#strings.equalsIgnoreCase(estadoPostulacion, 'aprobado')])}">0</span>
+                </div>
+            </div>
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-sm">
+                <p class="text-[10px] uppercase tracking-widest text-rose-600 mb-2 font-bold leading-none">Rechazados</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-bold text-rose-600" th:text="${#lists.size(postulantes.?[#strings.equalsIgnoreCase(estadoPostulacion, 'rechazado')])}">0</span>
+                </div>
+            </div>
+            <div class="col-span-1 bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/10 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 font-bold leading-none">Fuente</p>
+                    <div class="flex items-center gap-1.5 text-on-surface-variant">
+                         <span class="material-symbols-outlined text-sm text-[#0094bc]">database</span>
+                         <span class="text-xs font-medium">Base de Datos MySQL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="space-y-4">
+            <div class="flex items-center justify-between bg-surface-container-low/50 p-1.5 rounded-lg border border-outline-variant/10 w-fit">
+                <button class="filter-btn active px-6 py-1.5 rounded-md text-xs transition-all duration-200" data-filter="TODOS">Ver Todos</button>
+                <button class="filter-btn px-6 py-1.5 rounded-md text-xs text-on-surface-variant hover:text-on-surface transition-all duration-200" data-filter="APROBADO">Aprobados</button>
+                <button class="filter-btn px-6 py-1.5 rounded-md text-xs text-on-surface-variant hover:text-on-surface transition-all duration-200" data-filter="RECHAZADO">Rechazados</button>
+            </div>
+
+            <div class="bg-white rounded-xl overflow-hidden border border-outline-variant/10 shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="tablaHistorial">
+                        <thead>
+                        <tr class="bg-surface-container-low/20 border-b border-outline-variant/5">
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Postulante</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Documento</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Fecha</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Estado DB</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Motivo / Detalle</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/5" id="bodyHistorial">
+                        <tr th:if="${#lists.isEmpty(postulantes)}">
+                            <td class="px-6 py-10 text-center text-on-surface-variant" colspan="5">Consultando base de Datos...</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors historial-row" th:each="p : ${postulantes}">
+                            <td class="px-6 py-4">
+                                <div class="name-container">
+                                    <p class="text-sm font-semibold text-on-surface leading-tight" th:text="${p.nombres != null ? p.nombres + ' ' + (p.apellidoPaterno ?: '') : (p.razonSocial ?: 'Empresa')}">Nombre</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5" th:text="${p.correoElectronico}">correo@ejemplo.com</p>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-on-surface-variant doc-container font-medium" th:text="${p.tipoDocumento + ' ' + p.numeroDocumento}">DNI 00000000</td>
+                            <td class="px-6 py-4 text-xs text-on-surface-variant/60" th:text="${p.fechaRegistro}">2023-01-01</td>
+                            <td class="px-6 py-4 estado-container">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider badge-status"
+                                      th:classappend="${#strings.equalsIgnoreCase(p.estadoPostulacion, 'aprobado')} ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'"
+                                      th:text="${#strings.toUpperCase(p.estadoPostulacion)}">Estado</span>
+                            </td>
+                            <td class="px-6 py-4 observacion-container">
+                                 <p th:if="${p.motivoRechazo != null}" class="text-[11px] text-rose-600 font-medium italic" th:text="${p.motivoRechazo}"></p>
+                                 <p th:if="${#strings.equalsIgnoreCase(p.estadoPostulacion, 'aprobado')}" class="text-[11px] text-emerald-600/80 font-medium">Activado en Sistema</p>
+                                 <p th:if="${p.motivoRechazo == null && #strings.equalsIgnoreCase(p.estadoPostulacion, 'rechazado')}" class="text-[11px] text-slate-300 italic">Sin observaciones</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-3.5 bg-slate-50/50 border-t border-outline-variant/5 flex items-center justify-between">
+                    <p class="text-[11px] text-on-surface-variant font-medium">Mostrando <span class="font-bold text-on-surface" id="mostrandoCount" th:text="${#lists.size(postulantes)}">0</span> registros desde BD</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('bodyHistorial');
+    const rows = document.querySelectorAll('.historial-row');
+    const mostrandoCount = document.getElementById('mostrandoCount');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    let currentStatusFilter = 'TODOS';
+
+    function filtrarHistorial() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.querySelector('.name-container').innerText.toLowerCase();
+            const doc = row.querySelector('.doc-container').innerText.toLowerCase();
+            const obs = row.querySelector('.observacion-container').innerText.toLowerCase();
+            const rowStatus = row.querySelector('.badge-status').innerText.trim().toUpperCase();
+
+            const matchesSearch = name.includes(query) || doc.includes(query) || obs.includes(query);
+            const matchesStatus = currentStatusFilter === 'TODOS' || rowStatus === currentStatusFilter;
+
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        mostrandoCount.innerText = visibleCount;
+
+        const noResultsId = 'no-results-row';
+        let noResults = document.getElementById(noResultsId);
+        
+        if (visibleCount === 0 && rows.length > 0) {
+            if (!noResults) {
+                noResults = document.createElement('tr');
+                noResults.id = noResultsId;
+                noResults.innerHTML = '<td colspan="5" class="px-6 py-12 text-center text-slate-400">Sin coincidencias en la Base de Datos.</td>';
+                tableBody.appendChild(noResults);
+            }
+        } else if (noResults) {
+            noResults.remove();
+        }
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('text-on-surface-variant');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('text-on-surface-variant');
+            currentStatusFilter = btn.getAttribute('data-filter');
+            filtrarHistorial();
+        });
+    });
+
+    searchInput.addEventListener('input', filtrarHistorial);
+</script>
+</body>
+</html>

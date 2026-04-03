@@ -57,4 +57,7 @@ public class PostulanteDTO {
     
     @JsonProperty("estado_postulacion")
     private String estadoPostulacion;
+
+    @JsonProperty("motivo_rechazo")
+    private String motivoRechazo;
 }

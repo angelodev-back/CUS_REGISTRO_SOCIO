@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de Cuenta | Club Neptuno</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0369a1;
+            --primary-light: #e0f2fe;
+            --secondary: #0ea5e9;
+            --accent: #f59e0b;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --success: #10b981;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(3, 105, 161, 0.08) 0px, transparent 50%);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            color: #ef4444;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fef2f2;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .welcome-section {
+            margin-bottom: 32px;
+        }
+
+        .welcome-section h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .welcome-section p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #d1fae5;
+        }
+
+        .info-group {
+            margin-bottom: 24px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .account-summary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
+
+        .summary-title {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .summary-amount {
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: white;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                padding: 16px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="logo">
+        <div class="logo-icon">N</div>
+        Club Neptuno
+    </a>
+    <div class="user-nav">
+        <a href="/logout" class="logout-btn">Cerrar Sesión</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome-section" th:if="${socio != null}">
+        <h1 th:text="'¡Hola, ' + ${socio.nombres} + '!'">¡Hola, Diego!</h1>
+        <p>Bienvenido a tu portal de socio. Aquí puedes revisar el estado de tu cuenta.</p>
+    </div>
+
+    <div class="grid" th:if="${socio != null}">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+                <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Información del Socio</h2>
+                <span class="status-badge" th:classappend="${socio.estadoPostulacion == 'APROBADO' ? 'status-active' : ''}" 
+                      th:text="${socio.estadoPostulacion}">
+                    ACTIVO
+                </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                <div class="info-group">
+                    <div class="info-label">Nombre Completo</div>
+                    <div class="info-value" th:text="${socio.nombres + ' ' + socio.apellidoPaterno + ' ' + socio.apellidoMaterno}">Diego Alonso Martinez Rojas</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">DNI / Documento</div>
+                    <div class="info-value" th:text="${socio.numeroDocumento}">71458236</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Correo Electrónico</div>
+                    <div class="info-value" th:text="${socio.correoElectronico}">diego.martinez@mockmail.com</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Tipo de Membresía</div>
+                    <div class="info-value" th:text="${#strings.capitalize(socio.tipoInteres)}">Náutico</div>
+                </div>
+            </div>
+
+            <div class="info-group" style="margin-top: 16px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
+                <div class="info-label">Dirección de Residencia</div>
+                <div class="info-value" th:text="${socio.direccion + ', ' + socio.ciudad}">Av. Jose Pardo 245, Miraflores</div>
+            </div>
+        </div>
+
+        <div class="card account-summary">
+            <div class="summary-title">Saldo Pendiente</div>
+            <div class="summary-amount">S/ 0.00</div>
+            <div style="margin-bottom: 32px; font-size: 14px; opacity: 0.9;">
+                Tu cuenta está al día. ¡Gracias por ser parte del Club Neptuno!
+            </div>
+            <button class="btn-pay">Ver Historial de Pagos</button>
+        </div>
+    </div>
+
+    <div class="card" th:if="${socio == null}" style="text-align: center; padding: 60px;">
+        <h2 style="color: #ef4444;">No se encontró información</h2>
+        <p>Hubo un problema al cargar los datos de tu cuenta. Por favor, contacta a soporte.</p>
+        <a href="/login" class="btn-pay" style="display: inline-block; margin-top: 20px; width: auto; text-decoration: none;">Volver al Inicio</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -17,4 +17,5 @@ public class ConsultaEstadoDTO {
     private String estado;
     private Boolean tieneAcceso;
     private String mensajeEstado;
+    private String motivoRechazo;
 }
