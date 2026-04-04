@@ -90,21 +90,6 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setFechaRegistro(LocalDate.now());
         
         Postulante guardado = postulanteRepository.save(postulante);
-        
-        // Crear automáticamente la cuenta de usuario
-        Rol rolSocio = rolRepository.findByNombre("SOCIO")
-                .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
-
-        Usuario usuario = Usuario.builder()
-                .username(guardado.getCorreoElectronico())
-                .password(passwordEncoder.encode(guardado.getTelefono())) // Se encripta el teléfono
-                .correoElectronico(guardado.getCorreoElectronico())
-                .rol(rolSocio)
-                .estadoUsuario(true)
-                .build();
-        
-        usuarioRepository.save(usuario);
-        
         return postulanteMapper.toDTO(guardado);
     }
 
@@ -242,7 +227,36 @@ public class PostulanteServiceImpl implements PostulanteService {
             postulante.setEstado(EstadoPostulante.APROBADO);
             postulanteRepository.save(postulante);
             
-            registrarHistorial(postulante, estadoAnterior, "Postulante aprobado - Pendiente de generación de cuenta", idEmpleado);
+            // Generar cuenta de usuario al aprobar
+            Rol rolSocio = rolRepository.findByNombre("SOCIO")
+                    .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
+
+            String passwordTemporal = postulante.getNumeroDocumento() + 
+                    (postulante.getNombres() != null ? postulante.getNombres().toLowerCase().split(" ")[0] : 
+                    (postulante.getRazonSocial() != null ? postulante.getRazonSocial().toLowerCase().split(" ")[0] : ""));
+
+            Usuario usuario = Usuario.builder()
+                    .username(postulante.getCorreoElectronico())
+                    .password(passwordEncoder.encode(passwordTemporal))
+                    .correoElectronico(postulante.getCorreoElectronico())
+                    .rol(rolSocio)
+                    .estadoUsuario(true)
+                    .build();
+            
+            usuarioRepository.save(usuario);
+            
+            // Enviar credenciales por correo
+            try {
+                emailService.enviarCredenciales(
+                    postulante.getCorreoElectronico(), 
+                    postulante.getCorreoElectronico(), 
+                    passwordTemporal
+                );
+            } catch (Exception e) {
+                logger.error("No se pudo enviar el correo de credenciales: {}", e.getMessage());
+            }
+
+            registrarHistorial(postulante, estadoAnterior, "Cuenta socio activada y credenciales enviadas", idEmpleado);
 
         } catch (Exception e) {
             throw new RuntimeException("Error al aprobar: " + e.getMessage());

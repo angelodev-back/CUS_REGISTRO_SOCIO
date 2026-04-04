@@ -127,19 +127,35 @@ public class WebController {
     @GetMapping("/jefe/historial")
     public String historialSolicitudes(Model model) {
         agregarPerfilJefe(model);
+        
         List<com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO> todos = postulanteService.listarPostulantes();
-        // Filtrar los que terminaron proceso
+        
+        // Historial General: Incluimos todos los registros para seguimiento total
         List<com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO> historial = todos.stream()
-                .filter(p -> "aprobado".equalsIgnoreCase(p.getEstadoPostulacion()) 
-                        || "rechazado".equalsIgnoreCase(p.getEstadoPostulacion()))
                 .peek(p -> {
-                    if ("rechazado".equalsIgnoreCase(p.getEstadoPostulacion())) {
+                    if (p.getEstadoPostulacion() != null && p.getEstadoPostulacion().toLowerCase().contains("rechazado")) {
                         p.setMotivoRechazo(postulanteService.obtenerUltimoMotivoRechazo(p.getIdPostulante()));
                     }
                 })
                 .collect(java.util.stream.Collectors.toList());
         
+        // Calcular estadísticas reales para los cuadros del dashboard
+        long countAprobados = todos.stream()
+                .filter(p -> p.getEstadoPostulacion() != null && p.getEstadoPostulacion().toLowerCase().contains("aprobado"))
+                .count();
+        long countRechazados = todos.stream()
+                .filter(p -> p.getEstadoPostulacion() != null && p.getEstadoPostulacion().toLowerCase().contains("rechazado"))
+                .count();
+        long countPendientes = todos.stream()
+                .filter(p -> p.getEstadoPostulacion() != null && (p.getEstadoPostulacion().toLowerCase().contains("pendiente") || p.getEstadoPostulacion().toLowerCase().contains("subsanado")))
+                .count();
+        
         model.addAttribute("postulantes", historial);
+        model.addAttribute("totalRegistros", historial.size());
+        model.addAttribute("totalAprobados", countAprobados);
+        model.addAttribute("totalRechazados", countRechazados);
+        model.addAttribute("totalPendientes", countPendientes);
+        
         return "jefe/historial-solicitudes";
     }
 
@@ -147,6 +163,34 @@ public class WebController {
     public String sociosAprobadosPanel(Model model) {
         agregarPerfilJefe(model);
         return "jefe/socios-aprobados-panel";
+    }
+
+    // --- FLUJO SOCIO (Dashboard) ---
+    @GetMapping("/socio/dashboard")
+    public String socioDashboard(Model model) {
+        Usuario usuario = obtenerUsuarioActual();
+        if (usuario == null) return "redirect:/login";
+
+        // Obtener datos del socio (basado en postulante aprobado)
+        PostulanteDTO p = postulanteService.buscarPorNumeroDocumento(usuario.getUsername());
+        if (p == null) {
+            p = postulanteRepository.findByCorreoElectronico(usuario.getUsername())
+                    .map(ent -> postulanteService.buscarPorId(ent.getId()))
+                    .orElse(null);
+        }
+
+        if (p != null) {
+            model.addAttribute("socio", p);
+            agregarPerfilSocio(model, p);
+            
+            // Datos estadísticos simulados o reales (HU-09/15/17)
+            model.addAttribute("totalEmbarcaciones", 1); // Placeholder
+            model.addAttribute("saldoPendiente", 150.00); // Placeholder o desde service
+            model.addAttribute("ultimaSalida", "2024-03-28");
+            model.addAttribute("proximaReserva", "2024-04-10");
+        }
+
+        return "socio/dashboard";
     }
 
     @GetMapping("/consultar-estado-socio")
@@ -175,7 +219,10 @@ public class WebController {
                     }).orElse(null);
         }
 
-        model.addAttribute("socio", postulante);
+        if (postulante != null) {
+            model.addAttribute("socio", postulante);
+            agregarPerfilSocio(model, postulante);
+        }
         return "socio/verificar-estado-cuenta";
     }
 
@@ -192,7 +239,7 @@ public class WebController {
         }
 
         if (postulante != null) {
-            PostulanteConDeudasDTO conDeudas = postulanteService.obtenerPostulanteConDeudas(postulante.getIdPostulante());
+            PostulanteConDeudasDTO conDeudas = postulanteService.obtenerPostulanteConDeudasDetalle(postulante.getIdPostulante());
             model.addAttribute("socio", conDeudas);
             model.addAttribute("motivoRechazo", postulanteService.obtenerUltimoMotivoRechazo(postulante.getIdPostulante()));
         }
@@ -348,6 +395,14 @@ public class WebController {
 
         model.addAttribute("jefeNombre", nombre);
         model.addAttribute("jefeIniciales", iniciales);
+    }
+
+    private void agregarPerfilSocio(Model model, PostulanteDTO p) {
+        String nombre = p.getNombres() != null ? (p.getNombres() + " " + p.getApellidoPaterno()) : p.getRazonSocial();
+        String iniciales = p.getNombres() != null ? generarIniciales(p.getNombres(), p.getApellidoPaterno()) : "SC";
+        
+        model.addAttribute("socioNombre", nombre);
+        model.addAttribute("socioIniciales", iniciales);
     }
 
     private String generarIniciales(String primerTexto, String segundoTexto) {

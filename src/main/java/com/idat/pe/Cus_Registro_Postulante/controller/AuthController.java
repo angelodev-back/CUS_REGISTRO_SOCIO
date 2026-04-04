@@ -38,7 +38,7 @@ public class AuthController {
                 if (postulanteOpt.isPresent()) {
                     EstadoPostulante estado = postulanteOpt.get().getEstado();
                     if (estado == EstadoPostulante.APROBADO) {
-                        return "redirect:/verificar-estado-cuenta";
+                        return "redirect:/socio/dashboard";
                     } else if (estado == EstadoPostulante.RECHAZADO) {
                         return "redirect:/socio/deuda-pendiente";
                     } else if (estado == EstadoPostulante.PENDIENTE || estado == EstadoPostulante.SUBSANADO) {

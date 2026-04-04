@@ -1,277 +1,282 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html class="light" lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Estado de Cuenta | Club Neptuno</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e40af",      // Blue 800 (Nautical)
+                        "primary-dark": "#1e3a8a", // Blue 900
+                        "primary-light": "#dbeafe",// Blue 100
+                        "surface": "#ffffff",
+                        "background": "#f8fafc",   // Slate 50
+                        "on-surface": "#1e293b",   // Slate 800
+                        "on-surface-variant": "#64748b" // Slate 500
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #0369a1;
-            --primary-light: #e0f2fe;
-            --secondary: #0ea5e9;
-            --accent: #f59e0b;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --bg-body: #f8fafc;
-            --card-bg: #ffffff;
-            --success: #10b981;
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
         }
-
-        body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: var(--text-main);
-            background-color: var(--bg-body);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(3, 105, 161, 0.08) 0px, transparent 50%);
-            min-height: 100vh;
+        .premium-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid #e2e8f0;
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            font-weight: 800;
-            font-size: 20px;
-            color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--primary);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logout-btn {
-            color: #ef4444;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #fef2f2;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
-
-        .welcome-section {
-            margin-bottom: 32px;
-        }
-
-        .welcome-section h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0 0 8px 0;
-            letter-spacing: -0.02em;
-        }
-
-        .welcome-section p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 99px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .status-active {
-            background-color: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #d1fae5;
-        }
-
-        .info-group {
-            margin-bottom: 24px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            margin-bottom: 6px;
-        }
-
-        .info-value {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .account-summary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-        }
-
-        .summary-title {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .summary-amount {
-            font-size: 44px;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-
-        .btn-pay {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 14px;
-            background: white;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .btn-pay:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            nav {
-                padding: 16px 20px;
-            }
+        .premium-card:hover {
+            box-shadow: 0 12px 24px -10px rgba(30, 64, 175, 0.1);
         }
     </style>
 </head>
-<body>
+<body class="bg-background text-on-surface antialiased font-['Inter']">
 
-<nav>
-    <a href="/" class="logo">
-        <div class="logo-icon">N</div>
-        Club Neptuno
-    </a>
-    <div class="user-nav">
-        <a href="/logout" class="logout-btn">Cerrar Sesión</a>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="welcome-section" th:if="${socio != null}">
-        <h1 th:text="'¡Hola, ' + ${socio.nombres} + '!'">¡Hola, Diego!</h1>
-        <p>Bienvenido a tu portal de socio. Aquí puedes revisar el estado de tu cuenta.</p>
+<!-- Sidebar -->
+<aside class="h-screen w-72 fixed left-0 top-0 z-40 bg-white text-sm tracking-tight flex flex-col p-6 space-y-2 border-r border-slate-200/60 shadow-sm">
+    <div class="flex items-center space-x-3 mb-10 px-2">
+        <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined text-white text-xl">water_drop</span>
+        </div>
+        <div>
+            <h1 class="text-xl font-black tracking-tight text-primary-dark">Club Neptuno</h1>
+            <p class="text-[10px] text-primary/60 uppercase tracking-widest font-bold">Portal del Socio</p>
+        </div>
     </div>
 
-    <div class="grid" th:if="${socio != null}">
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
-                <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Información del Socio</h2>
-                <span class="status-badge" th:classappend="${socio.estadoPostulacion == 'APROBADO' ? 'status-active' : ''}" 
-                      th:text="${socio.estadoPostulacion}">
-                    ACTIVO
+    <nav class="flex-1 space-y-1.5">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-3">Menú Principal</p>
+        
+        <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+            <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">dashboard</span>
+            <span>Mi Dashboard</span>
+        </a>
+        
+        <!-- Opciones para Socio NAUTICO -->
+        <th:block th:if="${#strings.equalsIgnoreCase(socio.tipoInteres, 'NAUTICO')}">
+            <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+                <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">directions_boat</span>
+                <span>Mis Embarcaciones</span>
+            </a>
+            <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+                <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">explore</span>
+                <span>Plan de Navegación</span>
+            </a>
+        </th:block>
+
+        <!-- Opciones para Socio SOCIAL -->
+        <th:block th:if="${#strings.equalsIgnoreCase(socio.tipoInteres, 'SOCIAL')}">
+            <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/verificar-estado-cuenta}">
+                <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">receipt_long</span>
+                <span>Facturación</span>
+            </a>
+            <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+                <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">restaurant</span>
+                <span>Restaurantes</span>
+            </a>
+            <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+                <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">celebration</span>
+                <span>Eventos Sociales</span>
+            </a>
+        </th:block>
+
+        <a class="bg-primary/5 text-primary font-semibold rounded-xl px-4 py-3 flex items-center transition-all group" th:href="@{/verificar-estado-cuenta}">
+            <span class="material-symbols-outlined mr-3 text-primary group-hover:scale-110 transition-transform">account_balance_wallet</span>
+            <span>Estado de Cuenta</span>
+        </a>
+
+        <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+            <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">event_available</span>
+            <span>Nueva Reserva</span>
+        </a>
+
+        <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
+            <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">report_problem</span>
+            <span>Quejas y Reclamos</span>
+        </a>
+    </nav>
+
+    <div class="pt-6 border-t border-slate-100 mt-auto space-y-1">
+        <form th:action="@{/logout}" method="post">
+            <button class="w-full flex items-center text-slate-400 px-4 py-3 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all group" type="submit">
+                <span class="material-symbols-outlined mr-3 group-hover:rotate-12 transition-transform">logout</span>
+                <span class="font-medium">Cerrar Sesión</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="ml-72 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="sticky top-0 w-full z-30 bg-white/80 backdrop-blur-md flex items-center justify-between px-10 h-20 text-sm border-b border-slate-200/50">
+        <div class="flex flex-col">
+            <span class="text-primary-dark font-bold text-lg leading-none">Estado de Cuenta</span>
+            <span class="text-slate-400 text-[11px] font-medium mt-1 uppercase tracking-wider">Mis Finanzas y Reportes</span>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center px-4 py-2 bg-slate-50 rounded-full border border-slate-100">
+                <span class="text-right mr-4">
+                    <p class="text-xs font-bold text-slate-800 leading-none" th:text="${socioNombre}">Nombre Socio</p>
+                    <p class="text-[10px] text-primary font-bold uppercase tracking-tighter mt-1" th:text="${(socio != null && socio.tipoInteres != null ? socio.tipoInteres : 'ESTÁNDAR') + ' MEMBER'}">Nautico Member</p>
                 </span>
+                <div class="w-10 h-10 rounded-full bg-primary text-white font-black text-sm flex items-center justify-center shadow-md shadow-primary/20" th:text="${socioIniciales}">SN</div>
             </div>
+        </div>
+    </header>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
-                <div class="info-group">
-                    <div class="info-label">Nombre Completo</div>
-                    <div class="info-value" th:text="${socio.nombres + ' ' + socio.apellidoPaterno + ' ' + socio.apellidoMaterno}">Diego Alonso Martinez Rojas</div>
-                </div>
-                <div class="info-group">
-                    <div class="info-label">DNI / Documento</div>
-                    <div class="info-value" th:text="${socio.numeroDocumento}">71458236</div>
-                </div>
-                <div class="info-group">
-                    <div class="info-label">Correo Electrónico</div>
-                    <div class="info-value" th:text="${socio.correoElectronico}">diego.martinez@mockmail.com</div>
-                </div>
-                <div class="info-group">
-                    <div class="info-label">Tipo de Membresía</div>
-                    <div class="info-value" th:text="${#strings.capitalize(socio.tipoInteres)}">Náutico</div>
-                </div>
-            </div>
-
-            <div class="info-group" style="margin-top: 16px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
-                <div class="info-label">Dirección de Residencia</div>
-                <div class="info-value" th:text="${socio.direccion + ', ' + socio.ciudad}">Av. Jose Pardo 245, Miraflores</div>
+    <!-- Main Content -->
+    <div class="p-10 max-w-6xl w-full mx-auto space-y-8" th:if="${socio != null}">
+        
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Resumen Financiero</h2>
+            <div class="flex gap-2">
+                <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    Descargar Estado
+                </button>
             </div>
         </div>
 
-        <div class="card account-summary">
-            <div class="summary-title">Saldo Pendiente</div>
-            <div class="summary-amount">S/ 0.00</div>
-            <div style="margin-bottom: 32px; font-size: 14px; opacity: 0.9;">
-                Tu cuenta está al día. ¡Gracias por ser parte del Club Neptuno!
+        <div class="grid grid-cols-12 gap-8">
+            <!-- Left Side: Profile Info -->
+            <div class="col-span-12 lg:col-span-8 space-y-8">
+                <div class="premium-card bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-50">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center">
+                                <span class="material-symbols-outlined">person</span>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800">Información del Perfil</h3>
+                        </div>
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100" th:text="${socio.estadoPostulacion}">ACTIVO</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-12 gap-y-8">
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nombre Completo</p>
+                            <p class="text-sm font-black text-slate-700" th:text="${socio.nombres + ' ' + socio.apellidoPaterno + ' ' + socio.apellidoMaterno}">Diego Martinez Rojas</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">DNI / Documento</p>
+                            <p class="text-sm font-black text-slate-700" th:text="${socio.numeroDocumento}">71458236</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Correo Electrónico</p>
+                            <p class="text-sm font-black text-slate-700" th:text="${socio.correoElectronico}">diego@mail.com</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tipo de Membresía</p>
+                            <p class="text-sm font-black text-slate-700 capitalize" th:text="${socio.tipoInteres}">Nautico</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-8 border-t border-slate-50">
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dirección de Residencia</p>
+                            <p class="text-sm font-black text-slate-700 font-medium" th:text="${socio.direccion + ', ' + socio.ciudad}">Av. Pardo 123, Lima</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Movements Mockup -->
+                <div class="premium-card bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
+                    <h3 class="text-lg font-black text-slate-800 mb-6">Últimos Cobros</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-dotted border-slate-200">
+                            <div class="flex gap-4 items-center">
+                                <div class="w-10 h-10 bg-white rounded-xl border border-slate-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-slate-400">receipt_long</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-slate-800">Mantenimiento de Muelle - Marzo</p>
+                                    <p class="text-[10px] text-slate-400">01/03/2024</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-black text-slate-700">S/ 75.00</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-dotted border-slate-200">
+                            <div class="flex gap-4 items-center">
+                                <div class="w-10 h-10 bg-white rounded-xl border border-slate-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-slate-400">dock</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-slate-800">Cuota Administrativa</p>
+                                    <p class="text-[10px] text-slate-400">01/02/2024</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-black text-slate-700">S/ 75.00</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button class="btn-pay">Ver Historial de Pagos</button>
+
+            <!-- Right Side: Summary Card -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <div class="premium-card bg-primary-dark rounded-[2rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-primary/20">
+                    <div class="absolute top-0 right-0 p-8 opacity-10">
+                        <span class="material-symbols-outlined text-8xl">account_balance</span>
+                    </div>
+                    
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2">Saldo Total a Pagar</p>
+                        <h4 class="text-4xl font-black mb-6">S/ 0.00</h4>
+                        <div class="p-4 bg-white/10 rounded-2xl border border-white/10 mb-8 backdrop-blur-md">
+                            <p class="text-[11px] font-medium leading-relaxed italic opacity-90">
+                                "Tu cuenta se encuentra al día. ¡Gracias por tu puntualidad!"
+                            </p>
+                        </div>
+                        <button class="w-full bg-white text-primary-dark font-black py-4 rounded-2xl text-sm hover:bg-primary-light transition-all active:scale-95 shadow-lg">
+                            Ver Historial de Pagos
+                        </button>
+                    </div>
+                </div>
+
+                <div class="premium-card bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6">Próximos Vencimientos</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
+                            <span class="material-symbols-outlined">event</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-slate-800">Mantenimiento Abril</p>
+                            <p class="text-[10px] text-slate-400">Vence: 05/04/2024</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card" th:if="${socio == null}" style="text-align: center; padding: 60px;">
-        <h2 style="color: #ef4444;">No se encontró información</h2>
-        <p>Hubo un problema al cargar los datos de tu cuenta. Por favor, contacta a soporte.</p>
-        <a href="/login" class="btn-pay" style="display: inline-block; margin-top: 20px; width: auto; text-decoration: none;">Volver al Inicio</a>
+    <!-- Error/No info case -->
+    <div class="flex-1 flex items-center justify-center p-20" th:if="${socio == null}">
+        <div class="text-center space-y-6 max-w-md">
+            <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl mx-auto flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl">warning</span>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Acceso Restringido</h2>
+            <p class="text-slate-500 text-sm font-medium">
+                No hemos podido localizar la información de tu cuenta. Asegúrate de haber completado tu proceso de registro.
+            </p>
+            <a th:href="@{/login}" class="inline-block bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary-dark transition-all">
+                Volver al Portal
+            </a>
+        </div>
     </div>
-</div>
+</main>
 
 </body>
 </html>

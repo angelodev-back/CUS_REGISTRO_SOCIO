@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/deudas/**")).hasRole("JEFE")
                 .requestMatchers(new AntPathRequestMatcher("/api/socios/aprobados")).hasRole("JEFE")
                 .requestMatchers(new AntPathRequestMatcher("/api/socios/generar-cuenta/**")).hasRole("JEFE")
+                .requestMatchers(new AntPathRequestMatcher("/socio/**")).hasRole("SOCIO")
+                .requestMatchers(new AntPathRequestMatcher("/verificar-estado-cuenta")).hasRole("SOCIO")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

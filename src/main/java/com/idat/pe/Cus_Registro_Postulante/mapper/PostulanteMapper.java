@@ -68,7 +68,10 @@ public class PostulanteMapper {
                 .tipoInteres(entity.getTipoInteres())
                 .codigoPostal(entity.getCodigoPostal())
                 .fechaRegistro(entity.getFechaRegistro())
-                .estadoPostulacion(entity.getEstado() != null ? entity.getEstado().name().toLowerCase() : null)
+                .accountPassword(entity.getNumeroDocumento() + 
+                                (entity.getNombres() != null ? entity.getNombres().toLowerCase().split(" ")[0] : 
+                                (entity.getRazonSocial() != null ? entity.getRazonSocial().toLowerCase().split(" ")[0] : "")))
+                .estadoPostulacion(entity.getEstado() != null ? entity.getEstado().name() : null)
                 .build();
     }
 }

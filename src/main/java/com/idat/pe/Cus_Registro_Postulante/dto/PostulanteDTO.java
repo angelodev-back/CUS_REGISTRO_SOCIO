@@ -60,4 +60,7 @@ public class PostulanteDTO {
 
     @JsonProperty("motivo_rechazo")
     private String motivoRechazo;
+
+    @JsonProperty("account_password")
+    private String accountPassword;
 }
