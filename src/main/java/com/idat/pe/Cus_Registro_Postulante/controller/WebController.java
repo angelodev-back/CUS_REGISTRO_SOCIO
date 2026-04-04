@@ -1,5 +1,6 @@
 package com.idat.pe.Cus_Registro_Postulante.controller;
 
+import org.springframework.ui.Model;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.PostulanteConDeudasDTO;
 import com.idat.pe.Cus_Registro_Postulante.dto.RegistroPostulanteDTO;
@@ -12,11 +13,13 @@ import com.idat.pe.Cus_Registro_Postulante.entity.Postulante;
 import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import com.idat.pe.Cus_Registro_Postulante.service.SocioService;
 import com.idat.pe.Cus_Registro_Postulante.dto.ConsultaEstadoDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -265,7 +268,13 @@ public class WebController {
     }
 
     @PostMapping("/registro/guardar")
-    public String guardarRegistro(@ModelAttribute("registroDTO") RegistroPostulanteDTO dto, RedirectAttributes ra) {
+    public String guardarRegistro(@Valid @ModelAttribute("registroDTO") RegistroPostulanteDTO dto, BindingResult result, RedirectAttributes ra) {
+        if (result.hasErrors()) {
+            String firstError = result.getAllErrors().get(0).getDefaultMessage();
+            ra.addFlashAttribute("error", firstError);
+            ra.addFlashAttribute("registroDTO", dto);
+            return "redirect:/registro";
+        }
         try {
             PostulanteDTO guardado = postulanteService.registrarPostulante(dto);
             ra.addFlashAttribute("postulante", guardado);
@@ -343,7 +352,13 @@ public class WebController {
     }
 
     @PostMapping("/registro/subsanar/guardar")
-    public String guardarSubsanacion(@ModelAttribute("registroDTO") RegistroPostulanteDTO dto, RedirectAttributes ra) {
+    public String guardarSubsanacion(@Valid @ModelAttribute("registroDTO") RegistroPostulanteDTO dto, BindingResult result, RedirectAttributes ra) {
+        if (result.hasErrors()) {
+            String firstError = result.getAllErrors().get(0).getDefaultMessage();
+            ra.addFlashAttribute("error", firstError);
+            ra.addFlashAttribute("registroDTO", dto);
+            return "redirect:/registro/subsanar";
+        }
         try {
             // Buscar por DNI ya que el ID no viene en el form mapping simple sin hidden
             PostulanteDTO p = postulanteService.buscarPorNumeroDocumento(dto.getNumeroDocumento());

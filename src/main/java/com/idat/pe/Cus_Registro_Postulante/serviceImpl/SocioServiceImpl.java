@@ -126,15 +126,49 @@ public class SocioServiceImpl implements SocioService {
             motivoRechazo = postulanteService.obtenerUltimoMotivoRechazo(postulante.getId());
         }
 
+        String emailEnmascarado = enmascararEmail(postulante.getCorreoElectronico());
+        String nombreEnmascarado = construirNombreEnmascarado(postulante);
+        
         return ConsultaEstadoDTO.builder()
-                .nombre(nombre)
+                .nombre(nombreEnmascarado)
                 .numeroDocumento(postulante.getNumeroDocumento())
-                .email(postulante.getCorreoElectronico())
+                .email(emailEnmascarado)
                 .estado(estado)
                 .tieneAcceso(tieneAcceso)
                 .mensajeEstado(mensajeEstado)
                 .motivoRechazo(motivoRechazo)
                 .build();
+    }
+
+    private String enmascararEmail(String email) {
+        if (email == null || email.length() < 5) return "*****" + (email != null ? email : "");
+        int indexAt = email.indexOf("@");
+        if (indexAt > 0) {
+            String parteLocal = email.substring(0, indexAt);
+            String dominio = email.substring(indexAt);
+            if (parteLocal.length() > 5) {
+                return "*****" + parteLocal.substring(5) + dominio;
+            } else {
+                return "*****" + dominio;
+            }
+        }
+        return "*****";
+    }
+
+    private String construirNombreEnmascarado(Postulante postulante) {
+        if (postulante.getNombres() != null && !postulante.getNombres().isBlank()) {
+            String nombres = postulante.getNombres();
+            String p = enmascararApellido(postulante.getApellidoPaterno());
+            String m = enmascararApellido(postulante.getApellidoMaterno());
+            return (nombres + " " + p + " " + m).trim();
+        }
+        return postulante.getRazonSocial() != null ? postulante.getRazonSocial() : "Postulante";
+    }
+
+    private String enmascararApellido(String apellido) {
+        if (apellido == null || apellido.isBlank()) return "";
+        if (apellido.length() <= 4) return apellido + "****";
+        return apellido.substring(0, 4) + "****";
     }
 
     private SocioAprobadoDTO mapearSocioAprobado(Socio socio) {

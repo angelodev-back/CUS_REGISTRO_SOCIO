@@ -15,9 +15,56 @@
         .alert-logout { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; border: 1px solid #10b981; }
         .btn-outline-primary-custom { border: 2px solid #0094bc; color: #0094bc; font-weight: 600; }
         .btn-outline-primary-custom:hover { background: #0094bc; color: white; }
+
+        /* Loader Transition */
+        #login-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 30, 56, 0.98);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: blur(8px);
+        }
+        .loader-anchor {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 24px;
+            animation: anchor-rotate 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 15px rgba(78, 201, 228, 0.4));
+        }
+        @keyframes anchor-rotate {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+        }
+        .loader-text {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #4ec9e4;
+        }
+        .loader-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
+<!-- Loader Overlay -->
+<div id="login-loader">
+    <svg class="loader-anchor" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="6" r="3.5" stroke="#4ec9e4" stroke-width="2"/>
+        <line x1="16" y1="9.5" x2="16" y2="28" stroke="#4ec9e4" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8 18 C8 25 24 25 24 18" stroke="#4ec9e4" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="loader-text">Sincronizando con Neptuno</div>
+    <div class="loader-sub">Asegurando conexión con la red financiera...</div>
+</div>
+
 <div class="split-wrapper">
     <div class="panel-left">
         <div class="brand-row">
@@ -59,6 +106,14 @@
                     <svg viewBox="0 0 24 24" style="width:20px; height:20px; margin-right:8px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm12 0v6m-3-3h6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
                     Registrarse
                 </a>
+
+                <div class="mt-4 pt-4 border-top border-light text-center">
+                    <p class="text-secondary small mb-2">¿Ya enviaste tu solicitud?</p>
+                    <a th:href="@{/consultar-estado-socio}" class="text-decoration-none fw-bold d-inline-flex align-items-center justify-content-center" style="color: #0094bc; font-size: 14px; gap: 6px; transition: all 0.2s ease;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">track_changes</span>
+                        Consulte su estado aquí
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -76,7 +131,7 @@
                 <span>Usuario o contraseña incorrectos.</span>
             </div>
             
-            <form th:action="@{/login}" method="post" class="mt-4">
+            <form th:action="@{/login}" method="post" class="mt-4" id="loginForm">
                 <div class="mb-3">
                     <label for="username" class="form-label fw-bold small text-secondary">Usuario</label>
                     <input type="text" id="username" name="username" class="form-control fi" placeholder="Usuario" required />
@@ -112,6 +167,17 @@
             eyeIcon.innerText = 'visibility';
         }
     }
+
+    // Wake-up External API (Render cold start handling)
+    const RENDER_API = 'https://jsonubicaciongeografica.onrender.com/json/deudas-externas';
+    fetch(RENDER_API, { mode: 'no-cors' }).catch(() => {
+        // Silently fail, just a ping to wake up the server
+    });
+
+    // Handle Submit Loader
+    document.getElementById('loginForm').addEventListener('submit', function() {
+        document.getElementById('login-loader').style.display = 'flex';
+    });
 </script>
 </body>
 </html>

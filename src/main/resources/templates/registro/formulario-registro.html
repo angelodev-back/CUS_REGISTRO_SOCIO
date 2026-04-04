@@ -91,25 +91,6 @@
                 <p class="page-desc">Complete los campos obligatorios marcados con <strong>*</strong>. Su solicitud quedará en estado <strong>Pendiente de validación</strong> hasta ser procesada.</p>
             </div>
 
-            <!-- ─── FA2: DNI o correo ya registrado ─── -->
-            <div th:if="${errorDuplicado}" class="alert alert-warn">
-                <svg viewBox="0 0 20 20"><path d="M10 2L19 18H1L10 2z"/><line x1="10" y1="8" x2="10" y2="13"/><circle cx="10" cy="15.5" r=".5" fill="currentColor"/></svg>
-                <div>
-                    <strong>Ya existe un registro con este DNI o correo.</strong><br>
-                    <span th:text="${errorDuplicado}"></span>
-                </div>
-            </div>
-
-
-
-            <!-- ─── FA3: Error de servidor genérico ─── -->
-            <div th:if="${error != null and errorDuplicado == null}" class="alert alert-error">
-                <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><line x1="10" y1="6" x2="10" y2="11"/><circle cx="10" cy="14.5" r=".5" fill="currentColor"/></svg>
-                <div>
-                    <strong>Error al enviar la solicitud.</strong><br>
-                    <span th:text="${error}">Intente nuevamente más tarde.</span>
-                </div>
-            </div>
 
             <!-- ─── Info general ─── -->
             <div class="alert alert-info">
@@ -119,11 +100,8 @@
 
             <!-- ═══════════════ FORMULARIO ═══════════════ -->
             <form th:action="@{/registro/guardar}" th:object="${registroDTO}" method="post"
-                  id="formRegistro" novalidate enctype="multipart/form-data">
+                  id="formRegistro" enctype="multipart/form-data">
 
-                <div th:if="${error}" class="alert alert-error" style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px;">
-                    <strong th:text="${error}">Error</strong>
-                </div>
 
                 <div class="form-section">
                     <div class="sec-head">Datos del Postulante<div class="sec-line"></div></div>
@@ -131,14 +109,14 @@
                     <div class="frow frow-2">
                         <div class="fg">
                             <label>Tipo de Interés <span class="req">*</span></label>
-                            <select th:field="*{tipoInteres}" class="fi" id="tipoInteres">
+                            <select th:field="*{tipoInteres}" class="fi" id="tipoInteres" required>
                                 <option value="Nautico">Náutico</option>
                                 <option value="Social">Social</option>
                             </select>
                         </div>
                         <div class="fg">
                             <label>Tipo de Documento <span class="req">*</span></label>
-                            <select th:field="*{tipoDocumento}" class="fi" id="tipoDocSelect">
+                            <select th:field="*{tipoDocumento}" class="fi" id="tipoDocSelect" required>
                                 <option value="DNI">DNI (Persona Natural)</option>
                                 <option value="RUC">RUC (Persona Jurídica)</option>
                             </select>
@@ -149,7 +127,7 @@
                         <div class="fg">
                             <label>Número de Documento <span class="req">*</span></label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;">
+                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;" required minlength="8" maxlength="11">
                                 <button type="button" id="btn-validar" class="btn-submit" style="width: auto; padding: 0 20px; margin-top: 0; height: 45px; background: #0094bc;">
                                     Validar
                                 </button>
@@ -196,18 +174,18 @@
                     <div class="frow frow-2">
                         <div class="fg">
                             <label>Correo Electrónico <span class="req">*</span></label>
-                            <input type="email" th:field="*{correo}" class="fi" placeholder="nombre@correo.com">
+                            <input type="email" th:field="*{correo}" class="fi" placeholder="nombre@correo.com" required>
                         </div>
                         <div class="fg">
                             <label>Teléfono <span class="req">*</span></label>
-                            <input type="tel" th:field="*{telefono}" class="fi" placeholder="987 654 321">
+                            <input type="tel" th:field="*{telefono}" class="fi" placeholder="987 654 321" required>
                         </div>
                     </div>
 
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Dirección <span class="req">*</span></label>
-                            <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización">
+                            <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización" required>
                         </div>
                     </div>
 
@@ -221,7 +199,7 @@
                 </div>
 
                 <div class="cb-row" style="margin: 20px 0;">
-                    <input type="checkbox" id="terminos" name="terminos" class="cb-input" checked>
+                    <input type="checkbox" id="terminos" name="terminos" class="cb-input" checked required>
                     <label for="terminos" class="cb-text">Acepto los términos y condiciones.</label>
                 </div>
 
@@ -414,6 +392,30 @@
 
             this.jsonUrl = 'https://jsonubicaciongeografica.onrender.com/json/documentos';
             this.init();
+            this.checkServerErrors();
+        }
+
+        /**
+         * Verifica si llegaron errores desde el servidor vía Thymeleaf
+         */
+        checkServerErrors() {
+            // Capturamos los errores ocultos inyectados por Thymeleaf
+            const serverError = /*[[${error}]]*/ null;
+            const duplicateError = /*[[${errorDuplicado}]]*/ null;
+
+            if (duplicateError) {
+                this.showModal({
+                    title: "Registro Existente",
+                    text: "Ya existe un registro con este DNI o correo electrónico en nuestro sistema.",
+                    type: "error"
+                });
+            } else if (serverError) {
+                this.showModal({
+                    title: "Error en Solicitud",
+                    text: serverError,
+                    type: "error"
+                });
+            }
         }
 
         init() {
@@ -429,18 +431,76 @@
             // Confirmación antes de enviar
             this.form.addEventListener('submit', (e) => {
                 e.preventDefault();
+                
+                const validationError = this.validateFields();
+                if (validationError) {
+                    this.showModal({
+                        title: "Datos Incompletos",
+                        text: validationError,
+                        type: "error"
+                    });
+                    return;
+                }
+
                 this.showModal({
                     title: "¿Confirmar Registro?",
                     text: "¿Estás seguro de enviar tu solicitud de membresía? Por favor revisa que tus datos sean correctos.",
                     type: "confirm",
                     confirmText: "Sí, registrar",
                     cancelText: "No, revisar",
-                    onConfirm: () => this.form.submit()
+                    onConfirm: () => {
+                        this.btnSubmit = this.form.querySelector('.btn-submit:not(#btn-validar)');
+                        if (this.btnSubmit) {
+                            this.btnSubmit.disabled = true;
+                            this.btnSubmit.innerText = "Procesando...";
+                        }
+                        this.form.submit();
+                    }
                 });
             });
 
             // Inicializar estado UI
             this.updateUIByDocumentType();
+        }
+
+        /**
+         * Valida todos los campos antes del envío
+         */
+        validateFields() {
+            const tipoSocio = document.getElementById('tipoInteres').value;
+            const tipoDoc = this.tipoDocSelect.value;
+            const numeroDoc = this.numeroDocInput.value.trim();
+            const terminos = document.getElementById('terminos').checked;
+
+            // 1. Validar Documento
+            if (!numeroDoc) return "Debe ingresar su número de documento.";
+            if (tipoDoc === 'DNI' && numeroDoc.length !== 8) return "El DNI debe tener exactamente 8 dígitos.";
+            if (tipoDoc === 'RUC' && numeroDoc.length !== 11) return "El RUC debe tener exactamente 11 dígitos.";
+            if (!/^\d+$/.test(numeroDoc)) return "El documento debe contener solo números.";
+
+            // 2. Validar Nombres/Razón Social según tipo
+            if (tipoDoc === 'DNI') {
+                if (!this.fields.nombre.value.trim()) return "Debe ingresar sus nombres.";
+                if (!this.fields.apellidoPaterno.value.trim()) return "Debe ingresar su apellido paterno.";
+            } else {
+                if (!this.fields.razonSocial.value.trim()) return "Debe ingresar la razón social de la empresa.";
+            }
+
+            // 3. Validar Email
+            const email = this.fields.correo.value.trim();
+            if (!email) return "Debe ingresar un correo electrónico.";
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) return "El formato del correo electrónico no es válido.";
+
+            // 4. Otros obligatorios
+            if (!this.fields.telefono.value.trim()) return "Debe ingresar un número de teléfono.";
+            if (!this.fields.direccion.value.trim()) return "Debe ingresar su dirección de domicilio.";
+            if (!this.fields.fechaNacimiento.value) return "Debe ingresar la fecha de nacimiento o constitución.";
+
+            // 5. Términos
+            if (!terminos) return "Debe aceptar los términos y condiciones para continuar.";
+
+            return null; // Todo correcto
         }
 
         /**

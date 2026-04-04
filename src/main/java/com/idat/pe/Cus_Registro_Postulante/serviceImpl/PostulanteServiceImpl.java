@@ -67,6 +67,29 @@ public class PostulanteServiceImpl implements PostulanteService {
     @Override
     @Transactional
     public PostulanteDTO registrarPostulante(RegistroPostulanteDTO dto) {
+        // Validaciones Manuales de Regla de Negocio
+        if (dto.getTipoDocumento() == null || dto.getNumeroDocumento() == null) {
+            throw new RuntimeException("El tipo y número de documento son obligatorios.");
+        }
+        
+        if ("DNI".equalsIgnoreCase(dto.getTipoDocumento()) && dto.getNumeroDocumento().length() != 8) {
+            throw new RuntimeException("El DNI debe tener exactamente 8 dígitos.");
+        }
+        
+        if ("RUC".equalsIgnoreCase(dto.getTipoDocumento()) && dto.getNumeroDocumento().length() != 11) {
+            throw new RuntimeException("El RUC debe tener exactamente 11 dígitos.");
+        }
+
+        if ("DNI".equalsIgnoreCase(dto.getTipoDocumento())) {
+            if (dto.getNombre() == null || dto.getNombre().isBlank() || dto.getApellidoPaterno() == null || dto.getApellidoPaterno().isBlank()) {
+                throw new RuntimeException("Los nombres y el apellido paterno son obligatorios para DNI.");
+            }
+        } else if ("RUC".equalsIgnoreCase(dto.getTipoDocumento())) {
+            if (dto.getRazonSocial() == null || dto.getRazonSocial().isBlank()) {
+                throw new RuntimeException("La razón social es obligatoria para RUC.");
+            }
+        }
+
         Optional<Postulante> existingDoc = postulanteRepository.findByNumeroDocumento(dto.getNumeroDocumento());
         if (existingDoc.isPresent()) {
             if (existingDoc.get().getEstado() == EstadoPostulante.APROBADO) {

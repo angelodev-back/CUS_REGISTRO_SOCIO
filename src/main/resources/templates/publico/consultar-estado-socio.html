@@ -1,69 +1,159 @@
 <!DOCTYPE html>
-<html lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultar Estado Socio | Club Neptuno</title>
+    <title>Club Neptuno — Consulta de Estado</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/neptuno.css}">
     <style>
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; background: linear-gradient(135deg, #e0f2fe, #f8fafc 55%, #dbeafe); min-height: 100vh; }
-        .wrap { max-width: 760px; margin: 40px auto; padding: 0 16px; }
-        .card { background: rgba(255,255,255,.92); backdrop-filter: blur(6px); border: 1px solid #e2e8f0; border-radius: 20px; padding: 28px; box-shadow: 0 16px 40px rgba(15,23,42,.08); }
-        h1 { margin: 0 0 8px; font-size: 28px; }
-        p { color: #475569; margin: 0 0 20px; }
-        .row { display: flex; gap: 10px; flex-wrap: wrap; }
-        input { flex: 1; min-width: 240px; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; font-size: 15px; }
-        button { border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 700; background: #0ea5e9; color: #fff; cursor: pointer; }
-        button:hover { background: #0284c7; }
-        .result { margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; display: none; background: #fff; }
-        .label { color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-top: 8px; }
-        .value { font-weight: 700; }
-        .message { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #f0f9ff; color: #075985; }
-        .error { margin-top: 14px; color: #b91c1c; display: none; }
+        .result-card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; margin-top: 24px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; }
+        .data-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .data-item { display: flex; flex-direction: column; gap: 4px; }
+        .data-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+        .data-value { font-size: 15px; font-weight: 600; color: #1e293b; }
+        .status-badge { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-top: 8px; }
+        .status-approved { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-subsanado { background: #e0f2fe; color: #075985; }
+        
+        .alert-custom { padding: 16px; border-radius: 12px; font-size: 14px; margin-top: 20px; border: 1px solid transparent; }
+        .alert-info { background: #f0f9ff; color: #075985; border-color: #bae6fd; }
+        .error-msg { color: #e11d48; font-size: 13px; font-weight: 600; margin-top: 12px; display: none; }
+
+        /* Timer Badge */
+        .timer-badge { position: absolute; top: 24px; right: 24px; background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: 1px solid #fee2e2; }
+
+        /* Modal Customization */
+        .modal-content { border-radius: 20px; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-header { border-bottom: none; padding: 32px 32px 16px; }
+        .modal-body { padding: 0 32px 32px; }
+        .security-icon { width: 64px; height: 64px; background: #eff6ff; color: #2563eb; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-<div class="wrap">
-    <div class="card">
-        <h1>Consulta Pública de Estado</h1>
-        <p>Ingresa tu DNI o RUC para conocer el estado de tu solicitud o cuenta.</p>
-
-        <div class="row">
-            <input type="text" id="docInput" placeholder="Ejemplo: 12345678 o 20123456789" maxlength="11">
-            <button onclick="consultarEstado()">Consultar</button>
+<div class="split-wrapper">
+    <div class="panel-left">
+        <div class="brand-row">
+            <svg class="brand-anchor" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="6" r="3.5" stroke="#4ec9e4" stroke-width="1.8"/>
+                <line x1="16" y1="9.5" x2="16" y2="28" stroke="#4ec9e4" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M8 18 C8 25 24 25 24 18" stroke="#4ec9e4" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <div>
+                <div class="brand-name">Club Náutico Neptuno</div>
+                <span class="brand-sub">Servicios Digitales</span>
+            </div>
         </div>
+        <div class="left-body">
+            <div class="left-overline">Transparencia · Seguridad</div>
+            <h1 class="left-title">Consulta de<br><em>Estado Socio</em></h1>
+            <p class="left-desc">Verifica el progreso de tu solicitud o el estado actual de tu membresía de forma rápida y segura.</p>
+        </div>
+        <div class="left-copy">© 2025 Club Náutico Neptuno</div>
+    </div>
 
-        <div id="error" class="error"></div>
+    <div class="panel-right">
+        <div class="welcome-card" style="max-width: 500px;">
+            <a th:href="@{/login}" style="background:none; border:none; color:#5a6a80; cursor:pointer; display:flex; align-items:center; gap:6px; margin-bottom:20px; padding:0; font-size:14px; font-weight:500; text-decoration:none;">
+                <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                Volver al inicio
+            </a>
+            
+            <h2>Consulta Pública</h2>
+            <p class="desc">Ingresa tu número de documento para comenzar.</p>
 
-        <div id="resultado" class="result">
-            <div class="label">Nombre</div>
-            <div id="rNombre" class="value">-</div>
-            <div class="label">Documento</div>
-            <div id="rDocumento" class="value">-</div>
-            <div class="label">Correo</div>
-            <div id="rCorreo" class="value">-</div>
-            <div class="label">Estado</div>
-            <div id="rEstado" class="value">-</div>
-            <div class="label">Acceso al sistema</div>
-            <div id="rAcceso" class="value">-</div>
-            <div id="rMensaje" class="message"></div>
+            <div class="mt-4">
+                <div class="mb-3">
+                    <label for="docInput" class="form-label fw-bold small text-secondary">DNI / RUC</label>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="docInput" class="form-control fi" placeholder="Ej: 71458236" maxlength="11" />
+                        <button id="btnConsultar" onclick="consultarEstado()" class="btn-submit" style="width: auto; padding: 0 24px;">
+                            Consultar
+                        </button>
+                    </div>
+                    <div id="error" class="error-msg">Debes ingresar un documento válido.</div>
+                </div>
+            </div>
 
-            <div id="rRechazoBox" style="display: none; margin-top: 15px; border-top: 2px solid #fee2e2; padding-top: 15px;">
-                <div class="label" style="color: #b91c1c;">Motivo del Rechazo / Observación</div>
-                <div id="rMotivo" class="value" style="color: #991b1b; padding: 8px 0; font-style: italic;"></div>
-                <div style="margin-top: 15px;">
-                    <a id="btnSubsanar" href="/registro/subsanar" style="display: inline-block; background: #e11d48; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 14px;">
-                        Subsanar Solicitud Ahora
+            <!-- Resultados -->
+            <div id="resultado" class="result-card">
+                <div class="timer-badge">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">timer</span>
+                    <span id="countdown">60s</span>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 20px; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">Información Encontrada</h3>
+                
+                <div class="data-grid">
+                    <div class="data-item">
+                        <span class="data-label">Nombre del Titular</span>
+                        <span id="rNombre" class="data-value">-</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Correo Electrónico</span>
+                        <span id="rCorreo" class="data-value">-</span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <span class="data-label">Estado de Solicitud</span><br>
+                    <span id="rEstadoBadge" class="status-badge">-</span>
+                </div>
+
+                <div id="rMensaje" class="alert-custom alert-info">
+                    <!-- Mensaje dinámico -->
+                </div>
+
+                <!-- Bloque de Rechazo -->
+                <div id="rRechazoBox" style="display: none; margin-top: 24px; border-top: 2px dashed #fee2e2; padding-top: 16px;">
+                    <span class="data-label" style="color: #e11d48;">Observación del Comité</span>
+                    <p id="rMotivo" style="font-size: 13px; color: #991b1b; margin-top: 8px; font-style: italic; background: #fff1f2; padding: 12px; border-radius: 8px;"></p>
+                    <a href="/registro/subsanar" class="btn-submit w-100 justify-content-center mt-3" style="background: #e11d48;">
+                        Subsanar Solicitud
                     </a>
                 </div>
+            </div>
+            
+            <div id="no-results" class="text-center py-5" style="display: none;">
+                <span class="material-symbols-outlined text-secondary opacity-25" style="font-size: 48px;">search_off</span>
+                <p class="text-secondary mt-2 small">No se encontró información vinculada a este documento.</p>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal de Seguridad -->
+<div class="modal fade" id="securityModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- Icono removido por solicitud de minimalismo -->
+            </div>
+            <div class="modal-body text-center">
+                <h4 class="fw-bold text-dark mb-3">Consulta exitosa</h4>
+                <p class="text-secondary mb-4">Redirigiendo al login...</p>
+                <div class="mb-4">
+                    <span class="text-primary fw-bold" style="font-size: 14px;">Serás redirigido en <span id="modalCountdown">10</span> segundos</span>
+                </div>
+                <button type="button" class="btn-submit w-100 justify-content-center" onclick="redirectToLogin()">
+                    Regresar ahora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     const autoDni = /*[[${autoDni}]]*/ null;
+    let securityTimer = null;
+    let secondsLeft = 60;
+    const REDIRECT_URL = "http://localhost:8081/login";
 
     document.addEventListener('DOMContentLoaded', () => {
         if (autoDni) {
@@ -72,52 +162,104 @@
         }
     });
 
+    function redirectToLogin() {
+        window.location.href = REDIRECT_URL;
+    }
+
+    function startSecurityTimer() {
+        if (securityTimer) clearInterval(securityTimer);
+        
+        secondsLeft = 60;
+        const countdownEl = document.getElementById('countdown');
+        const modalCountdownEl = document.getElementById('modalCountdown');
+        const securityModal = new bootstrap.Modal(document.getElementById('securityModal'));
+        
+        countdownEl.textContent = `${secondsLeft}s`;
+        
+        securityTimer = setInterval(() => {
+            secondsLeft--;
+            countdownEl.textContent = `${secondsLeft}s`;
+            
+            // Mostrar modal cuando falten 10 segundos
+            if (secondsLeft === 10) {
+                securityModal.show();
+            }
+            
+            if (secondsLeft <= 10) {
+                modalCountdownEl.textContent = secondsLeft;
+            }
+
+            if (secondsLeft <= 0) {
+                clearInterval(securityTimer);
+                redirectToLogin();
+            }
+        }, 1000);
+    }
+
     async function consultarEstado() {
         const docInput = document.getElementById('docInput');
+        const btnConsultar = document.getElementById('btnConsultar');
         const error = document.getElementById('error');
         const resultado = document.getElementById('resultado');
+        const noResults = document.getElementById('no-results');
         const rechazoBox = document.getElementById('rRechazoBox');
+        const stateBadge = document.getElementById('rEstadoBadge');
 
         const documento = docInput.value.trim();
         if (!documento) {
             error.style.display = 'block';
             error.textContent = 'Debes ingresar un número de documento.';
             resultado.style.display = 'none';
+            noResults.style.display = 'none';
             return;
         }
 
         error.style.display = 'none';
+        noResults.style.display = 'none';
         rechazoBox.style.display = 'none';
+        btnConsultar.disabled = true;
 
         try {
             const res = await fetch(`/api/socios/consultar-publico/${documento}`);
-            const data = await res.json();
-
+            
             if (!res.ok) {
-                error.style.display = 'block';
-                error.textContent = data.error || 'No se encontró información para el documento ingresado.';
                 resultado.style.display = 'none';
+                noResults.style.display = 'block';
+                btnConsultar.disabled = false;
                 return;
             }
 
+            const data = await res.json();
+
             document.getElementById('rNombre').textContent = data.nombre || '-';
-            document.getElementById('rDocumento').textContent = data.numeroDocumento || '-';
             document.getElementById('rCorreo').textContent = data.email || '-';
-            document.getElementById('rEstado').textContent = (data.estado || '-').toUpperCase();
-            document.getElementById('rAcceso').textContent = data.tieneAcceso ? 'SI' : 'NO';
+            
+            const estado = (data.estado || '').toLowerCase();
+            stateBadge.textContent = estado.toUpperCase();
+            
+            // Clases de estado
+            stateBadge.className = 'status-badge';
+            if (estado.includes('aprobado') || estado.includes('activo')) stateBadge.classList.add('status-approved');
+            else if (estado.includes('pendiente')) stateBadge.classList.add('status-pending');
+            else if (estado.includes('rechazado')) stateBadge.classList.add('status-rejected');
+            else if (estado.includes('subsanado')) stateBadge.classList.add('status-subsanado');
+            else stateBadge.classList.add('status-pending');
+
             document.getElementById('rMensaje').textContent = data.mensajeEstado || '';
             
-            if (data.estado && data.estado.toLowerCase() === 'rechazado') {
+            if (estado === 'rechazado') {
                 rechazoBox.style.display = 'block';
-                document.getElementById('rMotivo').textContent = data.motivoRechazo || "No se especificó un motivo.";
-                // Opcional: Si tenemos el ID podríamos ir directo al form de subsanar
+                document.getElementById('rMotivo').textContent = data.motivoRechazo || "Revisa tus documentos adjuntos e intenta nuevamente.";
             }
 
             resultado.style.display = 'block';
+            startSecurityTimer(); // Iniciar temporizador de 1 minuto
+            
         } catch (e) {
             error.style.display = 'block';
-            error.textContent = 'No se pudo consultar en este momento. Intenta nuevamente.';
+            error.textContent = 'Error de conexión. Intenta nuevamente.';
             resultado.style.display = 'none';
+            btnConsultar.disabled = false;
         }
     }
 </script>
