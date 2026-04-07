@@ -44,12 +44,7 @@ public class WebController {
     @Autowired
     private EmpleadoRepository empleadoRepository;
 
-    @GetMapping("/")
-    public String index() {
-        return "redirect:/inicio"; // Redirigir a la nueva página de inicio
-    }
-
-    @GetMapping("/inicio")
+    @GetMapping({"/", "/inicio"})
     public String inicio() {
         return "index"; // Portal de bienvenida (página de inicio)
     }
