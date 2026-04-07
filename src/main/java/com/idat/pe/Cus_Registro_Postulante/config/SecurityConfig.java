@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     new AntPathRequestMatcher("/"),
                     new AntPathRequestMatcher("/login"),
-                    new AntPathRequestMatcher("/pre-registro"),
+                    new AntPathRequestMatcher("/inicio"),
                     new AntPathRequestMatcher("/registro/**"),
                     new AntPathRequestMatcher("/api/postulantes/buscar-por-documento/**"),
                     new AntPathRequestMatcher("/consultar-estado-socio"),
