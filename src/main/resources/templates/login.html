@@ -111,7 +111,8 @@
             <form th:action="@{/login}" method="post" class="mt-4" id="loginForm">
                 <div class="mb-3">
                     <label for="username" class="form-label fw-bold small text-secondary">Usuario</label>
-                    <input type="text" id="username" name="username" class="form-control fi" placeholder="Usuario" required />
+                    <input type="text" id="username" name="username" class="form-control fi" placeholder="Usuario" required maxlength="100" />
+                    <div id="username-error" class="invalid-feedback-custom" style="display:none; color:#ef4444; font-size:12px; margin-top:5px; font-weight:500;"></div>
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label fw-bold small text-secondary">Contraseña</label>
@@ -120,6 +121,9 @@
                         <button type="button" onclick="togglePassword()" class="position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent text-secondary p-0 me-3 d-flex align-items-center justify-content-center" style="cursor: pointer;">
                             <span id="eye-icon" class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
                         </button>
+                    </div>
+                    <div class="text-end mt-2">
+                        <a th:href="@{/recuperar-password}" style="font-size: 12.5px; color: var(--teal); text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
                     </div>
                 </div>
                 <button type="submit" class="btn-submit w-100 justify-content-center">
@@ -151,8 +155,27 @@
         // Silently fail, just a ping to wake up the server
     });
 
-    // Handle Submit Loader
-    document.getElementById('loginForm').addEventListener('submit', function() {
+    // Handle Submit Loader & Validation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value.trim();
+        const errorDiv = document.getElementById('username-error');
+        const usernameInput = document.getElementById('username');
+        
+        // Validation for DNI (8) or RUC (11) if numeric
+        if (/^\d+$/.test(username)) {
+            if (username.length !== 8 && username.length !== 11) {
+                e.preventDefault();
+                errorDiv.innerText = "Si ingresas un documento, debe ser DNI (8 dígitos) o RUC (11 dígitos).";
+                errorDiv.style.display = 'block';
+                usernameInput.style.borderColor = '#ef4444';
+                usernameInput.style.background = '#fef2f2';
+                return;
+            }
+        }
+        
+        errorDiv.style.display = 'none';
+        usernameInput.style.borderColor = '';
+        usernameInput.style.background = '';
         document.getElementById('login-loader').style.display = 'flex';
     });
 </script>

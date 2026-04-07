@@ -10,6 +10,10 @@ public interface SocioService {
 
     List<SocioAprobadoDTO> listarSociosAprobados();
 
+    SocioAprobadoDTO buscarPorId(Integer socioId);
+    
+    com.idat.pe.Cus_Registro_Postulante.entity.Socio obtenerEntidadSocio(Integer socioId);
+
     Map<String, Object> generarCuentaSocio(Integer socioId);
 
     ConsultaEstadoDTO consultarEstadoPublico(String numeroDocumento);

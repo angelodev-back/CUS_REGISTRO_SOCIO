@@ -92,11 +92,7 @@
             </div>
 
 
-            <!-- ─── Info general ─── -->
-            <div class="alert alert-info">
-                <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="7" r=".5" fill="currentColor"/></svg>
-                <span>Recibirá un <strong>código de seguimiento</strong> al enviar su solicitud. Guárdelo para consultar el estado de su admisión.</span>
-            </div>
+
 
             <!-- ═══════════════ FORMULARIO ═══════════════ -->
             <form th:action="@{/registro/guardar}" th:object="${registroDTO}" method="post"
@@ -127,7 +123,7 @@
                         <div class="fg">
                             <label>Número de Documento <span class="req">*</span></label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;" required minlength="8" maxlength="11">
+                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;" required maxlength="11">
                                 <button type="button" id="btn-validar" class="btn-submit" style="width: auto; padding: 0 20px; margin-top: 0; height: 45px; background: #0094bc;">
                                     Validar
                                 </button>
@@ -138,54 +134,54 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Razón Social <span class="opt">(Solo para RUC)</span></label>
-                            <input type="text" th:field="*{razonSocial}" class="fi" placeholder="Empresa S.A.C.">
+                            <input type="text" th:field="*{razonSocial}" class="fi" placeholder="Empresa S.A.C." maxlength="200">
                         </div>
                     </div>
 
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Nombres <span class="opt">(Solo para DNI)</span></label>
-                            <input type="text" th:field="*{nombre}" class="fi" placeholder="Juan Carlos">
+                            <input type="text" th:field="*{nombre}" class="fi" placeholder="Juan Carlos" maxlength="100">
                         </div>
                     </div>
 
                     <div class="frow frow-2">
                         <div class="fg">
                             <label>Apellido Paterno <span class="opt">(Solo para DNI)</span></label>
-                            <input type="text" th:field="*{apellidoPaterno}" class="fi" placeholder="Pérez">
+                            <input type="text" th:field="*{apellidoPaterno}" class="fi" placeholder="Pérez" maxlength="100">
                         </div>
                         <div class="fg">
                             <label>Apellido Materno <span class="opt">(Solo para DNI)</span></label>
-                            <input type="text" th:field="*{apellidoMaterno}" class="fi" placeholder="García">
+                            <input type="text" th:field="*{apellidoMaterno}" class="fi" placeholder="García" maxlength="100">
                         </div>
                     </div>
 
                     <div class="frow frow-2">
                         <div class="fg">
-                            <label>Fecha de Nacimiento / Constitución <span class="req">*</span></label>
+                            <label id="lblFecha">Fecha de Nacimiento / Constitución <span class="req">*</span></label>
                             <input type="date" th:field="*{fechaNacimiento}" class="fi" required>
                         </div>
                         <div class="fg">
                             <label>Código Postal</label>
-                            <input type="text" th:field="*{codigoPostal}" class="fi" placeholder="15001">
+                            <input type="text" th:field="*{codigoPostal}" class="fi" placeholder="15001" maxlength="20">
                         </div>
                     </div>
 
                     <div class="frow frow-2">
                         <div class="fg">
                             <label>Correo Electrónico <span class="req">*</span></label>
-                            <input type="email" th:field="*{correo}" class="fi" placeholder="nombre@correo.com" required>
+                            <input type="email" th:field="*{correo}" class="fi" placeholder="nombre@correo.com" required maxlength="100">
                         </div>
                         <div class="fg">
                             <label>Teléfono <span class="req">*</span></label>
-                            <input type="tel" th:field="*{telefono}" class="fi" placeholder="987 654 321" required>
+                            <input type="tel" th:field="*{telefono}" class="fi" placeholder="987 654 321" required maxlength="15">
                         </div>
                     </div>
 
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Dirección <span class="req">*</span></label>
-                            <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización" required>
+                            <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización" required maxlength="200">
                         </div>
                     </div>
 
@@ -193,7 +189,7 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Ciudad</label>
-                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores, Lima">
+                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores, Lima" maxlength="100">
                         </div>
                     </div>
                 </div>
@@ -355,6 +351,19 @@
     .modal-overlay.active .modal-icon-wrapper {
         animation: modalBounce 0.8s ease;
     }
+    
+    /* Error classes */
+    .fi.is-invalid {
+        border-color: #ef4444 !important;
+        background: #fef2f2;
+    }
+    .invalid-feedback-custom {
+        color: #ef4444;
+        font-size: 11.5px;
+        font-weight: 500;
+        margin-top: 4px;
+        display: block;
+    }
 </style>
 
 <script>
@@ -368,6 +377,7 @@
             this.tipoDocSelect = document.getElementById('tipoDocSelect');
             this.numeroDocInput = document.getElementById('numeroDocumento');
             this.btnValidar = document.getElementById('btn-validar');
+            this.lblFecha = document.getElementById('lblFecha');
             
             // Modal Elements
             this.modal = document.getElementById('customModal');
@@ -467,40 +477,114 @@
          * Valida todos los campos antes del envío
          */
         validateFields() {
+            let hasError = false;
+            this.clearAllErrors();
+
             const tipoSocio = document.getElementById('tipoInteres').value;
             const tipoDoc = this.tipoDocSelect.value;
             const numeroDoc = this.numeroDocInput.value.trim();
             const terminos = document.getElementById('terminos').checked;
 
             // 1. Validar Documento
-            if (!numeroDoc) return "Debe ingresar su número de documento.";
-            if (tipoDoc === 'DNI' && numeroDoc.length !== 8) return "El DNI debe tener exactamente 8 dígitos.";
-            if (tipoDoc === 'RUC' && numeroDoc.length !== 11) return "El RUC debe tener exactamente 11 dígitos.";
-            if (!/^\d+$/.test(numeroDoc)) return "El documento debe contener solo números.";
+            if (!numeroDoc) {
+                this.showFieldError('numeroDocumento', "Debe ingresar su número de documento.");
+                hasError = true;
+            } else {
+                if (tipoDoc === 'DNI' && numeroDoc.length !== 8) {
+                    this.showFieldError('numeroDocumento', "El DNI debe tener exactamente 8 dígitos.");
+                    hasError = true;
+                }
+                if (tipoDoc === 'RUC' && numeroDoc.length !== 11) {
+                    this.showFieldError('numeroDocumento', "El RUC debe tener exactamente 11 dígitos.");
+                    hasError = true;
+                }
+                if (!/^\d+$/.test(numeroDoc)) {
+                    this.showFieldError('numeroDocumento', "El documento debe contener solo números.");
+                    hasError = true;
+                }
+            }
 
             // 2. Validar Nombres/Razón Social según tipo
             if (tipoDoc === 'DNI') {
-                if (!this.fields.nombre.value.trim()) return "Debe ingresar sus nombres.";
-                if (!this.fields.apellidoPaterno.value.trim()) return "Debe ingresar su apellido paterno.";
+                if (!this.fields.nombre.value.trim()) {
+                    this.showFieldError('nombre', "Debe ingresar sus nombres.");
+                    hasError = true;
+                }
+                if (!this.fields.apellidoPaterno.value.trim()) {
+                    this.showFieldError('apellidoPaterno', "Debe ingresar su apellido paterno.");
+                    hasError = true;
+                }
+                if (!this.fields.apellidoMaterno.value.trim()) {
+                    this.showFieldError('apellidoMaterno', "Debe ingresar su apellido materno.");
+                    hasError = true;
+                }
             } else {
-                if (!this.fields.razonSocial.value.trim()) return "Debe ingresar la razón social de la empresa.";
+                if (!this.fields.razonSocial.value.trim()) {
+                    this.showFieldError('razonSocial', "Debe ingresar la razón social de la empresa.");
+                    hasError = true;
+                }
             }
 
             // 3. Validar Email
             const email = this.fields.correo.value.trim();
-            if (!email) return "Debe ingresar un correo electrónico.";
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) return "El formato del correo electrónico no es válido.";
+            if (!email) {
+                this.showFieldError('correo', "Debe ingresar un correo electrónico.");
+                hasError = true;
+            } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    this.showFieldError('correo', "El formato del correo electrónico no es válido.");
+                    hasError = true;
+                }
+            }
 
             // 4. Otros obligatorios
-            if (!this.fields.telefono.value.trim()) return "Debe ingresar un número de teléfono.";
-            if (!this.fields.direccion.value.trim()) return "Debe ingresar su dirección de domicilio.";
-            if (!this.fields.fechaNacimiento.value) return "Debe ingresar la fecha de nacimiento o constitución.";
+            if (!this.fields.telefono.value.trim()) {
+                this.showFieldError('telefono', "Debe ingresar un número de teléfono.");
+                hasError = true;
+            }
+            if (!this.fields.direccion.value.trim()) {
+                this.showFieldError('direccion', "Debe ingresar su dirección de domicilio.");
+                hasError = true;
+            }
+            if (!this.fields.fechaNacimiento.value) {
+                this.showFieldError('fechaNacimiento', "Debe ingresar la fecha.");
+                hasError = true;
+            }
 
             // 5. Términos
-            if (!terminos) return "Debe aceptar los términos y condiciones para continuar.";
+            if (!terminos) {
+                this.showModal({
+                    title: "Términos y Condiciones",
+                    text: "Debe aceptar los términos para continuar.",
+                    type: "error"
+                });
+                hasError = true;
+            }
 
-            return null; // Todo correcto
+            return hasError ? "Por favor corrija los campos marcados en rojo." : null;
+        }
+
+        showFieldError(fieldName, message) {
+            const field = (fieldName === 'numeroDocumento') ? this.numeroDocInput : this.fields[fieldName];
+            if (field) {
+                field.classList.add('is-invalid');
+                const container = field.closest('.fg');
+                if (container) {
+                    const errorDiv = document.createElement('span');
+                    errorDiv.className = 'invalid-feedback-custom';
+                    errorDiv.innerText = message;
+                    container.appendChild(errorDiv);
+                }
+            }
+        }
+
+        clearAllErrors() {
+            const invalidFields = this.form.querySelectorAll('.fi.is-invalid');
+            invalidFields.forEach(f => f.classList.remove('is-invalid'));
+            
+            const errorMsgs = this.form.querySelectorAll('.invalid-feedback-custom');
+            errorMsgs.forEach(m => m.remove());
         }
 
         /**
@@ -551,6 +635,12 @@
         updateUIByDocumentType() {
             const isDNI = this.tipoDocSelect.value === 'DNI';
             this.numeroDocInput.placeholder = isDNI ? "Número de DNI" : "Número de RUC";
+            
+            if (this.lblFecha) {
+                this.lblFecha.innerHTML = isDNI 
+                    ? 'Fecha de Nacimiento <span class="req">*</span>' 
+                    : 'Fecha de Registro <span class="req">*</span>';
+            }
             
             // Razón Social solo para RUC
             this.toggleFieldGroup('razonSocial', !isDNI);
@@ -665,7 +755,9 @@
                 this.fields.apellidoMaterno.value = "";
             }
 
-            this.fields.fechaNacimiento.value = data.fecha_nacimiento || "";
+            // Ajuste para mapear tanto fecha_nacimiento como fecha_registro (CUS RUC)
+            const fechaDato = data.fecha_nacimiento || data.fecha_registro || "";
+            this.fields.fechaNacimiento.value = fechaDato;
 
             this.fields.correo.value = data.correo_electronico || "";
             this.fields.telefono.value = data.telefono || "";

@@ -42,6 +42,9 @@ public class WebController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private com.idat.pe.Cus_Registro_Postulante.repository.HistorialEstadoPostulanteRepository historialRepository;
+
+    @Autowired
     private EmpleadoRepository empleadoRepository;
 
     @GetMapping({"/", "/inicio"})
@@ -52,6 +55,31 @@ public class WebController {
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @GetMapping("/recuperar-password")
+    public String recuperarPasswordView() {
+        return "publico/recuperar-password";
+    }
+
+    @PostMapping("/recuperar-password")
+    public String recuperarPasswordSubmit(@RequestParam("numDocumento") String numDocumento, 
+                                          @RequestParam("nuevaPassword") String nuevaPassword, 
+                                          RedirectAttributes ra) {
+        Optional<Usuario> userOpt = usuarioRepository.findByUsername(numDocumento);
+        if(userOpt.isPresent()) {
+            Usuario u = userOpt.get();
+            u.setPassword(passwordEncoder.encode(nuevaPassword));
+            usuarioRepository.save(u);
+            ra.addFlashAttribute("mensaje", "Contraseña cambiada exitosamente. Ahora puedes ingresar.");
+            return "redirect:/login";
+        } else {
+            ra.addFlashAttribute("error", "El número de documento no está registrado en el sistema.");
+            return "redirect:/recuperar-password";
+        }
     }
 
     // --- FLUJO REGISTRO ---
@@ -163,6 +191,31 @@ public class WebController {
         return "jefe/socios-aprobados-panel";
     }
 
+    @GetMapping("/jefe/informe-registro/{id}")
+    public String verInformeRegistro(@PathVariable Integer id, Model model) {
+        agregarPerfilJefe(model);
+        try {
+            com.idat.pe.Cus_Registro_Postulante.entity.Socio socio = socioService.obtenerEntidadSocio(id);
+            model.addAttribute("socio", socio);
+            model.addAttribute("postulante", socio.getPostulante());
+
+            // Buscar quién fue el que aprobó al postulante
+            List<com.idat.pe.Cus_Registro_Postulante.entity.HistorialEstadoPostulante> historial =
+                historialRepository.findByPostulante_IdOrderByFechaCambioDesc(socio.getPostulante().getId());
+
+            com.idat.pe.Cus_Registro_Postulante.entity.HistorialEstadoPostulante validacion = historial.stream()
+                .filter(h -> "aprobado".equalsIgnoreCase(h.getEstadoNuevo()))
+                .findFirst()
+                .orElse(null);
+
+            model.addAttribute("validacion", validacion);
+            
+            return "jefe/informe-registro";
+        } catch (Exception e) {
+            return "redirect:/jefe/socios-aprobados";
+        }
+    }
+
     // --- FLUJO SOCIO (Dashboard) ---
     @GetMapping("/socio/dashboard")
     public String socioDashboard(Model model) {
@@ -191,16 +244,7 @@ public class WebController {
         return "socio/dashboard";
     }
 
-    @GetMapping("/consultar-estado-socio")
-    public String consultarEstadoPublico(@RequestParam(required = false) Boolean autoconsulta, Model model) {
-        if (Boolean.TRUE.equals(autoconsulta)) {
-            Usuario usuario = obtenerUsuarioActual();
-            if (usuario != null) {
-                model.addAttribute("autoDni", usuario.getUsername()); // El username es el correo/DNI en este sistema
-            }
-        }
-        return "publico/consultar-estado-socio";
-    }
+
 
     @GetMapping("/verificar-estado-cuenta")
     public String verificarEstadoCuenta(Model model) {
@@ -274,7 +318,7 @@ public class WebController {
             PostulanteDTO guardado = postulanteService.registrarPostulante(dto);
             ra.addFlashAttribute("postulante", guardado);
             ra.addFlashAttribute("mensaje", "Solicitud de registro enviada exitosamente. Por favor, espere la validación.");
-            return "redirect:/login?registered=true";
+            return "redirect:/registro/exitoso";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
             ra.addFlashAttribute("registroDTO", dto);
@@ -289,7 +333,7 @@ public class WebController {
             PostulanteDTO guardado = postulanteService.buscarPorId(id);
             ra.addFlashAttribute("postulante", guardado);
             ra.addFlashAttribute("mensaje", "Subsanación completada exitosamente.");
-            return "redirect:/login?registered=true";
+            return "redirect:/registro/exitoso";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
             ra.addFlashAttribute("registroDTO", dto);

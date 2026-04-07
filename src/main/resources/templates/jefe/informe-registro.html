@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Registro — Club Náutico Neptuno</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/css/neptuno.css}">
+    <style>
+        :root {
+            --gold: #c5a059;
+            --gold-light: #e6d5b8;
+            --report-bg: #ffffff;
+        }
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1e293b;
+            padding: 40px 20px;
+        }
+        .report-paper {
+            background: var(--report-bg);
+            max-width: 850px;
+            margin: 0 auto;
+            border-radius: 4px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .report-header {
+            padding: 60px 80px 40px;
+            text-align: center;
+            border-bottom: 2px solid #f1f5f9;
+            position: relative;
+        }
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--teal), var(--navy));
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 15rem;
+            opacity: 0.03;
+            pointer-events: none;
+            font-weight: 900;
+            white-space: nowrap;
+            z-index: 0;
+            color: var(--navy);
+        }
+        .report-content {
+            padding: 40px 80px 60px;
+            position: relative;
+            z-index: 1;
+        }
+        .section-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--teal);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #f1f5f9;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .info-item span {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .status-pill.success { background: #dcfce7; color: #166534; }
+        .status-pill.warning { background: #fef9c3; color: #854d0e; }
+        
+        .footer-signatures {
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+        .signature-line {
+            width: 220px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .actions-bar {
+            max-width: 850px;
+            margin: 30px auto 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .actions-bar, .nav-header { display: none !important; }
+            .report-paper { box-shadow: none; border: none; }
+        }
+        .btn-activate {
+            background: var(--navy);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-activate:hover {
+            background: #1a2333;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="actions-bar">
+        <a th:href="@{/jefe/socios-aprobados}" style="color: #64748b; font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>
+            Regresar a Gestión
+        </a>
+        <div class="d-flex gap-3">
+            <button onclick="window.print()" class="btn-submit" style="background: white; color: #475569; border: 1px solid #e2e8f0; width: auto; padding: 10px 20px; font-size: 13px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">print</span>
+                Imprimir Informe
+            </button>
+            <form th:if="${socio.estadoSocio == 'aprobado'}" th:id="'form-activar-' + ${socio.id}" style="display:inline;">
+                <button type="button" th:onclick="'activarSocio(' + ${socio.id} + ')'" class="btn-activate">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">verified_user</span>
+                    Activar Socio y Generar Credenciales
+                </button>
+            </form>
+            <span th:if="${socio.estadoSocio == 'activo'}" class="status-pill success">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 5px;">check_circle</span>
+                Socio ya está Activo
+            </span>
+        </div>
+    </div>
+
+    <div class="report-paper mt-4">
+        <div class="watermark">NEPTUNO</div>
+        
+        <header class="report-header">
+            <div style="width: 60px; height: 60px; background: var(--navy); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 32 32" style="width: 32px; height: 32px; stroke: white; fill: none; stroke-width: 2;">
+                    <circle cx="16" cy="6" r="3.5" />
+                    <line x1="16" y1="9.5" x2="16" y2="28" stroke-linecap="round"/>
+                    <path d="M8 18 C8 25 24 25 24 18" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h1 style="font-size: 24px; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 8px;">Informe de Registro Exitoso</h1>
+            <p style="color: #64748b; font-size: 14px; font-weight: 500;">Club Náutico Neptuno — Expediente de Membresía</p>
+            <div style="margin-top: 20px;">
+                <span class="status-pill success" th:if="${postulante.estado.name() == 'APROBADO'}">Validación Completada</span>
+            </div>
+        </header>
+
+        <div class="report-content">
+            <div class="section-title">Información del Postulante</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Nombre Completo / Razón Social</label>
+                    <span th:text="${postulante.nombres != null ? (postulante.nombres + ' ' + postulante.apellidoPaterno + ' ' + postulante.apellidoMaterno) : postulante.razon_social}">JUAN PEREZ GARCIA</span>
+                </div>
+                <div class="info-item">
+                    <label>Documento de Identidad</label>
+                    <span th:text="${postulante.tipoDocumento + ': ' + postulante.numeroDocumento}">DNI: 12345678</span>
+                </div>
+                <div class="info-item">
+                    <label>Correo Electrónico</label>
+                    <span th:text="${postulante.correoElectronico}">juan.perez@email.com</span>
+                </div>
+                <div class="info-item">
+                    <label>Teléfono de Contacto</label>
+                    <span th:text="${postulante.telefono}">+51 987 654 321</span>
+                </div>
+            </div>
+
+            <div class="section-title">Detalles de la Solicitud</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Tipo de Interés</label>
+                    <span th:text="${postulante.tipoInteres}">MEMBRESÍA NÁUTICA</span>
+                </div>
+                <div class="info-item">
+                    <label>Fecha de Solicitud</label>
+                    <span th:text="${#temporals.format(postulante.fechaRegistro, 'dd/MM/yyyy')}">12/05/2025</span>
+                </div>
+                <div class="info-item">
+                    <label>Dirección Laboral/Residencial</label>
+                    <span th:text="${postulante.direccion + ', ' + postulante.ciudad}">Av. Marina 123, Lima</span>
+                </div>
+                <div class="info-item">
+                    <label>ID de Expediente</label>
+                    <span th:text="${'EXP-' + #numbers.formatInteger(postulante.id, 6)}">EXP-000452</span>
+                </div>
+            </div>
+
+            <div class="section-title">Estado de Validación Administrativa</div>
+            <div style="background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-start gap-3">
+                    <span class="material-symbols-outlined text-success" style="font-size: 24px;">task_alt</span>
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px;" th:text="${validacion != null ? 'Aprobado por: ' + validacion.empleado.nombres + ' ' + validacion.empleado.apellidoPaterno : 'Evaluación Favorable'}">Evaluación Favorable</h4>
+                        <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;" th:text="${validacion != null ? validacion.motivo : 'El área administrativa ha verificado la autenticidad de los documentos presentados. El postulante no presenta deudas pendientes con el club y cumple con el perfil requerido.'}">
+                            El área administrativa ha verificado la autenticidad de los documentos presentados. El postulante no presenta deudas pendientes con el club y cumple con el perfil requerido para la categoría de <strong th:text="${socio.tipoSocio}">Náutico</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-signatures">
+                <div>
+                    <div class="signature-line">
+                        <strong>Firma del Postulante</strong><br>
+                        Titular de la Solicitud
+                    </div>
+                </div>
+                <div>
+                    <div class="signature-line">
+                        <strong th:text="${validacion != null ? validacion.empleado.nombres + ' ' + validacion.empleado.apellidoPaterno : jefeNombre}">Juan Pérez</strong><br>
+                        Jefe de Atención al Cliente
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 60px; text-align: center; font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
+                Documento generado electrónicamente por el Sistema Neptuno v1.0 — <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function activarSocio(id) {
+            if(!confirm('¿Está seguro de activar este socio y generar sus credenciales de acceso?')) return;
+            
+            try {
+                const res = await fetch(`/api/socios/generar-cuenta/${id}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                if(res.ok) {
+                    alert('Socio activado exitosamente. Se han enviado las credenciales por correo electrónico.');
+                    window.location.reload();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Ocurrió un error al activar el socio.');
+                }
+            } catch (e) {
+                alert('Error de conexión al procesar la activación.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -8,11 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/neptuno.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
 <div class="split-wrapper">
 
-    <!-- ══ PANEL IZQUIERDO ══ -->
+    <!-- ══ PANEL IZQUIERDO (Copiado de Inicio) ══ -->
     <div class="panel-left">
 
         <div class="brand-row">
@@ -26,125 +27,84 @@
             </svg>
             <div>
                 <div class="brand-name">Club Náutico Neptuno</div>
-                <span class="brand-sub">Confirmación de Solicitud</span>
+                <span class="brand-sub">Sistema de Registro Oficial</span>
             </div>
         </div>
 
         <div class="left-body">
             <div class="left-icon-circle">
-                <svg viewBox="0 0 34 34"><polyline points="6,17 14,25 28,10" stroke="#4ec9e4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                <svg viewBox="0 0 34 34">
+                    <polyline points="6,17 14,25 28,10" stroke="#4ec9e4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
             </div>
 
-            <div class="left-overline">Solicitud recibida</div>
-            <h1 class="left-title">Registro<br><em>completado</em><br>exitosamente</h1>
+            <div class="left-overline">Membresía · Portal</div>
+            <h1 class="left-title">¡Excelente<br><em>noticia!</em><br>Tu solicitud está en camino</h1>
             <div class="left-divider"></div>
             <p class="left-desc">
-                Su solicitud fue registrada. Nuestro equipo la revisará y le notificará el resultado en un plazo de <strong style="color:rgba(255,255,255,.75);">48 horas hábiles</strong>.
+                ¡Qué alegría! El primer paso para unirte al Club Náutico Neptuno ya está dado. Hemos recibido tu información y nuestro equipo la revisará con mucho cuidado.
             </p>
 
-            <div class="state-badge">
-                <div class="pulse-dot"></div>
-                Pendiente de validación
-            </div>
+            <ul class="benefit-list">
+                <li>
+                    <div class="benefit-check">
+                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+                    </div>
+                    Revisión manual por nuestro equipo de admisiones
+                </li>
+                <li>
+                    <div class="benefit-check">
+                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+                    </div>
+                    Notificación automática a tu correo electrónico
+                </li>
+                <li>
+                    <div class="benefit-check">
+                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+                    </div>
+                    Acceso total tras la validación administrativa
+                </li>
+            </ul>
         </div>
 
         <svg class="left-wave" viewBox="0 0 800 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M0,50 C150,90 350,10 500,50 C650,90 750,20 800,50 L800,100 L0,100 Z" fill="#4ec9e4"/>
         </svg>
 
-        <div class="left-copy">© 2025 Club Náutico Neptuno</div>
+        <div class="left-copy">© 2025 Club Náutico Neptuno — Sistema Interno v1.0</div>
     </div>
 
-    <!-- ══ PANEL DERECHO ══ -->
-    <div class="panel-right">
-        <div style="width:100%; max-width:500px;">
+    <!-- ══ PANEL DERECHO (Mensaje Amigable) ══ -->
+    <div class="panel-right" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px;">
+        
+        <div style="width: 100%; max-width: 480px; text-align: center;">
+            <div style="width: 80px; height: 80px; background: #ecfdf5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);">
+                <span class="material-symbols-outlined" style="font-size: 40px;">check_circle</span>
+            </div>
 
-            <div class="page-tag">Membresía · Confirmación</div>
-            <h1 class="page-title" style="margin-bottom:8px;">Solicitud enviada</h1>
-            <p class="page-desc" style="margin-bottom:28px;">
-                A continuación encontrará el resumen de su solicitud. <strong>Guarde su código de seguimiento</strong> para consultar el estado de su admisión.
+            <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 16px; letter-spacing: -0.02em;">¡Todo listo de tu parte!</h1>
+            
+            <p style="font-size: 16px; color: #64748b; line-height: 1.7; margin-bottom: 40px;">
+                Hemos registrado satisfactoriamente tu solicitud para <strong th:text="${postulante != null ? postulante.nombres : 'el club'}">el club</strong>. Estaremos en contacto contigo muy pronto vía correo electrónico para informarte sobre el estado de tu admisión.
             </p>
 
-            <!-- Código de seguimiento (destacado) -->
-            <div class="alert alert-ok" style="margin-bottom:20px;">
-                <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><polyline points="6,10 9,13 14,7"/></svg>
-                <div>
-                        <span class="tracking-code" style="display:inline-block; font-weight:600; color:#4ec9e4; font-family:monospace; margin-left:8px;" 
-                              th:text="${postulante != null} ? '#' + ${postulante.id} : '#0000'">#0000</span>
-                </div>
+            <div style="background: #f8fafc; padding: 24px; border-radius: 20px; border: 1.5px dashed #e2e8f0; margin-bottom: 40px;">
+                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #94a3b8; display: block; margin-bottom: 8px;">Código de Seguimiento</span>
+                <span style="font-size: 24px; font-weight: 800; color: #0284c7; font-family: 'Inter', sans-serif;" th:text="${postulante != null} ? '#' + ${postulante.id} : '#0000'">#0000</span>
             </div>
 
-            <!-- Mensaje de confirmación -->
-            <div class="alert alert-info" style="margin-bottom:20px;">
-                <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="7" r=".5" fill="currentColor"/></svg>
-                <span th:if="${postulante != null}">Solicitud de registro enviada exitosamente.</span>
-                <span th:if="${postulante == null}">Su solicitud ha sido procesada correctamente. Puede volver al inicio.</span>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <a href="/inicio" class="btn-submit" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:10px; padding: 18px 32px; font-size: 15px; background: #0f172a; color: #ffffff; border-radius: 14px; border: none; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1);">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">home</span>
+                    Volver a la página principal
+                </a>
             </div>
-
-            <div th:if="${postulante == null}" class="alert alert-warn" style="margin-bottom:20px; background: rgba(255,193,7,0.1); border-color: rgba(255,193,7,0.2); color: #ffc107;">
-                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L2 18h16L10 2zm0 3.5L16.5 17H3.5L10 5.5zm-1 8h2v2H9v-2zm0-5h2v4H9V8.5z"/></svg>
-                <span style="margin-left:8px;">La información detallada ya no está disponible por seguridad. Guarde su número de documento para consultas futuras.</span>
+            
+            <div style="margin-top: 32px; font-size: 13px; color: #94a3b8; font-weight: 500;">
+                ¿Dificultades? Contáctanos a <a href="mailto:soporte@clubneptuno.pe" style="color: #0284c7; text-decoration: none;">soporte@clubneptuno.pe</a>
             </div>
-
-            <!-- Datos del postulante -->
-            <div class="data-card" th:if="${postulante != null}">
-                <div class="data-card-head">Datos registrados</div>
-                <div class="data-row">
-                    <span class="data-key" th:text="${postulante.tipoDocumento}">DNI</span>
-                    <span class="data-val" th:text="${postulante.numeroDocumento}">—</span>
-                </div>
-                <div class="data-row" th:if="${postulante.tipoDocumento == 'DNI'}">
-                    <span class="data-key">Nombre completo</span>
-                    <span class="data-val" th:text="${postulante.nombres} + ' ' + ${postulante.apellidoPaterno}">—</span>
-                </div>
-                <div class="data-row" th:if="${postulante.tipoDocumento == 'RUC'}">
-                    <span class="data-key">Razón Social</span>
-                    <span class="data-val" th:text="${postulante.razonSocial}">—</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-key">Correo electrónico</span>
-                    <span class="data-val" th:text="${postulante.correo}">—</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-key">Estado</span>
-                    <span class="badge-pending" th:text="${postulante.estado}">PENDIENTE</span>
-                </div>
-            </div>
-
-            <!-- Próximos pasos -->
-            <div class="steps-card">
-                <div class="steps-card-head">¿Qué sigue?</div>
-                <ul class="steps-list">
-                    <li>
-                        <div class="step-n">1</div>
-                        <div class="step-body">
-                            Revisamos sus datos personales
-                            <span>Verificamos la información ingresada en el formulario.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="step-n">2</div>
-                        <div class="step-body">
-                            Validación con otros clubes
-                            <span>Consultamos registros de membresías previas en instituciones afiliadas.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="step-n">3</div>
-                        <div class="step-body">
-                            Notificación por correo
-                            <span th:if="${postulante != null}">Le comunicaremos el resultado a <strong th:text="${postulante.correo}">su correo</strong>.</span>
-                            <span th:if="${postulante == null}">Le comunicaremos el resultado a su correo electrónico registrado.</span>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <a href="/" class="btn-submit" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:10px; background:transparent; color:#5a6a80; border:1px solid #dcdfe6; margin-top:12px;">
-                Volver al inicio
-            </a>
-
         </div>
+
     </div>
 
 </div>

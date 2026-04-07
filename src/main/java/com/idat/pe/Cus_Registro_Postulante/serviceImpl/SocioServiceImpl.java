@@ -59,6 +59,21 @@ public class SocioServiceImpl implements SocioService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public SocioAprobadoDTO buscarPorId(Integer socioId) {
+        return socioRepository.findById(socioId)
+                .map(this::mapearSocioAprobado)
+                .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + socioId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Socio obtenerEntidadSocio(Integer socioId) {
+        return socioRepository.findById(socioId)
+                .orElseThrow(() -> new RuntimeException("No se encontró la entidad de socio con ID: " + socioId));
+    }
+
+    @Override
     @Transactional
     public Map<String, Object> generarCuentaSocio(Integer socioId) {
         Socio socio = socioRepository.findById(socioId)
@@ -77,7 +92,7 @@ public class SocioServiceImpl implements SocioService {
                 .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
 
         String correo = postulante.getCorreoElectronico();
-        String passwordTemporal = postulante.getTelefono(); // Usar teléfono como password
+        String passwordTemporal = generarPasswordSegura();
 
         Usuario usuario = usuarioRepository.findByUsernameOrCorreoElectronico(correo, correo)
                 .orElseGet(() -> {
@@ -93,6 +108,7 @@ public class SocioServiceImpl implements SocioService {
 
         socio.setUsuario(usuario);
         socio.setEstadoSocio("activo");
+        socio.setFechaActivacion(java.time.LocalDate.now());
         socioRepository.save(socio);
 
         emailService.enviarCredenciales(correo, correo, passwordTemporal);
@@ -100,9 +116,37 @@ public class SocioServiceImpl implements SocioService {
         return Map.of(
                 "mensaje", "Cuenta generada correctamente",
                 "usuario", correo,
+                "password", passwordTemporal,
                 "socioId", socio.getId(),
                 "estado", "activo"
         );
+    }
+
+    private String generarPasswordSegura() {
+        String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        String special = "!@#$%&*";
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        
+        // 6 Alphanumerics
+        for (int i = 0; i < 6; i++) {
+            sb.append(alpha.charAt(random.nextInt(alpha.length())));
+        }
+        // 2 Specials
+        for (int i = 0; i < 2; i++) {
+            sb.append(special.charAt(random.nextInt(special.length())));
+        }
+        
+        // Shuffle (simple)
+        char[] password = sb.toString().toCharArray();
+        for (int i = 0; i < password.length; i++) {
+            int j = random.nextInt(password.length);
+            char temp = password[i];
+            password[i] = password[j];
+            password[j] = temp;
+        }
+        
+        return new String(password);
     }
 
     @Override

@@ -23,10 +23,11 @@ public class SecurityConfig {
                 .requestMatchers(
                     new AntPathRequestMatcher("/"),
                     new AntPathRequestMatcher("/login"),
+                    new AntPathRequestMatcher("/recuperar-password"),
                     new AntPathRequestMatcher("/inicio"),
                     new AntPathRequestMatcher("/registro/**"),
                     new AntPathRequestMatcher("/api/postulantes/buscar-por-documento/**"),
-                    new AntPathRequestMatcher("/consultar-estado-socio"),
+
                     new AntPathRequestMatcher("/api/socios/consultar-publico/**"),
                     new AntPathRequestMatcher("/css/**"),
                     new AntPathRequestMatcher("/js/**"),
@@ -38,7 +39,6 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/socios/aprobados")).hasRole("JEFE")
                 .requestMatchers(new AntPathRequestMatcher("/api/socios/generar-cuenta/**")).hasRole("JEFE")
                 .requestMatchers(new AntPathRequestMatcher("/socio/**")).hasRole("SOCIO")
-                .requestMatchers(new AntPathRequestMatcher("/verificar-estado-cuenta")).hasRole("SOCIO")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

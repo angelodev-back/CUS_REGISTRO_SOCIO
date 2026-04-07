@@ -294,8 +294,14 @@
             const estadoText = s.tieneAcceso ? 'Activo' : 'Aprobado';
 
             const accion = s.tieneAcceso
-                ? '<button class="px-3 py-1.5 bg-slate-200 text-slate-500 rounded text-[11px] font-semibold cursor-not-allowed" disabled>Cuenta generada</button>'
-                : `<button class="px-3 py-1.5 bg-blue-600 text-white rounded text-[11px] font-semibold hover:bg-blue-700 transition-colors shadow-sm active:scale-95" onclick="abrirModalGenerar(${s.socioId}, '${(s.nombre || '').replace(/'/g, "&#39;")}')">Generar cuenta</button>`;
+                ? `<div class="flex gap-2 justify-end">
+                    <a href="/jefe/informe-registro/${s.socioId}" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-[11px] font-semibold hover:bg-slate-200 transition-all no-underline">Ver Informe</a>
+                    <button class="px-3 py-1.5 bg-slate-200 text-slate-500 rounded text-[11px] font-semibold cursor-not-allowed" disabled>Cuenta activa</button>
+                   </div>`
+                : `<div class="flex gap-2 justify-end">
+                    <a href="/jefe/informe-registro/${s.socioId}" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-[11px] font-semibold hover:bg-slate-200 transition-all no-underline">Ver Informe</a>
+                    <button class="px-3 py-1.5 bg-blue-600 text-white rounded text-[11px] font-semibold hover:bg-blue-700 transition-colors shadow-sm active:scale-95" onclick="abrirModalGenerar(${s.socioId}, '${(s.nombre || '').replace(/'/g, "&#39;")}')">Activar cuenta</button>
+                   </div>`;
 
             return `
                 <tr class="hover:bg-surface-container-low/30 transition-colors group">
