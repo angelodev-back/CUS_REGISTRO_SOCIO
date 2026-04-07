@@ -1,4 +1,3 @@
-DROP DATABASE IF EXISTS Neptuno;
 CREATE DATABASE Neptuno
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
