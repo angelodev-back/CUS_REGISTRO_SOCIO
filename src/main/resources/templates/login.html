@@ -87,46 +87,23 @@
     </div>
 
     <div class="panel-right">
-        <!-- Vista de Selección -->
-        <div class="welcome-card" id="selection-view" th:style="${param.error != null or param.form != null} ? 'display: none;' : 'display: block;'">
-            <h2>Bienvenido</h2>
-            <p class="desc">Selecciona una opción para continuar.</p>
+        <!-- Formulario de Login -->
+        <div class="welcome-card" id="login-form-view" style="display: block;">
+            
+            <a th:href="@{/pre-registro}" style="background:none; border:none; color:#5a6a80; cursor:pointer; display:flex; align-items:center; gap:6px; margin-bottom:20px; padding:0; font-size:14px; font-weight:500; text-decoration:none;">
+                <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                Volver al Inicio
+            </a>
 
+            <h2>Iniciar sesión</h2>
+            <p class="desc">Ingresa tus credenciales para continuar.</p>
+
+            <!-- Mensajes de Error o Logout -->
             <div th:if="${mensaje}" class="alert alert-logout" style="background: #dcfce7; color: #166534; border-color: #86efac; margin-bottom: 24px;">
                 <svg viewBox="0 0 20 20" style="width:18px; height:18px; fill:currentColor; margin-right:8px;"><circle cx="10" cy="10" r="8"/><polyline points="6,10 9,13 14,7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
                 <span th:text="${mensaje}">Operación exitosa</span>
             </div>
 
-            <div class="selection-buttons d-flex flex-column gap-3 mt-4">
-                <a th:href="@{/login(form=true)}" class="btn-submit text-decoration-none d-inline-flex align-items-center justify-content-center" style="background: #0094bc; border: none; height: 52px; font-weight: 600;">
-                    <svg viewBox="0 0 24 24" style="width:20px; height:20px; margin-right:8px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                    Ingresar
-                </a>
-                <a th:href="@{/pre-registro}" class="btn-submit btn-outline-primary-custom text-decoration-none d-inline-flex align-items-center justify-content-center" style="background: transparent; height: 52px;">
-                    <svg viewBox="0 0 24 24" style="width:20px; height:20px; margin-right:8px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm12 0v6m-3-3h6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                    Registrarse
-                </a>
-
-                <div class="mt-4 pt-4 border-top border-light text-center">
-                    <p class="text-secondary small mb-2">¿Ya enviaste tu solicitud?</p>
-                    <a th:href="@{/consultar-estado-socio}" class="text-decoration-none fw-bold d-inline-flex align-items-center justify-content-center" style="color: #0094bc; font-size: 14px; gap: 6px; transition: all 0.2s ease;">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">track_changes</span>
-                        Consulte su estado aquí
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulario de Login -->
-        <div class="welcome-card" id="login-form-view" th:style="${param.error != null or param.form != null} ? 'display: block;' : 'display: none;'">
-            <a th:href="@{/login}" style="background:none; border:none; color:#5a6a80; cursor:pointer; display:flex; align-items:center; gap:6px; margin-bottom:20px; padding:0; font-size:14px; font-weight:500; text-decoration:none;">
-                <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                Volver
-            </a>
-            <h2>Iniciar sesión</h2>
-            <p class="desc">Ingresa tus credenciales para continuar.</p>
-
-            <!-- Mensajes de Error o Logout -->
             <div th:if="${param.error}" class="alert alert-error">
                 <span>Usuario o contraseña incorrectos.</span>
             </div>

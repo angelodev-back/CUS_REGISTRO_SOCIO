@@ -46,12 +46,12 @@ public class WebController {
 
     @GetMapping("/")
     public String index() {
-        return "login";
+        return "redirect:/pre-registro"; // Redirigir a la nueva página de inicio
     }
 
     @GetMapping("/pre-registro")
     public String preRegistro() {
-        return "index";
+        return "index"; // Portal de bienvenida (página de inicio)
     }
 
     @GetMapping("/login")
