@@ -101,6 +101,39 @@
             padding: 1rem;
         }
         .modal-overlay.open { display: flex; }
+        
+        /* Estilos para el Editor de Informe */
+        .report-section {
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+        }
+        .report-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .report-input {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem;
+            font-size: 13px;
+            color: #1e293b;
+            background: white;
+            transition: all 0.2s;
+        }
+        .report-input:focus {
+            border-color: #0d9488;
+            ring: 2px;
+            ring-color: #0d948820;
+            outline: none;
+        }
     </style>
 </head>
 <body class="bg-surface text-on-surface antialiased">
@@ -117,12 +150,8 @@
 
     <nav class="flex-1 space-y-1">
         <a class="bg-white text-slate-900 font-medium shadow-sm rounded-md px-3 py-2 flex items-center transition-transform active:scale-[0.98]" th:href="@{/jefe/dashboard}">
-            <span class="material-symbols-outlined mr-3">dashboard</span>
+            <span class="material-symbols-outlined mr-3 text-slate-900">dashboard</span>
             <span>Revision de Postulantes</span>
-        </a>
-        <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/socios-aprobados}">
-            <span class="material-symbols-outlined mr-3">group</span>
-            <span>Gestion de Socios</span>
         </a>
         <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/historial}">
             <span class="material-symbols-outlined mr-3">history</span>
@@ -161,9 +190,21 @@
         <div th:if="${mensaje}" class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700" th:text="${mensaje}"></div>
         <div th:if="${error}" class="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700" th:text="${error}"></div>
 
-        <div class="space-y-1">
-            <h2 class="text-2xl font-semibold tracking-tight text-on-surface">Validacion de Postulantes</h2>
-            <p class="text-on-surface-variant max-w-2xl leading-relaxed">Gestion de identidad y flujos de aprobacion para nuevos registros de membresia.</p>
+        <div class="space-y-3">
+            <div class="space-y-1">
+                <h2 class="text-2xl font-semibold tracking-tight text-on-surface">Validacion de Postulantes</h2>
+                <p class="text-on-surface-variant max-w-2xl leading-relaxed">Gestion de identidad y flujos de aprobacion para nuevos registros de membresia.</p>
+            </div>
+            <div class="max-w-4xl rounded-lg border border-slate-200 bg-white/80 px-4 py-3">
+                <p class="text-[11px] uppercase tracking-widest text-slate-500 font-bold">Sugerencia de admision</p>
+                <p class="text-sm text-slate-700 mt-1">Politica del Club Nautico Atenas del Peru: solo los socios clasificados como <span class="font-semibold text-emerald-700">Pagador</span> son elegibles.</p>
+                <div class="mt-2 flex flex-wrap gap-2 text-[11px]">
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Pagador: Elegible</span>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">Pagador esporadico: Revisar</span>
+                    <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold">Renuente a pago: No elegible</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-2">Recomendacion: si la clasificacion es <span class="font-semibold text-rose-700">Renuente a pago</span>, no aprobar admision.</p>
+            </div>
         </div>
 
         <section class="bg-surface-container-low p-1 rounded-xl">
@@ -291,8 +332,94 @@
                 <div><span class="text-on-surface-variant">Clasificacion:</span> <span class="font-semibold" id="dyn_scoring">-</span></div>
             </div>
             <div>
-                <h5 class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-2">Deudas externas</h5>
-                <div class="space-y-2" id="dyn_debts_container"></div>
+                <div class="flex items-center justify-between mb-2">
+                    <h5 class="text-xs uppercase tracking-widest text-on-surface-variant font-bold">Deudas externas</h5>
+                </div>
+                <div class="max-h-40 overflow-y-auto space-y-2 pr-2" id="dyn_debts_container"></div>
+            </div>
+
+            <div class="flex items-center justify-end pt-6 border-t border-slate-100">
+                <button onclick="abrirPortalInforme()" class="px-8 py-3 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 flex items-center gap-3 active:scale-95">
+                    <span class="material-symbols-outlined text-lg">assignment_turned_in</span>
+                    Preparar Informe Final
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NUEVO MODAL: Portal de Informe (Sencillo) -->
+<div class="modal-overlay" id="modalReportPortal" onclick="cerrarModalEnOverlay(event, 'modalReportPortal')">
+    <div class="bg-white w-full max-w-4xl rounded-xl overflow-hidden border border-outline-variant/20 shadow-xl">
+        <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between bg-surface">
+            <h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant flex items-center">
+                <span class="material-symbols-outlined mr-2 text-primary">analytics</span>
+                Preparar Informe de Admisión
+            </h4>
+            <button class="p-1 hover:bg-slate-100 rounded-md transition-colors" onclick="cerrarModal('modalReportPortal')">
+                <span class="material-symbols-outlined text-slate-400">close</span>
+            </button>
+        </div>
+        
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Sección de Edición -->
+            <div class="space-y-6">
+                <div>
+                    <h5 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Parámetros del Informe</h5>
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-tight" for="p_report_obs">Observaciones</label>
+                            <textarea id="p_report_obs" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm p-3 focus:ring-1 focus:ring-primary/40 h-32 text-slate-700" placeholder="Redacte las observaciones..."></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-tight" for="p_report_rec">Recomendación Final</label>
+                            <input id="p_report_rec" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-sm px-3 py-2 focus:ring-1 focus:ring-primary/40 text-slate-700" placeholder="Ej. Aprobado para ingreso">
+                        </div>
+                    </div>
+                </div>
+                <button onclick="guardarInformePortal()" class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-primary-dim transition-all shadow-md">
+                    Actualizar Informe
+                </button>
+            </div>
+
+            <!-- Sección de Vista Previa -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 space-y-6">
+                <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-primary tracking-widest">Club Neptuno</p>
+                        <p class="text-lg font-bold text-slate-800" id="p_preview_name">-</p>
+                    </div>
+                    <span id="p_report_status" class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 text-[9px] font-bold uppercase tracking-tighter">Borrador</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4 text-[11px]">
+                        <div>
+                            <p class="text-slate-400 uppercase font-bold">Documento</p>
+                            <p class="text-slate-800 font-semibold" id="p_preview_dni">-</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 uppercase font-bold">Fecha</p>
+                            <p class="text-slate-800 font-semibold">07/04/2026</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-400 uppercase font-bold border-b border-slate-200 pb-1">Trazabilidad</p>
+                        <div class="space-y-3 max-h-32 overflow-y-auto pr-2" id="p_preview_history">
+                            <p class="text-[10px] italic text-slate-400">Consultando historial...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex gap-2">
+                    <a id="p_btn_pdf" href="#" class="flex-1 bg-white border border-slate-300 text-slate-600 py-2 rounded-lg text-xs font-bold text-center hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">picture_as_pdf</span> PDF
+                    </a>
+                    <a id="p_btn_excel" href="#" class="flex-1 bg-slate-800 text-white py-2 rounded-lg text-xs font-bold text-center hover:bg-slate-700 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <span class="material-symbols-outlined text-sm">description</span> EXCEL
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -315,7 +442,7 @@
         <p class="text-sm text-on-surface-variant mt-2">Ingresa observacion para <span class="font-semibold" id="rejectName">postulante</span>.</p>
         <form class="mt-4 space-y-3" method="post" th:action="@{/jefe/rechazar}">
             <input id="idPostulanteRechazo" name="idPostulante" type="hidden">
-            <textarea class="w-full rounded-md border-outline-variant/30 text-sm" name="motivo" placeholder="Motivo de rechazo" required rows="4"></textarea>
+            <textarea class="w-full rounded-md border-outline-variant/30 text-sm" name="motivo" placeholder="Motivo de rechazo" required rows="4" maxlength="100"></textarea>
             <div class="flex justify-end gap-2">
                 <button class="px-4 py-2 rounded-md border border-outline-variant/30 text-on-surface-variant" onclick="cerrarModal('modalReject')" type="button">Cancelar</button>
                 <button class="px-4 py-2 rounded-md bg-rose-600 text-white font-semibold hover:bg-rose-700" type="submit">Enviar</button>
@@ -351,29 +478,120 @@
         abrirModal('modalReject');
     }
 
+    let currentPostulanteId = null;
+
     function abrirModalRevision(id) {
+        currentPostulanteId = id;
         document.getElementById('modalLoader').classList.remove('hidden');
         document.getElementById('modalDynamicContent').classList.add('hidden');
+        
         abrirModal('modalReview');
 
+        // Cargar datos del postulante
         fetch('/api/deudas/detalle-postulante/' + id)
             .then(res => res.json())
             .then(data => {
-                document.getElementById('dyn_name').innerText = (data.nombres ? (data.nombres + ' ' + (data.apellidoPaterno || '')) : (data.razonSocial || '-')).trim();
+                document.getElementById('modalLoader').classList.add('hidden');
+                document.getElementById('modalDynamicContent').classList.remove('hidden');
+                
+                const fullName = (data.nombres ? (data.nombres + ' ' + (data.apellidoPaterno || '')) : (data.razonSocial || '-')).trim();
+                document.getElementById('dyn_name').innerText = fullName;
                 document.getElementById('dyn_ids').innerText = (data.tipoDocumento || '-') + ' ' + (data.numeroDocumento || '-');
                 document.getElementById('dyn_email').innerText = data.correoElectronico || '-';
                 document.getElementById('dyn_phone').innerText = data.telefono || '-';
                 document.getElementById('dyn_city').innerText = data.ciudad || '-';
                 document.getElementById('dyn_scoring').innerText = data.clasificacion || 'Sin datos';
                 document.getElementById('dyn_debts_container').innerHTML = generarHtmlDeudas(data.deudas);
-                document.getElementById('modalLoader').classList.add('hidden');
-                document.getElementById('modalDynamicContent').classList.remove('hidden');
+                
+                // Set previews for the portal as well
+                document.getElementById('p_preview_name').innerText = fullName;
+                document.getElementById('p_preview_dni').innerText = data.numeroDocumento;
             })
-            .catch(() => {
-                document.getElementById('dyn_debts_container').innerHTML = '<div class="text-sm text-rose-600">No se pudo cargar el detalle.</div>';
-                document.getElementById('modalLoader').classList.add('hidden');
-                document.getElementById('modalDynamicContent').classList.remove('hidden');
+            .catch(error => {
+                console.error('Error fetching details:', error);
+                alert('No se pudo cargar el expediente.');
             });
+    }
+
+    function abrirPortalInforme() {
+        if (!currentPostulanteId) return;
+        
+        // Cargar Informe Actual (Borrador)
+        fetch('/jefe/api/informe/' + currentPostulanteId)
+            .then(res => res.status === 404 ? {estado: 'NUEVO'} : res.json())
+            .then(data => {
+                if (!data) data = {estado: 'NUEVO'};
+                
+                document.getElementById('p_report_obs').value = data.observaciones || '';
+                document.getElementById('p_report_rec').value = data.recomendacion || '';
+                document.getElementById('p_report_status').innerText = data.estado || 'NUEVO';
+                
+                // Configurar Botones de Exportación
+                document.getElementById('p_btn_pdf').href = '/jefe/pre-informe/' + currentPostulanteId + '/pdf';
+                document.getElementById('p_btn_excel').href = '/jefe/reporte/' + currentPostulanteId + '/excel';
+                
+                abrirModal('modalReportPortal');
+            })
+            .catch(err => {
+                console.warn('Error loading draft, opening as new:', err);
+                document.getElementById('p_report_obs').value = '';
+                document.getElementById('p_report_rec').value = '';
+                document.getElementById('p_report_status').innerText = 'NUEVO';
+                abrirModal('modalReportPortal');
+            });
+            
+        // Cargar Historial para Preview
+        fetch('/jefe/api/historial/' + currentPostulanteId)
+            .then(res => res.json())
+            .then(history => {
+                const hContainer = document.getElementById('p_preview_history');
+                hContainer.innerHTML = '';
+                if (history && history.length > 0) {
+                    history.forEach(h => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-start gap-3 border-b border-white/5 pb-2 last:border-0';
+                        const fecha = h.fechaCambio || 'Fecha N/A';
+                        item.innerHTML = `
+                            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0"></div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">${fecha} - ${h.estadoNuevo}</p>
+                                <p class="text-[11px] text-white/80">${h.motivo || 'Sin descripción'}</p>
+                            </div>
+                        `;
+                        hContainer.appendChild(item);
+                    });
+                } else {
+                    hContainer.innerHTML = '<p class="text-[11px] italic opacity-50">Sin historial registrado.</p>';
+                }
+            })
+            .catch(err => console.error('Error history preview:', err));
+    }
+
+    function guardarInformePortal() {
+        const obs = document.getElementById('p_report_obs').value;
+        const rec = document.getElementById('p_report_rec').value;
+        
+        const params = new URLSearchParams();
+        params.append('idPostulante', currentPostulanteId);
+        params.append('observaciones', obs);
+        params.append('recomendacion', rec);
+        params.append('estado', 'ACTUALIZADO');
+        
+        fetch('/jefe/informe-guardar', {
+            method: 'POST',
+            body: params
+        })
+        .then(res => res.ok ? res.json() : Promise.reject('Error'))
+        .then(data => {
+            document.getElementById('p_report_status').innerText = 'ACTUALIZADO';
+            // Estilo minimalista para el status
+            document.getElementById('p_report_status').className = 'px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-tighter';
+            alert('Informe guardado correctamente');
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error al guardar reporte');
+        });
     }
 
     function generarHtmlDeudas(deudas) {

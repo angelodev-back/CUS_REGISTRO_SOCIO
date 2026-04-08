@@ -165,12 +165,20 @@
         <div class="d-flex gap-3">
             <button onclick="window.print()" class="btn-submit" style="background: white; color: #475569; border: 1px solid #e2e8f0; width: auto; padding: 10px 20px; font-size: 13px;">
                 <span class="material-symbols-outlined" style="font-size: 18px;">print</span>
-                Imprimir Informe
+                Imprimir
             </button>
+            <a th:href="@{/jefe/informe-registro/{id}/pdf(id=${socio.id})}" class="btn-submit" style="background: #ef4444; color: white; border: none; width: auto; padding: 10px 20px; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">picture_as_pdf</span>
+                PDF
+            </a>
+            <a th:href="@{/jefe/informe-registro/{id}/excel(id=${socio.id})}" class="btn-submit" style="background: #10b981; color: white; border: none; width: auto; padding: 10px 20px; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">table_chart</span>
+                Excel
+            </a>
             <form th:if="${socio.estadoSocio == 'aprobado'}" th:id="'form-activar-' + ${socio.id}" style="display:inline;">
-                <button type="button" th:onclick="'activarSocio(' + ${socio.id} + ')'" class="btn-activate">
+                <button type="button" th:onclick="'activarSocio(' + ${socio.id} + ')'" class="btn-activate" style="margin-left: 10px;">
                     <span class="material-symbols-outlined" style="font-size: 18px;">verified_user</span>
-                    Activar Socio y Generar Credenciales
+                    Activar Socio
                 </button>
             </form>
             <span th:if="${socio.estadoSocio == 'activo'}" class="status-pill success">
@@ -294,6 +302,34 @@
             } catch (e) {
                 alert('Error de conexión al procesar la activación.');
             }
+        }
+        function downloadHTML() {
+            const reportElement = document.querySelector('.report-paper');
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Informe de Registro - Club Neptuno</title>
+                    <style>
+                        ${document.querySelector('style').innerHTML}
+                        .report-paper { box-shadow: none; border: 1px solid #e2e8f0; margin: 20px auto; }
+                    </style>
+                </head>
+                <body>
+                    ${reportElement.outerHTML}
+                </body>
+                </html>
+            `;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Informe_Registro_${document.querySelector('.info-item span:nth-child(2)')?.innerText.split(': ')[1] || 'Socio'}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>

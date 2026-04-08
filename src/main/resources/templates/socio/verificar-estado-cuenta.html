@@ -192,68 +192,75 @@
                     </div>
                 </div>
 
-                <!-- Section: Movements Mockup -->
+                <!-- Section: Real Account Movements -->
                 <div class="premium-card bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
-                    <h3 class="text-lg font-black text-slate-800 mb-6">Últimos Cobros</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-dotted border-slate-200">
-                            <div class="flex gap-4 items-center">
-                                <div class="w-10 h-10 bg-white rounded-xl border border-slate-100 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-slate-400">receipt_long</span>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-slate-800">Mantenimiento de Muelle - Marzo</p>
-                                    <p class="text-[10px] text-slate-400">01/03/2024</p>
-                                </div>
-                            </div>
-                            <span class="text-xs font-black text-slate-700">S/ 75.00</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-dotted border-slate-200">
-                            <div class="flex gap-4 items-center">
-                                <div class="w-10 h-10 bg-white rounded-xl border border-slate-100 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-slate-400">dock</span>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-slate-800">Cuota Administrativa</p>
-                                    <p class="text-[10px] text-slate-400">01/02/2024</p>
-                                </div>
-                            </div>
-                            <span class="text-xs font-black text-slate-700">S/ 75.00</span>
-                        </div>
+                    <h3 class="text-lg font-black text-slate-800 mb-6 underline decoration-primary/20 decoration-4 underline-offset-8">Detalle por Período</h3>
+                    
+                    <div class="overflow-hidden">
+                        <table class="w-full text-left border-separate border-spacing-y-3">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <th class="px-4 py-2">Período</th>
+                                    <th class="px-4 py-2">Monto Total</th>
+                                    <th class="px-4 py-2">Pagado</th>
+                                    <th class="px-4 py-2">Saldo Pendiente</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr th:each="estado : ${estadosCuenta}" class="bg-slate-50/50 hover:bg-slate-100/50 transition-colors">
+                                    <td class="px-4 py-4 rounded-l-2xl font-black text-slate-700" th:text="${estado.periodo}">Marzo 2024</td>
+                                    <td class="px-4 py-4 font-bold text-slate-600" th:text="'S/ ' + ${#numbers.formatDecimal(estado.montoTotal, 1, 2)}">S/ 150.00</td>
+                                    <td class="px-4 py-4 font-bold text-emerald-600" th:text="'S/ ' + ${#numbers.formatDecimal(estado.montoPagado, 1, 2)}">S/ 150.00</td>
+                                    <td class="px-4 py-4 rounded-r-2xl font-black" 
+                                        th:classappend="${estado.saldoPendiente > 0 ? 'text-rose-600' : 'text-slate-400'}"
+                                        th:text="'S/ ' + ${#numbers.formatDecimal(estado.saldoPendiente, 1, 2)}">S/ 0.00</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(estadosCuenta)}">
+                                    <td colspan="4" class="px-4 py-10 text-center text-slate-400 italic">
+                                        No se registran movimientos en tu estado de cuenta actual.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
             <!-- Right Side: Summary Card -->
             <div class="col-span-12 lg:col-span-4 space-y-6">
+                <!-- Tarjeta de Saldo Dinámica -->
                 <div class="premium-card bg-primary-dark rounded-[2rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-primary/20">
                     <div class="absolute top-0 right-0 p-8 opacity-10">
                         <span class="material-symbols-outlined text-8xl">account_balance</span>
                     </div>
                     
                     <div class="relative z-10">
-                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2">Saldo Total a Pagar</p>
-                        <h4 class="text-4xl font-black mb-6">S/ 0.00</h4>
+                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2">Saldo Total Pendiente</p>
+                        <h4 class="text-4xl font-black mb-6" th:text="'S/ ' + ${#numbers.formatDecimal(saldoTotal, 1, 2)}">S/ 0.00</h4>
                         <div class="p-4 bg-white/10 rounded-2xl border border-white/10 mb-8 backdrop-blur-md">
-                            <p class="text-[11px] font-medium leading-relaxed italic opacity-90">
+                            <p class="text-[11px] font-medium leading-relaxed italic opacity-90" th:if="${saldoTotal <= 0}">
                                 "Tu cuenta se encuentra al día. ¡Gracias por tu puntualidad!"
                             </p>
+                            <p class="text-[11px] font-medium leading-relaxed italic opacity-90" th:if="${saldoTotal > 0}">
+                                "Tienes un saldo pendiente. Te recomendamos regularizarlo para mantener tus beneficios activos."
+                            </p>
                         </div>
-                        <button class="w-full bg-white text-primary-dark font-black py-4 rounded-2xl text-sm hover:bg-primary-light transition-all active:scale-95 shadow-lg">
-                            Ver Historial de Pagos
+                        <button class="w-full bg-white text-primary-dark font-black py-4 rounded-2xl text-sm hover:bg-primary-light transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-lg">credit_card</span>
+                            Pagar Ahora
                         </button>
                     </div>
                 </div>
 
                 <div class="premium-card bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6">Próximos Vencimientos</h3>
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6">Estado de Membresía</h3>
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
-                            <span class="material-symbols-outlined">event</span>
+                        <div class="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center">
+                            <span class="material-symbols-outlined">verified</span>
                         </div>
                         <div>
-                            <p class="text-xs font-black text-slate-800">Mantenimiento Abril</p>
-                            <p class="text-[10px] text-slate-400">Vence: 05/04/2024</p>
+                            <p class="text-xs font-black text-slate-800" th:text="${(socio != null ? socio.tipoSocio : 'Socio') + ' Activo'}">Socio Activo</p>
+                            <p class="text-[10px] text-slate-400">Desde: <span th:text="${socio != null ? socio.fechaActivacion : 'Reciente'}">2024</span></p>
                         </div>
                     </div>
                 </div>

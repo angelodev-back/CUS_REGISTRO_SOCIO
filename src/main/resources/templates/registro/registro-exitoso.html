@@ -39,11 +39,8 @@
             </div>
 
             <div class="left-overline">Membresía · Portal</div>
-            <h1 class="left-title">¡Excelente<br><em>noticia!</em><br>Tu solicitud está en camino</h1>
+            <h1 class="left-title">Club Náutico</h1>
             <div class="left-divider"></div>
-            <p class="left-desc">
-                ¡Qué alegría! El primer paso para unirte al Club Náutico Neptuno ya está dado. Hemos recibido tu información y nuestro equipo la revisará con mucho cuidado.
-            </p>
 
             <ul class="benefit-list">
                 <li>
@@ -85,13 +82,10 @@
             <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 16px; letter-spacing: -0.02em;">¡Todo listo de tu parte!</h1>
             
             <p style="font-size: 16px; color: #64748b; line-height: 1.7; margin-bottom: 40px;">
-                Hemos registrado satisfactoriamente tu solicitud para <strong th:text="${postulante != null ? postulante.nombres : 'el club'}">el club</strong>. Estaremos en contacto contigo muy pronto vía correo electrónico para informarte sobre el estado de tu admisión.
+                Hemos registrado satisfactoriamente tu solicitud para <strong th:text="${postulante != null ? postulante.nombres : 'el postulante'}">el postulante</strong>. Estaremos en contacto contigo muy pronto para informarte sobre el estado de tu admisión.
             </p>
 
-            <div style="background: #f8fafc; padding: 24px; border-radius: 20px; border: 1.5px dashed #e2e8f0; margin-bottom: 40px;">
-                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #94a3b8; display: block; margin-bottom: 8px;">Código de Seguimiento</span>
-                <span style="font-size: 24px; font-weight: 800; color: #0284c7; font-family: 'Inter', sans-serif;" th:text="${postulante != null} ? '#' + ${postulante.id} : '#0000'">#0000</span>
-            </div>
+            <!-- Sección de Seguimiento Eliminada -->
 
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <a href="/inicio" class="btn-submit" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:10px; padding: 18px 32px; font-size: 15px; background: #0f172a; color: #ffffff; border-radius: 14px; border: none; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1);">

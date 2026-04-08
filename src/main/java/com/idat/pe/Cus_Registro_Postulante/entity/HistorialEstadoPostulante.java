@@ -32,6 +32,10 @@ public class HistorialEstadoPostulante {
     @JoinColumn(name = "id_empleado", nullable = false)
     private Empleado empleado;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_informe")
+    private InformeAdmision informe;
+
     @Column(name = "fecha_cambio", nullable = false)
     private LocalDate fechaCambio;
 
@@ -43,4 +47,8 @@ public class HistorialEstadoPostulante {
 
     @Column(name = "motivo", columnDefinition = "TEXT")
     private String motivo;
+
+    public String getFechaChangeStr() {
+        return fechaCambio != null ? fechaCambio.toString() : "";
+    }
 }

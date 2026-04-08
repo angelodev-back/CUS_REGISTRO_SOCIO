@@ -75,15 +75,15 @@
             </svg>
             <div>
                 <div class="brand-name">Club Náutico Neptuno</div>
-                <span class="brand-sub">Sistema Administrativo</span>
+                <span class="brand-sub">Portal de Socios y Postulantes</span>
             </div>
         </div>
         <div class="left-body">
-            <div class="left-overline">Autenticación · Sistema</div>
-            <h1 class="left-title">Acceso a<br><em>Panel de Control</em></h1>
-            <p class="left-desc">Inicia sesión con tus credenciales para administrar el club.</p>
+            <div class="left-overline">Acceso Digital · Comunidad</div>
+            <h1 class="left-title">Bienvenido a<br><em>Tu Club</em></h1>
+            <p class="left-desc">Inicia sesión para consultar tu estado de cuenta y gestionar tu membresía.</p>
         </div>
-        <div class="left-copy">© 2025 Club Náutico Neptuno</div>
+        <div class="left-copy">© 2025 Club Náutico Neptuno — Socios</div>
     </div>
 
     <div class="panel-right">
@@ -107,21 +107,27 @@
             <div th:if="${param.error}" class="alert alert-error">
                 <span>Usuario o contraseña incorrectos.</span>
             </div>
+
+            <div th:if="${param.portal_mismatch}" class="alert alert-error" style="background: #fff1f2; color: #9f1239; border-color: #fda4af;">
+                 <span>Acceso no autorizado: Debe usar el portal correspondiente a su perfil.</span>
+            </div>
             
             <form th:action="@{/login}" method="post" class="mt-4" id="loginForm">
+                <input type="hidden" name="portal_source" value="socio" />
                 <div class="mb-3">
-                    <label for="username" class="form-label fw-bold small text-secondary">Usuario</label>
-                    <input type="text" id="username" name="username" class="form-control fi" placeholder="Usuario" required maxlength="100" />
+                    <label for="username" class="form-label fw-bold small text-secondary">Usuario o correo</label>
+                    <input type="text" id="username" name="username" class="form-control fi" placeholder="Usuario o correo" required maxlength="100" />
                     <div id="username-error" class="invalid-feedback-custom" style="display:none; color:#ef4444; font-size:12px; margin-top:5px; font-weight:500;"></div>
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label fw-bold small text-secondary">Contraseña</label>
                     <div class="position-relative">
-                        <input type="password" id="password" name="password" class="form-control fi" placeholder="********" required style="padding-right: 48px;" />
+                        <input type="password" id="password" name="password" class="form-control fi" placeholder="********" required maxlength="255" style="padding-right: 48px;" />
                         <button type="button" onclick="togglePassword()" class="position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent text-secondary p-0 me-3 d-flex align-items-center justify-content-center" style="cursor: pointer;">
                             <span id="eye-icon" class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
                         </button>
                     </div>
+                    <div id="password-error" class="invalid-feedback-custom" style="display:none; color:#ef4444; font-size:12px; margin-top:5px; font-weight:500;"></div>
                     <div class="text-end mt-2">
                         <a th:href="@{/recuperar-password}" style="font-size: 12.5px; color: var(--teal); text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
                     </div>
@@ -158,8 +164,29 @@
     // Handle Submit Loader & Validation
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('username-error');
+        const passwordErrorDiv = document.getElementById('password-error');
         const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        if (username.length > 100) {
+            e.preventDefault();
+            errorDiv.innerText = "El usuario o correo no debe exceder 100 caracteres.";
+            errorDiv.style.display = 'block';
+            usernameInput.style.borderColor = '#ef4444';
+            usernameInput.style.background = '#fef2f2';
+            return;
+        }
+
+        if (password.length > 255) {
+            e.preventDefault();
+            passwordErrorDiv.innerText = "La contraseña no debe exceder 255 caracteres.";
+            passwordErrorDiv.style.display = 'block';
+            passwordInput.style.borderColor = '#ef4444';
+            passwordInput.style.background = '#fef2f2';
+            return;
+        }
         
         // Validation for DNI (8) or RUC (11) if numeric
         if (/^\d+$/.test(username)) {
@@ -176,6 +203,9 @@
         errorDiv.style.display = 'none';
         usernameInput.style.borderColor = '';
         usernameInput.style.background = '';
+        passwordErrorDiv.style.display = 'none';
+        passwordInput.style.borderColor = '';
+        passwordInput.style.background = '';
         document.getElementById('login-loader').style.display = 'flex';
     });
 </script>

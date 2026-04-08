@@ -18,27 +18,31 @@ public class Postulante {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_documento", nullable = false)
+    @Column(name = "tipo_documento", nullable = false, length = 10)
     private TipoDocumento tipoDocumento;
 
     @Column(name = "numero_documento", nullable = false, unique = true, length = 11)
     private String numeroDocumento;
 
     // Persona Natural
+    @Column(name = "nombres", length = 100)
     private String nombres;
-    @Column(name = "apellido_paterno")
+    @Column(name = "apellido_paterno", length = 100)
     private String apellidoPaterno;
-    @Column(name = "apellido_materno")
+    @Column(name = "apellido_materno", length = 100)
     private String apellidoMaterno;
 
     // Persona Jurídica
-    @Column(name = "razon_social")
+    @Column(name = "razon_social", length = 200)
     private String razonSocial;
 
-    @Column(name = "correo_electronico", nullable = false, unique = true)
+    @Column(name = "correo_electronico", nullable = false, unique = true, length = 100)
     private String correoElectronico;
 
+    @Column(name = "telefono", length = 15)
     private String telefono;
+
+    @Column(name = "direccion", length = 200)
     private String direccion;
 
     @Column(name = "ciudad", length = 100)
@@ -47,10 +51,10 @@ public class Postulante {
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
-    @Column(name = "tipo_interes")
+    @Column(name = "tipo_interes", length = 20)
     private String tipoInteres;
 
-    @Column(name = "codigo_postal")
+    @Column(name = "codigo_postal", length = 20)
     private String codigoPostal;
 
     @Column(name = "fecha_registro", nullable = false)

@@ -11,7 +11,6 @@ import com.idat.pe.Cus_Registro_Postulante.repository.PostulanteRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.RolRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.SocioRepository;
 import com.idat.pe.Cus_Registro_Postulante.repository.UsuarioRepository;
-import com.idat.pe.Cus_Registro_Postulante.service.EmailService;
 import com.idat.pe.Cus_Registro_Postulante.service.PostulanteService;
 import com.idat.pe.Cus_Registro_Postulante.service.SocioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +40,6 @@ public class SocioServiceImpl implements SocioService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EmailService emailService;
 
     @Autowired
     @Lazy
@@ -92,7 +88,8 @@ public class SocioServiceImpl implements SocioService {
                 .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
 
         String correo = postulante.getCorreoElectronico();
-        String passwordTemporal = generarPasswordSegura();
+        String doc = postulante.getNumeroDocumento();
+        String passwordTemporal = doc.substring(Math.max(0, doc.length() - 4)) + "!!";
 
         Usuario usuario = usuarioRepository.findByUsernameOrCorreoElectronico(correo, correo)
                 .orElseGet(() -> {
@@ -111,42 +108,17 @@ public class SocioServiceImpl implements SocioService {
         socio.setFechaActivacion(java.time.LocalDate.now());
         socioRepository.save(socio);
 
-        emailService.enviarCredenciales(correo, correo, passwordTemporal);
+        // emailService.enviarCredenciales(correo, correo, passwordTemporal);
+
+        String nombreCompleto = construirNombreCompleto(postulante);
 
         return Map.of(
-                "mensaje", "Cuenta generada correctamente",
+                "mensaje", "Cuenta generada para " + nombreCompleto,
                 "usuario", correo,
-                "password", passwordTemporal,
+                "password", "REGLA: " + doc.substring(Math.max(0, doc.length() - 4)) + "!!",
                 "socioId", socio.getId(),
                 "estado", "activo"
         );
-    }
-
-    private String generarPasswordSegura() {
-        String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        String special = "!@#$%&*";
-        java.security.SecureRandom random = new java.security.SecureRandom();
-        StringBuilder sb = new StringBuilder();
-        
-        // 6 Alphanumerics
-        for (int i = 0; i < 6; i++) {
-            sb.append(alpha.charAt(random.nextInt(alpha.length())));
-        }
-        // 2 Specials
-        for (int i = 0; i < 2; i++) {
-            sb.append(special.charAt(random.nextInt(special.length())));
-        }
-        
-        // Shuffle (simple)
-        char[] password = sb.toString().toCharArray();
-        for (int i = 0; i < password.length; i++) {
-            int j = random.nextInt(password.length);
-            char temp = password[i];
-            password[i] = password[j];
-            password[j] = temp;
-        }
-        
-        return new String(password);
     }
 
     @Override

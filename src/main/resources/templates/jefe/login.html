@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Náutico Neptuno — Portal Administrativo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/neptuno.css}">
+    <style>
+        :root {
+            --admin-navy: #0f172a;
+            --admin-slate: #334155;
+            --admin-accent: #64748b;
+            --admin-success: #10b981;
+        }
+        
+        body { background: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .split-wrapper { display: flex; height: 100vh; width: 100%; overflow: hidden; }
+        
+        .panel-left { 
+            background: var(--admin-navy); 
+            color: white; 
+            width: 40%; 
+            padding: 60px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .panel-left::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(148, 163, 184, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .brand-row { display: flex; align-items: center; gap: 16px; z-index: 2; }
+        .brand-anchor { width: 36px; height: 36px; }
+        .brand-name { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+        .brand-sub { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: var(--admin-accent); }
+        
+        .left-body { z-index: 2; }
+        .left-overline { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--admin-accent); margin-bottom: 24px; }
+        .left-title { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; }
+        .left-title em { font-style: normal; color: #94a3b8; }
+        .left-desc { font-size: 17px; color: #94a3b8; max-width: 400px; line-height: 1.6; }
+        
+        .panel-right { 
+            width: 60%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 40px; 
+            background: white;
+        }
+        
+        .welcome-card { width: 100%; max-width: 420px; }
+        .welcome-card h2 { font-size: 32px; font-weight: 800; color: var(--admin-navy); margin-bottom: 8px; }
+        .welcome-card .desc { color: var(--admin-slate); font-size: 15px; margin-bottom: 32px; }
+
+        .fi { 
+            border: 1.5px solid #e2e8f0; 
+            padding: 12px 16px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            transition: all 0.2s; 
+            background: #f8fafc;
+        }
+        .fi:focus { 
+            border-color: var(--admin-navy); 
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05); 
+            background: white;
+        }
+
+        .btn-submit { 
+            background: var(--admin-navy); 
+            color: white; 
+            padding: 14px; 
+            border-radius: 10px; 
+            border: none; 
+            font-weight: 700; 
+            font-size: 15px; 
+            transition: all 0.2s; 
+            margin-top: 10px;
+        }
+        .btn-submit:hover { 
+            background: #1e293b; 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        .alert-error { background: #fff1f2; color: #9f1239; padding: 16px; border-radius: 10px; border: 1px solid #fda4af; font-size: 14px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Loader */
+        #login-loader {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-loader">
+    <div class="spinner-border text-light mb-3" role="status"></div>
+    <div class="fw-bold">Acceso Seguro Administrativo</div>
+    <div class="small opacity-50 mt-2">Verificando nivel de autorización...</div>
+</div>
+
+<div class="split-wrapper">
+    <div class="panel-left">
+        <div class="brand-row">
+            <svg class="brand-anchor" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="6" r="3.5" stroke="white" stroke-width="2"/>
+                <line x1="16" y1="9.5" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M8 18 C8 25 24 25 24 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div>
+                <div class="brand-name">Club Náutico Neptuno</div>
+                <div class="brand-sub">Panel Administrativo</div>
+            </div>
+        </div>
+        <div class="left-body">
+            <div class="left-overline">Administración Central</div>
+            <h1 class="left-title">Acceso Restringido <em>Personal</em></h1>
+            <p class="left-desc">Inicio de sesión reservado para empleados y socios de la junta directiva.</p>
+        </div>
+        <div class="small text-secondary">© 2025 Club Náutico Neptuno — División Tecnológica</div>
+    </div>
+
+    <div class="panel-right">
+        <div class="welcome-card">
+            <a th:href="@{/inicio}" class="d-flex align-items-center gap-2 text-secondary text-decoration-none small fw-semibold mb-4">
+                <span class="material-symbols-outlined fs-5">arrow_back</span>
+                Portal Público
+            </a>
+            
+            <h2>Inicio de Sesión</h2>
+            <p class="desc">Introduce tus credenciales de empleado.</p>
+
+            <div th:if="${param.error}" class="alert alert-error">
+                <span class="material-symbols-outlined">report</span>
+                <span>Las credenciales no coinciden con nuestros registros.</span>
+            </div>
+
+            <div th:if="${param.portal_mismatch}" class="alert alert-error">
+                 <span class="material-symbols-outlined">lock</span>
+                 <span>Acceso denegado: Este portal es exclusivo para Personal Administrativo.</span>
+            </div>
+
+            <form th:action="@{/login}" method="post" id="loginForm">
+                <input type="hidden" name="portal_source" value="jefe" />
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary">ID de Usuario / Email</label>
+                    <input type="text" name="username" class="form-control fi" placeholder="ejemplo@neptuno.pe" required pattern=".{4,100}" />
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary">Clave de Acceso</label>
+                    <div class="position-relative">
+                        <input type="password" id="password" name="password" class="form-control fi w-100" placeholder="********" required style="padding-right: 45px;" />
+                        <button type="button" onclick="togglePassword()" class="position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent text-secondary p-0 me-3 d-flex align-items-center justify-content-center" style="cursor: pointer; z-index: 10;">
+                            <span id="eye-icon" class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit w-100">
+                    Entrar al Panel
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.innerText = 'visibility_off';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.innerText = 'visibility';
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function() {
+        document.getElementById('login-loader').style.display = 'flex';
+    });
+</script>
+</body>
+</html>

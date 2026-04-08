@@ -24,6 +24,7 @@ public class PostulanteConDeudasDTO {
     private String razonSocial; // para RUC
     private String correoElectronico;
     private String telefono;
+    private String ciudad;
     private String direccion;
     private String fechaNacimiento;
     private String tipoInteres; // Nautico o Social

@@ -123,7 +123,7 @@
                         <div class="fg">
                             <label>Número de Documento <span class="req">*</span></label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;" required maxlength="11">
+                                <input type="text" th:field="*{numeroDocumento}" class="fi" id="numeroDocumento" placeholder="DNI o RUC" style="flex: 1;" required maxlength="11" minlength="8" inputmode="numeric" pattern="[0-9]{8,11}" title="Ingrese 8 dígitos (DNI) o 11 dígitos (RUC)">
                                 <button type="button" id="btn-validar" class="btn-submit" style="width: auto; padding: 0 20px; margin-top: 0; height: 45px; background: #0094bc;">
                                     Validar
                                 </button>
@@ -141,18 +141,18 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Nombres <span class="opt">(Solo para DNI)</span></label>
-                            <input type="text" th:field="*{nombre}" class="fi" placeholder="Juan Carlos" maxlength="100">
+                            <input type="text" th:field="*{nombre}" class="fi" placeholder="Juan Carlos" maxlength="100" pattern="[A-Za-zÀ-ÿÑñ\s]{1,100}" title="Solo letras y espacios">
                         </div>
                     </div>
 
                     <div class="frow frow-2">
                         <div class="fg">
                             <label>Apellido Paterno <span class="opt">(Solo para DNI)</span></label>
-                            <input type="text" th:field="*{apellidoPaterno}" class="fi" placeholder="Pérez" maxlength="100">
+                            <input type="text" th:field="*{apellidoPaterno}" class="fi" placeholder="Pérez" maxlength="100" pattern="[A-Za-zÀ-ÿÑñ\s]{1,100}" title="Solo letras y espacios">
                         </div>
                         <div class="fg">
                             <label>Apellido Materno <span class="opt">(Solo para DNI)</span></label>
-                            <input type="text" th:field="*{apellidoMaterno}" class="fi" placeholder="García" maxlength="100">
+                            <input type="text" th:field="*{apellidoMaterno}" class="fi" placeholder="García" maxlength="100" pattern="[A-Za-zÀ-ÿÑñ\s]{1,100}" title="Solo letras y espacios">
                         </div>
                     </div>
 
@@ -163,7 +163,7 @@
                         </div>
                         <div class="fg">
                             <label>Código Postal</label>
-                            <input type="text" th:field="*{codigoPostal}" class="fi" placeholder="15001" maxlength="20">
+                            <input type="text" th:field="*{codigoPostal}" class="fi" placeholder="15001" maxlength="5" inputmode="numeric" pattern="[0-9]{5}" title="Debe contener exactamente 5 dígitos numéricos">
                         </div>
                     </div>
 
@@ -173,8 +173,18 @@
                             <input type="email" th:field="*{correo}" class="fi" placeholder="nombre@correo.com" required maxlength="100">
                         </div>
                         <div class="fg">
+                            <label>Tipo de Teléfono <span class="req">*</span></label>
+                            <select th:field="*{tipoTelefono}" class="fi" id="tipoTelefonoSelect" required>
+                                <option value="CELULAR">Celular (+51 9XXXXXXXX)</option>
+                                <option value="FIJO">Fijo (0XXXXXXXX)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="frow frow-1">
+                        <div class="fg">
                             <label>Teléfono <span class="req">*</span></label>
-                            <input type="tel" th:field="*{telefono}" class="fi" placeholder="987 654 321" required maxlength="15">
+                            <input type="tel" th:field="*{telefono}" class="fi" id="telefonoInput" placeholder="+51987654321" required maxlength="15" minlength="9" inputmode="tel" pattern="\+519[0-9]{8}" title="Celular Perú: +51 seguido de 9 y 8 dígitos">
                         </div>
                     </div>
 
@@ -189,7 +199,7 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Ciudad</label>
-                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores, Lima" maxlength="100">
+                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores Lima" maxlength="50" pattern="[A-Za-zÀ-ÿÑñ\s]{0,50}" title="Solo letras y espacios (máximo 50 caracteres)">
                         </div>
                     </div>
                 </div>
@@ -364,9 +374,16 @@
         margin-top: 4px;
         display: block;
     }
+    .valid-feedback-custom {
+        color: #10b981;
+        font-size: 11.5px;
+        font-weight: 500;
+        margin-top: 4px;
+        display: block;
+    }
 </style>
 
-<script>
+<script th:inline="javascript">
     /**
      * Gestión dinámica del formulario de registro
      * Maneja el cambio de etiquetas, validación y autocompletado desde JSON.
@@ -375,9 +392,12 @@
         constructor() {
             this.form = document.getElementById('formRegistro');
             this.tipoDocSelect = document.getElementById('tipoDocSelect');
+            this.tipoTelefonoSelect = document.getElementById('tipoTelefonoSelect');
             this.numeroDocInput = document.getElementById('numeroDocumento');
+            this.telefonoInput = document.getElementById('telefonoInput');
             this.btnValidar = document.getElementById('btn-validar');
             this.lblFecha = document.getElementById('lblFecha');
+            this.textOnlyRegex = /^[A-Za-zÀ-ÿÑñ\s]+$/;
             
             // Modal Elements
             this.modal = document.getElementById('customModal');
@@ -394,6 +414,7 @@
                 razonSocial: document.querySelector('[name="razonSocial"]'),
                 fechaNacimiento: document.querySelector('[name="fechaNacimiento"]'),
                 correo: document.querySelector('[name="correo"]'),
+                tipoTelefono: document.querySelector('[name="tipoTelefono"]'),
                 telefono: document.querySelector('[name="telefono"]'),
                 direccion: document.querySelector('[name="direccion"]'),
                 codigoPostal: document.querySelector('[name="codigoPostal"]'),
@@ -435,6 +456,12 @@
                 this.updateUIByDocumentType();
             });
 
+            if (this.tipoTelefonoSelect) {
+                this.tipoTelefonoSelect.addEventListener('change', () => this.updatePhoneUIByType());
+            }
+
+            this.setupRealTimeValidation();
+
             // Botón Validar
             this.btnValidar.addEventListener('click', () => this.validateAndFill());
             
@@ -471,6 +498,213 @@
 
             // Inicializar estado UI
             this.updateUIByDocumentType();
+            this.updatePhoneUIByType();
+        }
+
+        setupRealTimeValidation() {
+            this.numeroDocInput.addEventListener('input', () => {
+                // Para no bloquear RUC en frontend, permitir escribir hasta 11 dígitos.
+                this.enforceNumericInput(this.numeroDocInput, 11);
+                this.validateDocumentRealtime();
+            });
+
+            this.enforceNumericField(this.fields.codigoPostal, 5, "El código postal solo admite números.");
+
+            if (this.fields.telefono) {
+                this.fields.telefono.addEventListener('input', () => {
+                    this.fields.telefono.value = this.sanitizePhoneInput(this.fields.telefono.value);
+                    this.validatePhoneRealtime();
+                });
+            }
+
+            this.enforceTextField(this.fields.nombre, 100, "El nombre solo admite letras y espacios.");
+            this.enforceTextField(this.fields.apellidoPaterno, 100, "El apellido paterno solo admite letras y espacios.");
+            this.enforceTextField(this.fields.apellidoMaterno, 100, "El apellido materno solo admite letras y espacios.");
+            this.enforceTextField(this.fields.ciudad, 50, "La ciudad solo admite letras y espacios.");
+        }
+
+        enforceNumericField(field, maxLength, message) {
+            if (!field) return;
+            field.addEventListener('input', () => {
+                const original = field.value;
+                const sanitized = original.replace(/\D/g, '').slice(0, maxLength);
+                field.value = sanitized;
+
+                if (original !== sanitized) {
+                    this.setLiveInputError(field, message);
+                } else {
+                    this.clearLiveInputError(field);
+                }
+            });
+        }
+
+        enforceTextField(field, maxLength, message) {
+            if (!field) return;
+            field.addEventListener('input', () => {
+                const original = field.value;
+                const sanitized = original.replace(/[^A-Za-zÀ-ÿÑñ\s]/g, '').slice(0, maxLength);
+                field.value = sanitized;
+
+                if (original !== sanitized) {
+                    this.setLiveInputError(field, message);
+                } else {
+                    this.clearLiveInputError(field);
+                }
+            });
+        }
+
+        enforceNumericInput(field, maxLength) {
+            if (!field) return;
+            field.value = field.value.replace(/\D/g, '').slice(0, maxLength);
+        }
+
+        validateDocumentRealtime() {
+            const tipoDoc = (this.tipoDocSelect.value || '').toUpperCase();
+            const numeroDoc = this.numeroDocInput.value.trim();
+            const longitudRequerida = 8;
+
+            if (!numeroDoc) {
+                this.clearLiveInputError(this.numeroDocInput);
+                return;
+            }
+
+            if (tipoDoc === 'RUC') {
+                this.clearLiveInputError(this.numeroDocInput);
+                return;
+            }
+
+            if (numeroDoc.length < longitudRequerida) {
+                this.setLiveInputError(
+                    this.numeroDocInput,
+                    `${tipoDoc} incompleto: ${numeroDoc.length}/${longitudRequerida} dígitos.`
+                );
+                return;
+            }
+
+            if (numeroDoc.length > longitudRequerida) {
+                this.setLiveInputError(
+                    this.numeroDocInput,
+                    `${tipoDoc} inválido: solo ${longitudRequerida} dígitos.`
+                );
+                return;
+            }
+
+            this.clearLiveInputError(this.numeroDocInput);
+        }
+
+        validatePhoneRealtime() {
+            const telefono = this.fields.telefono ? this.fields.telefono.value.trim() : "";
+            const tipoTelefono = this.tipoTelefonoSelect ? this.tipoTelefonoSelect.value : "";
+
+            if (!telefono) {
+                this.clearLiveInputError(this.fields.telefono);
+                return;
+            }
+
+            if (tipoTelefono === 'FIJO') {
+                if (telefono.length < 9) {
+                    this.setLiveInputError(this.fields.telefono, `Teléfono fijo incompleto: ${telefono.length}/9 caracteres.`);
+                    return;
+                }
+                if (!/^0\d{8}$/.test(telefono)) {
+                    this.setLiveInputError(this.fields.telefono, "Teléfono fijo inválido: debe iniciar con 0 y tener 9 dígitos.");
+                    return;
+                }
+                this.clearLiveInputError(this.fields.telefono);
+                return;
+            }
+
+            if (tipoTelefono === 'CELULAR') {
+                if (!telefono.startsWith('+51')) {
+                    this.setLiveInputError(this.fields.telefono, "Celular inválido: debe iniciar con +51.");
+                    return;
+                }
+                if (telefono.length < 12) {
+                    this.setLiveInputError(this.fields.telefono, `Celular incompleto: ${telefono.length}/12 caracteres.`);
+                    return;
+                }
+                if (!/^\+519\d{8}$/.test(telefono)) {
+                    this.setLiveInputError(this.fields.telefono, "Celular inválido: debe iniciar en +519 y tener 12 caracteres.");
+                    return;
+                }
+                this.clearLiveInputError(this.fields.telefono);
+                return;
+            }
+
+            this.setLiveInputError(this.fields.telefono, "Seleccione el tipo de teléfono.");
+        }
+
+        sanitizePhoneInput(rawValue) {
+            const tipoTelefono = this.tipoTelefonoSelect ? this.tipoTelefonoSelect.value : 'CELULAR';
+            const raw = (rawValue || '').trim();
+
+            if (!raw) {
+                return '';
+            }
+
+            if (tipoTelefono === 'FIJO') {
+                return raw.replace(/\D/g, '').slice(0, 9);
+            }
+
+            let digits = raw.replace(/\D/g, '');
+            if (digits.startsWith('51')) {
+                digits = digits.slice(2);
+            }
+            digits = digits.slice(0, 9);
+
+            if (!digits) {
+                return '+51';
+            }
+            return `+51${digits}`;
+        }
+
+        updatePhoneUIByType() {
+            if (!this.fields.telefono) return;
+
+            const isFijo = this.tipoTelefonoSelect && this.tipoTelefonoSelect.value === 'FIJO';
+
+            this.fields.telefono.placeholder = isFijo ? '054531278' : '+51987654321';
+            this.fields.telefono.minLength = isFijo ? 9 : 12;
+            this.fields.telefono.maxLength = isFijo ? 9 : 12;
+            this.fields.telefono.setAttribute('pattern', isFijo ? '0[0-9]{8}' : '\\+519[0-9]{8}');
+            this.fields.telefono.title = isFijo
+                ? 'Teléfono fijo Perú: debe iniciar con 0 y tener 9 dígitos.'
+                : 'Celular Perú: debe iniciar con +519 y tener 12 caracteres.';
+
+            this.fields.telefono.value = this.sanitizePhoneInput(this.fields.telefono.value);
+            this.validatePhoneRealtime();
+        }
+
+        setLiveInputError(field, message) {
+            if (!field) return;
+
+            field.classList.add('is-invalid');
+            const container = field.closest('.fg');
+            if (!container) return;
+
+            let errorDiv = container.querySelector('.invalid-feedback-custom.live-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('span');
+                errorDiv.className = 'invalid-feedback-custom live-error';
+                container.appendChild(errorDiv);
+            }
+            errorDiv.innerText = message;
+        }
+
+        clearLiveInputError(field) {
+            if (!field) return;
+
+            const container = field.closest('.fg');
+            if (!container) return;
+
+            const errorDiv = container.querySelector('.invalid-feedback-custom.live-error');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+
+            if (!container.querySelector('.invalid-feedback-custom')) {
+                field.classList.remove('is-invalid');
+            }
         }
 
         /**
@@ -480,8 +714,8 @@
             let hasError = false;
             this.clearAllErrors();
 
-            const tipoSocio = document.getElementById('tipoInteres').value;
-            const tipoDoc = this.tipoDocSelect.value;
+            const tipoDoc = (this.tipoDocSelect.value || '').toUpperCase();
+            const tipoTelefono = this.tipoTelefonoSelect ? this.tipoTelefonoSelect.value : '';
             const numeroDoc = this.numeroDocInput.value.trim();
             const terminos = document.getElementById('terminos').checked;
 
@@ -490,16 +724,14 @@
                 this.showFieldError('numeroDocumento', "Debe ingresar su número de documento.");
                 hasError = true;
             } else {
-                if (tipoDoc === 'DNI' && numeroDoc.length !== 8) {
-                    this.showFieldError('numeroDocumento', "El DNI debe tener exactamente 8 dígitos.");
-                    hasError = true;
-                }
-                if (tipoDoc === 'RUC' && numeroDoc.length !== 11) {
-                    this.showFieldError('numeroDocumento', "El RUC debe tener exactamente 11 dígitos.");
-                    hasError = true;
-                }
                 if (!/^\d+$/.test(numeroDoc)) {
                     this.showFieldError('numeroDocumento', "El documento debe contener solo números.");
+                    hasError = true;
+                } else if (numeroDoc.length > 11) {
+                    this.showFieldError('numeroDocumento', "El número de documento no debe exceder 11 dígitos.");
+                    hasError = true;
+                } else if (tipoDoc === 'DNI' && numeroDoc.length !== 8) {
+                    this.showFieldError('numeroDocumento', "El DNI debe tener exactamente 8 dígitos.");
                     hasError = true;
                 }
             }
@@ -509,18 +741,39 @@
                 if (!this.fields.nombre.value.trim()) {
                     this.showFieldError('nombre', "Debe ingresar sus nombres.");
                     hasError = true;
+                } else if (!this.textOnlyRegex.test(this.fields.nombre.value.trim())) {
+                    this.showFieldError('nombre', "El nombre solo puede contener letras y espacios.");
+                    hasError = true;
+                } else if (this.fields.nombre.value.trim().length > 100) {
+                    this.showFieldError('nombre', "El nombre no debe exceder 100 caracteres.");
+                    hasError = true;
                 }
                 if (!this.fields.apellidoPaterno.value.trim()) {
                     this.showFieldError('apellidoPaterno', "Debe ingresar su apellido paterno.");
+                    hasError = true;
+                } else if (!this.textOnlyRegex.test(this.fields.apellidoPaterno.value.trim())) {
+                    this.showFieldError('apellidoPaterno', "El apellido paterno solo puede contener letras y espacios.");
+                    hasError = true;
+                } else if (this.fields.apellidoPaterno.value.trim().length > 100) {
+                    this.showFieldError('apellidoPaterno', "El apellido paterno no debe exceder 100 caracteres.");
                     hasError = true;
                 }
                 if (!this.fields.apellidoMaterno.value.trim()) {
                     this.showFieldError('apellidoMaterno', "Debe ingresar su apellido materno.");
                     hasError = true;
+                } else if (!this.textOnlyRegex.test(this.fields.apellidoMaterno.value.trim())) {
+                    this.showFieldError('apellidoMaterno', "El apellido materno solo puede contener letras y espacios.");
+                    hasError = true;
+                } else if (this.fields.apellidoMaterno.value.trim().length > 100) {
+                    this.showFieldError('apellidoMaterno', "El apellido materno no debe exceder 100 caracteres.");
+                    hasError = true;
                 }
             } else {
                 if (!this.fields.razonSocial.value.trim()) {
                     this.showFieldError('razonSocial', "Debe ingresar la razón social de la empresa.");
+                    hasError = true;
+                } else if (this.fields.razonSocial.value.trim().length > 200) {
+                    this.showFieldError('razonSocial', "La razón social no debe exceder 200 caracteres.");
                     hasError = true;
                 }
             }
@@ -529,6 +782,9 @@
             const email = this.fields.correo.value.trim();
             if (!email) {
                 this.showFieldError('correo', "Debe ingresar un correo electrónico.");
+                hasError = true;
+            } else if (email.length > 100) {
+                this.showFieldError('correo', "El correo no debe exceder 100 caracteres.");
                 hasError = true;
             } else {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -542,14 +798,49 @@
             if (!this.fields.telefono.value.trim()) {
                 this.showFieldError('telefono', "Debe ingresar un número de teléfono.");
                 hasError = true;
+            } else if (!tipoTelefono) {
+                this.showFieldError('tipoTelefono', "Debe seleccionar el tipo de teléfono.");
+                hasError = true;
+            } else if (this.fields.telefono.value.trim().length > 15) {
+                this.showFieldError('telefono', "El teléfono no debe exceder 15 caracteres.");
+                hasError = true;
+            } else if (tipoTelefono === 'FIJO' && !/^0\d{8}$/.test(this.fields.telefono.value.trim())) {
+                this.showFieldError('telefono', "Para teléfono fijo debe iniciar con 0 y tener 9 dígitos.");
+                hasError = true;
+            } else if (tipoTelefono === 'CELULAR' && !/^\+519\d{8}$/.test(this.fields.telefono.value.trim())) {
+                this.showFieldError('telefono', "Para celular debe ingresar +51 seguido de un número que inicie en 9.");
+                hasError = true;
             }
             if (!this.fields.direccion.value.trim()) {
                 this.showFieldError('direccion', "Debe ingresar su dirección de domicilio.");
+                hasError = true;
+            } else if (this.fields.direccion.value.trim().length > 200) {
+                this.showFieldError('direccion', "La dirección no debe exceder 200 caracteres.");
                 hasError = true;
             }
             if (!this.fields.fechaNacimiento.value) {
                 this.showFieldError('fechaNacimiento', "Debe ingresar la fecha.");
                 hasError = true;
+            }
+
+            if (this.fields.ciudad.value.trim()) {
+                if (!this.textOnlyRegex.test(this.fields.ciudad.value.trim())) {
+                    this.showFieldError('ciudad', "La ciudad solo puede contener letras y espacios.");
+                    hasError = true;
+                } else if (this.fields.ciudad.value.trim().length > 50) {
+                    this.showFieldError('ciudad', "La ciudad no debe exceder 50 caracteres.");
+                    hasError = true;
+                }
+            }
+
+            if (this.fields.codigoPostal.value.trim()) {
+                if (!/^\d+$/.test(this.fields.codigoPostal.value.trim())) {
+                    this.showFieldError('codigoPostal', "El código postal solo puede contener números.");
+                    hasError = true;
+                } else if (this.fields.codigoPostal.value.trim().length !== 5) {
+                    this.showFieldError('codigoPostal', "El código postal debe tener exactamente 5 dígitos.");
+                    hasError = true;
+                }
             }
 
             // 5. Términos
@@ -571,6 +862,14 @@
                 field.classList.add('is-invalid');
                 const container = field.closest('.fg');
                 if (container) {
+                    const prevErrors = container.querySelectorAll('.invalid-feedback-custom, .valid-feedback-custom');
+                    prevErrors.forEach(e => e.remove());
+
+                    // Para numeroDocumento solo mostrar borde rojo, sin texto debajo.
+                    if (fieldName === 'numeroDocumento') {
+                        return;
+                    }
+
                     const errorDiv = document.createElement('span');
                     errorDiv.className = 'invalid-feedback-custom';
                     errorDiv.innerText = message;
@@ -579,11 +878,44 @@
             }
         }
 
+        showFieldSuccess(fieldName, message) {
+            const field = (fieldName === 'numeroDocumento') ? this.numeroDocInput : this.fields[fieldName];
+            if (field) {
+                field.classList.remove('is-invalid');
+                const container = field.closest('.fg');
+                if (container) {
+                    const prevMsgs = container.querySelectorAll('.invalid-feedback-custom, .valid-feedback-custom');
+                    prevMsgs.forEach(e => e.remove());
+
+                    if (fieldName === 'numeroDocumento') {
+                        return;
+                    }
+
+                    const successDiv = document.createElement('span');
+                    successDiv.className = 'valid-feedback-custom';
+                    successDiv.innerText = message;
+                    container.appendChild(successDiv);
+                }
+            }
+        }
+
+        clearFieldMessage(fieldName) {
+            const field = (fieldName === 'numeroDocumento') ? this.numeroDocInput : this.fields[fieldName];
+            if (field) {
+                field.classList.remove('is-invalid');
+                const container = field.closest('.fg');
+                if (container) {
+                    const prevMsgs = container.querySelectorAll('.invalid-feedback-custom, .valid-feedback-custom');
+                    prevMsgs.forEach(e => e.remove());
+                }
+            }
+        }
+
         clearAllErrors() {
             const invalidFields = this.form.querySelectorAll('.fi.is-invalid');
             invalidFields.forEach(f => f.classList.remove('is-invalid'));
             
-            const errorMsgs = this.form.querySelectorAll('.invalid-feedback-custom');
+            const errorMsgs = this.form.querySelectorAll('.invalid-feedback-custom, .valid-feedback-custom');
             errorMsgs.forEach(m => m.remove());
         }
 
@@ -627,14 +959,37 @@
 
         clearFields() {
             this.numeroDocInput.value = "";
-            Object.values(this.fields).forEach(field => {
-                if (field) field.value = "";
+            Object.entries(this.fields).forEach(([key, field]) => {
+                if (!field) return;
+                if (key === 'tipoTelefono') return;
+                field.value = "";
             });
+            if (this.tipoTelefonoSelect) {
+                this.tipoTelefonoSelect.value = 'CELULAR';
+            }
+            this.updatePhoneUIByType();
         }
 
         updateUIByDocumentType() {
             const isDNI = this.tipoDocSelect.value === 'DNI';
             this.numeroDocInput.placeholder = isDNI ? "Número de DNI" : "Número de RUC";
+            const longitudDocumentoMax = 11;
+
+            this.numeroDocInput.maxLength = longitudDocumentoMax;
+            this.numeroDocInput.minLength = isDNI ? 8 : 1;
+            if (isDNI) {
+                this.numeroDocInput.setAttribute('pattern', '[0-9]{8}');
+                this.numeroDocInput.title = 'DNI válido: exactamente 8 dígitos numéricos.';
+            } else {
+                // RUC sin validación estricta en frontend.
+                this.numeroDocInput.setAttribute('pattern', '[0-9]{1,11}');
+                this.numeroDocInput.title = 'RUC: ingrese hasta 11 dígitos numéricos.';
+            }
+
+            if (this.numeroDocInput.value.length > longitudDocumentoMax) {
+                this.numeroDocInput.value = this.numeroDocInput.value.slice(0, longitudDocumentoMax);
+            }
+            this.validateDocumentRealtime();
             
             if (this.lblFecha) {
                 this.lblFecha.innerHTML = isDNI 
@@ -661,8 +1016,12 @@
         async validateAndFill() {
             const tipo = this.tipoDocSelect.value.toLowerCase();
             const numero = this.numeroDocInput.value.trim();
+            const tipoDocumento = (this.tipoDocSelect.value || '').toUpperCase();
+
+            this.clearFieldMessage('numeroDocumento');
 
             if (!numero) {
+                this.showFieldError('numeroDocumento', `Debe ingresar el número de ${tipoDocumento}.`);
                 this.showModal({ 
                     title: "Campo Necesario", 
                     text: `Debes ingresar el número de ${tipo.toUpperCase()} para realizar la validación.`, 
@@ -680,27 +1039,19 @@
                 const clubData = await clubRes.json();
                 
                 if (clubData.body) {
-                    const p = clubData.body;
-                    const estado = (p.estado_postulacion || '').toLowerCase();
+                    const mensajeDocumento = `El ${tipoDocumento} ${numero} se encuentra en nuestra base de datos. Por favor comunicarse con el área de atención al cliente para conocer el estado de su postulación.`;
 
-                    if (estado === 'aprobado') {
-                         this.showModal({
-                            title: "Registro Existente",
-                            text: "Usted ya se encuentra registrado en el sistema.",
-                            type: "confirm",
-                            confirmText: "Ir al Login",
-                            onConfirm: () => window.location.href = '/login'
-                        });
-                        return;
-                    } else {
-                         // Pendiente, Subsanado o Rechazado (Desaprobado)
-                         this.showModal({
-                            title: "Solicitud en Proceso",
-                            text: "Usted se encuentra en proceso de validación para su cuenta.",
-                            type: "alert"
-                        });
-                        return;
-                    }
+                    this.showFieldError('numeroDocumento', mensajeDocumento);
+                    this.numeroDocInput.focus();
+
+                    this.showModal({
+                        title: "Registro Existente",
+                        text: mensajeDocumento,
+                        type: "alert",
+                        confirmText: "Ir al inicio",
+                        onConfirm: () => window.location.href = '/inicio'
+                    });
+                    return;
                 }
 
                 // 2. Si no existe en el club, buscar en fuentes externas
@@ -711,11 +1062,13 @@
                 if (record) {
                     this.fillForm(record, tipo);
                     this.showModal({ 
-                        title: "¡Datos Encontrados!", 
-                        text: "Hemos sincronizado la información correctamente con nuestra base de datos externa.", 
-                        type: "alert" 
+                        title: "Datos Encontrados", 
+                        text: `Datos encontrados de RENIEC para el ${tipoDocumento} ${numero}.`,
+                        type: "alert",
+                        confirmText: "Entendido"
                     });
                 } else {
+                    this.showFieldError('numeroDocumento', `No se encontró el ${tipoDocumento} ${numero} en nuestra base de datos ni en fuentes externas.`);
                     this.showModal({ 
                         title: "Sin Resultados", 
                         text: `No pudimos localizar un registro vinculado al ${tipo.toUpperCase()} ${numero}.`, 
@@ -724,6 +1077,7 @@
                 }
             } catch (error) {
                 console.error("Error:", error);
+                this.showFieldError('numeroDocumento', `No se pudo validar el ${tipoDocumento} ${numero}. Intente nuevamente.`);
                 this.showModal({ title: "Error de Conexión", text: "Hubo un problema al procesar la validación. Verifique los datos o intente más tarde.", type: "error" });
             } finally {
                 this.btnValidar.innerText = "Validar";
@@ -738,7 +1092,7 @@
             this.fields.razonSocial.value = data.razon_social || "";
             this.fields.fechaNacimiento.value = data.fecha_nacimiento || "";
             this.fields.correo.value = data.correo_electronico || "";
-            this.fields.telefono.value = data.telefono || "";
+            this.fillPhoneField(data.telefono || "");
             this.fields.direccion.value = data.direccion || "";
             this.fields.ciudad.value = data.ciudad || "";
         }
@@ -760,11 +1114,35 @@
             this.fields.fechaNacimiento.value = fechaDato;
 
             this.fields.correo.value = data.correo_electronico || "";
-            this.fields.telefono.value = data.telefono || "";
+            this.fillPhoneField(data.telefono || "");
             this.fields.direccion.value = data.direccion || "";
             this.fields.codigoPostal.value = data.codigo_postal || "";
 
             this.fields.ciudad.value = data.ciudad || "";
+        }
+
+        fillPhoneField(rawPhone) {
+            const telefono = (rawPhone || '').trim();
+            const soloDigitos = telefono.replace(/\D/g, '');
+
+            if (/^\+519\d{8}$/.test(telefono)) {
+                if (this.tipoTelefonoSelect) this.tipoTelefonoSelect.value = 'CELULAR';
+                this.fields.telefono.value = telefono;
+            } else if (/^0\d{8}$/.test(soloDigitos)) {
+                if (this.tipoTelefonoSelect) this.tipoTelefonoSelect.value = 'FIJO';
+                this.fields.telefono.value = soloDigitos;
+            } else if (/^519\d{8}$/.test(soloDigitos)) {
+                if (this.tipoTelefonoSelect) this.tipoTelefonoSelect.value = 'CELULAR';
+                this.fields.telefono.value = `+${soloDigitos}`;
+            } else if (/^9\d{8}$/.test(soloDigitos)) {
+                if (this.tipoTelefonoSelect) this.tipoTelefonoSelect.value = 'CELULAR';
+                this.fields.telefono.value = `+51${soloDigitos}`;
+            } else {
+                if (this.tipoTelefonoSelect) this.tipoTelefonoSelect.value = 'CELULAR';
+                this.fields.telefono.value = this.sanitizePhoneInput(telefono);
+            }
+
+            this.updatePhoneUIByType();
         }
     }
 

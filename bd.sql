@@ -97,6 +97,18 @@ CREATE TABLE socio (
                        CONSTRAINT CK_tipo_socio CHECK (tipo_socio IN ('Nautico', 'Social'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
+CREATE TABLE informe_admision (
+    id_informe INT AUTO_INCREMENT PRIMARY KEY,
+    id_postulante INT NOT NULL UNIQUE,
+    observaciones TEXT,
+    recomendacion_manual TEXT,
+    estado VARCHAR(20) DEFAULT 'BORRADOR',
+    fecha_ultima_edicion DATETIME,
+    CONSTRAINT fk_informe_postulante FOREIGN KEY (id_postulante) 
+        REFERENCES postulante(id_postulante) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- =====================================================
 -- 6. TABLA DE HISTORIAL DE ESTADOS DEL POSTULANTE
 -- =====================================================
@@ -104,6 +116,7 @@ CREATE TABLE historial_estado_postulante (
                                              id_historial INT AUTO_INCREMENT PRIMARY KEY,
                                              id_postulante INT NOT NULL,
                                              id_empleado INT NOT NULL,
+                                             id_informe INT NULL,
                                              fecha_cambio DATE NOT NULL,
                                              estado_anterior VARCHAR(20) NOT NULL,
                                              estado_nuevo VARCHAR(20) NOT NULL,
@@ -113,7 +126,10 @@ CREATE TABLE historial_estado_postulante (
                                                  REFERENCES postulante(id_postulante),
 
                                              CONSTRAINT FK_historial_empleado FOREIGN KEY (id_empleado)
-                                                 REFERENCES empleado(id_empleado)
+                                                 REFERENCES empleado(id_empleado),
+
+                                             CONSTRAINT FK_historial_informe FOREIGN KEY (id_informe)
+                                                 REFERENCES informe_admision(id_informe)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
@@ -362,6 +378,8 @@ CREATE INDEX IX_reserva_socio_estado ON reserva_alquiler(id_socio, estado_reserv
 CREATE INDEX IX_adherente_dni ON adherente(dni);
 CREATE INDEX IX_tripulante_reserva ON tripulante_reserva(id_reserva);
 
+
+
 -- =====================================================
 -- DATOS INICIALES
 -- =====================================================
@@ -390,27 +408,6 @@ VALUES (
            'Av. Náutica 1234',
            'Lima',
            '987654321',
-           CURDATE()
-       );
-
--- Insertar postulante de prueba (para socio)
-INSERT INTO postulante (
-    tipo_documento, numero_documento, nombres, apellido_paterno, apellido_materno,
-    correo_electronico, telefono, direccion, ciudad, fecha_nacimiento,
-    tipo_interes, codigo_postal, fecha_registro, estado_postulacion
-) VALUES (
-             'DNI', '87654321', 'María', 'López', 'Rodríguez',
-             'maria@email.com', '987654322', 'Av. Libertad 5678', 'Lima', '1990-05-15',
-             'Nautico', '15001', CURDATE(), 'aprobado'
-         );
-
--- Insertar socio aprobado (todavía sin cuenta de acceso)
-INSERT INTO socio (id_postulante, id_usuario, tipo_socio, estado_socio, fecha_activacion)
-VALUES (
-           (SELECT id_postulante FROM postulante WHERE numero_documento = '87654321'),
-           NULL,
-           'Nautico',
-           'aprobado',
            CURDATE()
        );
 

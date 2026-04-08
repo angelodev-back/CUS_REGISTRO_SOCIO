@@ -1,5 +1,6 @@
 package com.idat.pe.Cus_Registro_Postulante.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +16,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -23,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     new AntPathRequestMatcher("/"),
                     new AntPathRequestMatcher("/login"),
+                    new AntPathRequestMatcher("/jefe/login"),
                     new AntPathRequestMatcher("/recuperar-password"),
                     new AntPathRequestMatcher("/inicio"),
                     new AntPathRequestMatcher("/registro/**"),
@@ -44,7 +49,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/api/auth/login-success", true)
+                .successHandler(successHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )

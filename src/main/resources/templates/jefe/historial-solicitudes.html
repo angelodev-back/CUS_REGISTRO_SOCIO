@@ -59,12 +59,8 @@
 
     <nav class="flex-1 space-y-1">
         <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/dashboard}">
-            <span class="material-symbols-outlined mr-3">dashboard</span>
+            <span class="material-symbols-outlined mr-3 text-slate-500">dashboard</span>
             <span>Revision de Postulantes</span>
-        </a>
-        <a class="flex items-center text-slate-500 px-3 py-2 hover:bg-slate-200/50 transition-all duration-150 ease-out active:scale-[0.98]" th:href="@{/jefe/socios-aprobados}">
-            <span class="material-symbols-outlined mr-3">group</span>
-            <span>Gestion de Socios</span>
         </a>
         <a class="bg-white text-slate-900 font-medium shadow-sm rounded-md px-3 py-2 flex items-center transition-transform active:scale-[0.98]" th:href="@{/jefe/historial}">
             <span class="material-symbols-outlined mr-3 text-slate-900">history</span>
@@ -115,6 +111,10 @@
                     <span class="material-symbols-outlined text-sm">refresh</span>
                     Actualizar
                 </button>
+                <a th:href="@{/jefe/historial/excel}" class="px-4 py-2 bg-emerald-600 text-white rounded-md text-xs font-bold hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">description</span>
+                    Exportar Excel
+                </a>
             </div>
         </div>
 
@@ -189,11 +189,17 @@
                                                        (#strings.contains(#strings.toLowerCase(p.estadoPostulacion), 'rechazado') ? 'bg-rose-50 text-rose-600' : 
                                                        (#strings.contains(#strings.toLowerCase(p.estadoPostulacion), 'pend') ? 'bg-amber-50 text-amber-600' : 'bg-sky-50 text-sky-600')))}"
                                       th:text="${p.estadoPostulacion != null ? #strings.toUpperCase(p.estadoPostulacion) : 'N/A'}">Estado</span>
-                            </td>                            <td class="px-6 py-4 observacion-container">
-                                 <!-- Motivo de rechazo -->
-                                 <p th:if="${#strings.equalsIgnoreCase(p.estadoPostulacion, 'rechazado')}" 
-                                    class="text-[11px] text-rose-600 font-medium italic" 
-                                    th:text="${p.motivoRechazo ?: 'Sin observaciones'}"></p>
+                            </td>
+                            <td class="px-6 py-4 observacion-container">
+                                 <!-- Motivo de rechazo con botón Ver Detalle -->
+                                 <div th:if="${#strings.equalsIgnoreCase(p.estadoPostulacion, 'rechazado')}" class="flex items-center gap-2">
+                                     <button class="flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-600 rounded-md hover:bg-rose-100 transition-all active:scale-95 text-[10px] font-bold border border-rose-100 group"
+                                             th:data-motivo="${p.motivoRechazo ?: 'Sin observaciones'}"
+                                             onclick="abrirModalMotivo(this.getAttribute('data-motivo'))">
+                                         <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                         Ver Detalle
+                                     </button>
+                                 </div>
 
                                  <!-- Boton de credenciales (Efecto Premium) -->
                                  <div th:if="${p.estadoPostulacion != null and #strings.contains(#strings.toLowerCase(p.estadoPostulacion), 'aprobado')}" 
@@ -212,6 +218,16 @@
                                          <span class="material-symbols-outlined text-[12px]">verified</span>
                                          Cuenta del Sistema Activa
                                      </span>
+                                     <div class="flex items-center gap-2 mt-1">
+                                         <a th:href="@{'/jefe/pre-informe/' + ${p.idPostulante} + '/pdf'}" target="_blank"
+                                            class="p-1.5 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Ver Informe PDF">
+                                             <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                                         </a>
+                                         <a th:href="@{'/jefe/reporte/' + ${p.idPostulante} + '/excel'}"
+                                            class="p-1.5 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Ver Informe Excel">
+                                             <span class="material-symbols-outlined text-[16px]">description</span>
+                                         </a>
+                                     </div>
                                  </div>
                              </td>
                         </tr>
@@ -225,6 +241,34 @@
         </section>
     </div>
 </main>
+
+<!-- Modal de Detalle de Motivo (Rechazo) -->
+<div id="modalMotivo" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="cerrarModalMotivo()"></div>
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl transform transition-all scale-95 opacity-0 duration-300 relative z-10" id="modalMotivoContent">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-rose-600 text-[20px]">info</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800 tracking-tight">Motivo de Rechazo</h3>
+                </div>
+                <button onclick="cerrarModalMotivo()" class="p-1 hover:bg-slate-100 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-slate-400">close</span>
+                </button>
+            </div>
+
+            <div id="motivoContainer" class="bg-slate-50 border border-slate-200 rounded-xl p-4 min-h-[140px] max-h-[45vh] overflow-y-auto overflow-x-hidden w-full">
+                <p id="textoMotivo" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] w-full">Cargando motivo...</p>
+            </div>
+
+            <button onclick="cerrarModalMotivo()" class="w-full mt-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all active:scale-[0.98]">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal de Credenciales (Efecto Premium Minimalista) -->
 <div id="modalCredenciales" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
@@ -361,6 +405,37 @@
                 }
             }, 10);
         }
+    };
+
+    window.abrirModalMotivo = function(texto) {
+        const modalM = document.getElementById('modalMotivo');
+        const modalMContent = document.getElementById('modalMotivoContent');
+        const textoM = document.getElementById('textoMotivo');
+        const motivoContainer = document.getElementById('motivoContainer');
+        
+        if (textoM) textoM.innerText = (texto || 'Sin observaciones');
+        if (motivoContainer) motivoContainer.scrollTop = 0;
+        if (modalM) {
+            modalM.classList.remove('hidden');
+            setTimeout(() => {
+                if (modalMContent) {
+                    modalMContent.classList.remove('scale-95', 'opacity-0');
+                    modalMContent.classList.add('scale-100', 'opacity-100');
+                }
+            }, 10);
+        }
+    };
+
+    window.cerrarModalMotivo = function() {
+        const modalM = document.getElementById('modalMotivo');
+        const modalMContent = document.getElementById('modalMotivoContent');
+        if (modalMContent) {
+            modalMContent.classList.remove('scale-100', 'opacity-100');
+            modalMContent.classList.add('scale-95', 'opacity-0');
+        }
+        setTimeout(() => {
+            if (modalM) modalM.classList.add('hidden');
+        }, 300);
     };
 
     window.cerrarModal = function() {

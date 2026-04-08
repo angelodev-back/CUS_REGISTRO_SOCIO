@@ -59,6 +59,9 @@ public class PostulanteServiceImpl implements PostulanteService {
     private EmailService emailService;
 
     @Autowired
+    private InformeAdmisionRepository informeAdmisionRepository;
+
+    @Autowired
     private RolRepository rolRepository;
 
     @Autowired
@@ -71,6 +74,10 @@ public class PostulanteServiceImpl implements PostulanteService {
         if (dto.getTipoDocumento() == null || dto.getNumeroDocumento() == null) {
             throw new RuntimeException("El tipo y número de documento son obligatorios.");
         }
+
+        if (!dto.getNumeroDocumento().matches("\\d+")) {
+            throw new RuntimeException("El número de documento solo debe contener dígitos.");
+        }
         
         if ("DNI".equalsIgnoreCase(dto.getTipoDocumento()) && dto.getNumeroDocumento().length() != 8) {
             throw new RuntimeException("El DNI debe tener exactamente 8 dígitos.");
@@ -79,6 +86,12 @@ public class PostulanteServiceImpl implements PostulanteService {
         if ("RUC".equalsIgnoreCase(dto.getTipoDocumento()) && dto.getNumeroDocumento().length() != 11) {
             throw new RuntimeException("El RUC debe tener exactamente 11 dígitos.");
         }
+
+        if ("RUC".equalsIgnoreCase(dto.getTipoDocumento()) && !dto.getNumeroDocumento().matches("^(10|20)\\d{9}$")) {
+            throw new RuntimeException("El RUC debe iniciar con 10 o 20 y tener 11 dígitos.");
+        }
+
+        dto.setTelefono(validarYNormalizarTelefono(dto.getTipoTelefono(), dto.getTelefono()));
 
         if ("DNI".equalsIgnoreCase(dto.getTipoDocumento())) {
             if (dto.getNombre() == null || dto.getNombre().isBlank() || dto.getApellidoPaterno() == null || dto.getApellidoPaterno().isBlank()) {
@@ -138,10 +151,12 @@ public class PostulanteServiceImpl implements PostulanteService {
         Postulante postulante = postulanteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Postulante no encontrado con id: " + id));
 
+        String telefonoNormalizado = validarYNormalizarTelefono(dto.getTipoTelefono(), dto.getTelefono());
+
         postulante.setTipoDocumento(TipoDocumento.valueOf(dto.getTipoDocumento()));
         postulante.setNumeroDocumento(dto.getNumeroDocumento());
         postulante.setCorreoElectronico(dto.getCorreo());
-        postulante.setTelefono(dto.getTelefono());
+        postulante.setTelefono(telefonoNormalizado);
         postulante.setDireccion(dto.getDireccion());
         postulante.setCiudad(dto.getCiudad());
         postulante.setTipoInteres(dto.getTipoInteres());
@@ -179,7 +194,7 @@ public class PostulanteServiceImpl implements PostulanteService {
         }
 
         Postulante actualizado = postulanteRepository.save(postulante);
-        registrarHistorial(actualizado, estadoAnterior, "Cambio de estado manual", obtenerIdEmpleadoActual());
+        registrarHistorial(actualizado, estadoAnterior, "Cambio de estado manual", null, null);
         return postulanteMapper.toDTO(actualizado);
     }
 
@@ -205,8 +220,9 @@ public class PostulanteServiceImpl implements PostulanteService {
         
         List<DeudaExternaDTO> deudas = new ArrayList<>();
         String clasificacion = "Sin datos";
+        ExternalDebtResponseDTO ext = null;
         try {
-            ExternalDebtResponseDTO ext = deudaExternaService.obtenerDatosExternos(
+            ext = deudaExternaService.obtenerDatosExternos(
                     postulante.getTipoDocumento().toString(),
                     postulante.getNumeroDocumento()
             );
@@ -223,6 +239,9 @@ public class PostulanteServiceImpl implements PostulanteService {
         }
         
         PostulanteConDeudasDTO dto = mapearPostulanteBasico(postulante);
+        if ((dto.getCiudad() == null || dto.getCiudad().isBlank()) && ext != null) {
+            dto.setCiudad(obtenerCiudadExterna(ext));
+        }
         dto.setDeudas(deudas);
         dto.setClasificacion(clasificacion);
         return dto;
@@ -254,21 +273,29 @@ public class PostulanteServiceImpl implements PostulanteService {
             Rol rolSocio = rolRepository.findByNombre("SOCIO")
                     .orElseThrow(() -> new RuntimeException("Rol SOCIO no encontrado"));
 
-            String passwordTemporal = postulante.getNumeroDocumento() + 
-                    (postulante.getNombres() != null ? postulante.getNombres().toLowerCase().split(" ")[0] : 
-                    (postulante.getRazonSocial() != null ? postulante.getRazonSocial().toLowerCase().split(" ")[0] : ""));
+            String doc = postulante.getNumeroDocumento();
+            String passwordLast4 = doc.length() >= 4 ? doc.substring(doc.length() - 4) : doc;
+            String passwordTemporal = passwordLast4 + "*!";
 
-            Usuario usuario = Usuario.builder()
-                    .username(postulante.getCorreoElectronico())
-                    .password(passwordEncoder.encode(passwordTemporal))
-                    .correoElectronico(postulante.getCorreoElectronico())
-                    .rol(rolSocio)
-                    .estadoUsuario(true)
-                    .build();
+            // Buscar si ya existe el usuario para actualizarlo o crear uno nuevo
+            Usuario usuario = usuarioRepository.findByUsername(postulante.getCorreoElectronico())
+                    .orElse(new Usuario());
             
-            usuarioRepository.save(usuario);
+            usuario.setUsername(postulante.getCorreoElectronico());
+            usuario.setPassword(passwordEncoder.encode(passwordTemporal));
+            usuario.setCorreoElectronico(postulante.getCorreoElectronico());
+            usuario.setRol(rolSocio);
+            usuario.setEstadoUsuario(true);
             
-            // Enviar credenciales por correo
+            Usuario usuarioGuardado = usuarioRepository.save(usuario);
+            
+            // Vincular Usuario con Socio
+            socio.setUsuario(usuarioGuardado);
+            socio.setEstadoSocio("activo");
+            socioRepository.save(socio);
+            
+            // Email de notificación sín código (opcional, pero silenciado por requerimiento)
+            /* 
             try {
                 emailService.enviarCredenciales(
                     postulante.getCorreoElectronico(), 
@@ -278,8 +305,11 @@ public class PostulanteServiceImpl implements PostulanteService {
             } catch (Exception e) {
                 logger.error("No se pudo enviar el correo de credenciales: {}", e.getMessage());
             }
+            */
 
-            registrarHistorial(postulante, estadoAnterior, "Cuenta socio activada y credenciales enviadas", idEmpleado);
+            // Generar Historial con Informe
+            InformeAdmision informe = informeAdmisionRepository.findByPostulante_Id(postulante.getId()).orElse(null);
+            registrarHistorial(postulante, estadoAnterior, "Cuenta socio activada (Regla: DNI-4+*!)", idEmpleado, informe);
 
         } catch (Exception e) {
             throw new RuntimeException("Error al aprobar: " + e.getMessage());
@@ -296,7 +326,9 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setEstado(EstadoPostulante.RECHAZADO);
         postulanteRepository.save(postulante);
         
-        registrarHistorial(postulante, estadoAnterior, motivo, idEmpleado);
+        // Generar Historial con Informe
+        InformeAdmision informe = informeAdmisionRepository.findByPostulante_Id(postulante.getId()).orElse(null);
+        registrarHistorial(postulante, estadoAnterior, motivo, idEmpleado, informe);
         
         emailService.enviarNotificacionSubsanacion(postulante.getCorreoElectronico(), motivo);
     }
@@ -308,9 +340,10 @@ public class PostulanteServiceImpl implements PostulanteService {
                 .orElseThrow(() -> new RuntimeException("Postulante no encontrado"));
         
         EstadoPostulante estadoAnterior = postulante.getEstado();
+        String telefonoNormalizado = validarYNormalizarTelefono(dto.getTipoTelefono(), dto.getTelefono());
         
         postulante.setCorreoElectronico(dto.getCorreo());
-        postulante.setTelefono(dto.getTelefono());
+        postulante.setTelefono(telefonoNormalizado);
         postulante.setDireccion(dto.getDireccion());
         postulante.setCiudad(dto.getCiudad());
         postulante.setTipoInteres(dto.getTipoInteres());
@@ -326,7 +359,7 @@ public class PostulanteServiceImpl implements PostulanteService {
         postulante.setEstado(EstadoPostulante.SUBSANADO);
         postulanteRepository.save(postulante);
         
-        registrarHistorial(postulante, estadoAnterior, "Subsanación enviada por el postulante", null);
+        registrarHistorial(postulante, estadoAnterior, "Subsanación enviada por el postulante", null, null);
     }
 
     @Override
@@ -381,11 +414,14 @@ public class PostulanteServiceImpl implements PostulanteService {
         String clasificacion = (ext != null) ? ext.getClasificacionSugerida() : "Sin datos";
         
         PostulanteConDeudasDTO dto = mapearPostulanteBasico(p);
+        if ((dto.getCiudad() == null || dto.getCiudad().isBlank()) && ext != null) {
+            dto.setCiudad(obtenerCiudadExterna(ext));
+        }
         dto.setClasificacion(clasificacion);
         return dto;
     }
 
-    private void registrarHistorial(Postulante p, EstadoPostulante anterior, String motivo, Integer idEmpleado) {
+    private void registrarHistorial(Postulante p, EstadoPostulante anterior, String motivo, Integer idEmpleado, InformeAdmision informe) {
         Empleado empleado = null;
         if (idEmpleado != null && idEmpleado > 0) {
             empleado = empleadoRepository.findById(idEmpleado).orElse(null);
@@ -394,6 +430,7 @@ public class PostulanteServiceImpl implements PostulanteService {
         HistorialEstadoPostulante h = HistorialEstadoPostulante.builder()
                 .postulante(p)
                 .empleado(empleado)
+                .informe(informe)
                 .fechaCambio(LocalDate.now())
                 .estadoAnterior(anterior != null ? anterior.name().toLowerCase() : "pendiente")
                 .estadoNuevo(p.getEstado().name().toLowerCase())
@@ -413,12 +450,32 @@ public class PostulanteServiceImpl implements PostulanteService {
                 .razonSocial(p.getRazonSocial())
                 .correoElectronico(p.getCorreoElectronico())
                 .telefono(p.getTelefono())
+                .ciudad(p.getCiudad())
                 .direccion(p.getDireccion())
                 .fechaNacimiento(p.getFechaNacimiento() != null ? p.getFechaNacimiento().toString() : null)
                 .tipoInteres(p.getTipoInteres())
                 .fechaRegistro(p.getFechaRegistro() != null ? p.getFechaRegistro().toString() : null)
                 .estadoPostulacion(p.getEstado().name().toLowerCase())
                 .build();
+    }
+
+    private String obtenerCiudadExterna(ExternalDebtResponseDTO ext) {
+        if (ext == null) {
+            return null;
+        }
+        if (ext.getCiudad() != null && !ext.getCiudad().isBlank()) {
+            return ext.getCiudad().trim();
+        }
+        if (ext.getDistrito() != null && !ext.getDistrito().isBlank()) {
+            return ext.getDistrito().trim();
+        }
+        if (ext.getProvincia() != null && !ext.getProvincia().isBlank()) {
+            return ext.getProvincia().trim();
+        }
+        if (ext.getDepartamento() != null && !ext.getDepartamento().isBlank()) {
+            return ext.getDepartamento().trim();
+        }
+        return null;
     }
 
     private Integer obtenerIdEmpleadoActual() {
@@ -436,5 +493,46 @@ public class PostulanteServiceImpl implements PostulanteService {
         // Obtener empleado asociado
         Optional<Empleado> empleadoOpt = empleadoRepository.findByUsuario(usuarioOpt.get());
         return empleadoOpt.map(Empleado::getId).orElse(null);
+    }
+
+    private String validarYNormalizarTelefono(String tipoTelefono, String telefono) {
+        String telefonoNormalizado = telefono != null ? telefono.trim().replaceAll("\\s+", "") : "";
+        String tipoNormalizado = tipoTelefono != null ? tipoTelefono.trim().toUpperCase() : "";
+
+        if (tipoNormalizado.isBlank()) {
+            if (telefonoNormalizado.matches("^0\\d{8}$")) {
+                tipoNormalizado = "FIJO";
+            } else if (telefonoNormalizado.matches("^\\+519\\d{8}$")) {
+                tipoNormalizado = "CELULAR";
+            }
+        }
+
+        if (tipoNormalizado.isBlank()) {
+            throw new RuntimeException("Debe seleccionar si el teléfono es FIJO o CELULAR.");
+        }
+
+        if (!"FIJO".equals(tipoNormalizado) && !"CELULAR".equals(tipoNormalizado)) {
+            throw new RuntimeException("El tipo de teléfono debe ser FIJO o CELULAR.");
+        }
+
+        if (telefonoNormalizado.isBlank()) {
+            throw new RuntimeException("El teléfono es obligatorio.");
+        }
+
+        if (telefonoNormalizado.length() > 15) {
+            throw new RuntimeException("El teléfono no debe exceder 15 caracteres.");
+        }
+
+        if ("FIJO".equals(tipoNormalizado)) {
+            if (!telefonoNormalizado.matches("^0\\d{8}$")) {
+                throw new RuntimeException("Para teléfono fijo, ingrese 9 dígitos iniciando con 0.");
+            }
+            return telefonoNormalizado;
+        }
+
+        if (!telefonoNormalizado.matches("^\\+519\\d{8}$")) {
+            throw new RuntimeException("Para celular, ingrese el formato +51 seguido de un número que inicie en 9 (ejemplo: +51987654321).");
+        }
+        return telefonoNormalizado;
     }
 }

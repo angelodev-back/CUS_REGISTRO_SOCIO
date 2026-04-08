@@ -24,6 +24,18 @@ public class ExternalDebtResponseDTO {
     
     @JsonProperty("clasificacion_sugerida")
     private String clasificacionSugerida;
+
+    @JsonProperty("ciudad")
+    private String ciudad;
+
+    @JsonProperty("distrito")
+    private String distrito;
+
+    @JsonProperty("provincia")
+    private String provincia;
+
+    @JsonProperty("departamento")
+    private String departamento;
     
     @JsonProperty("deudas")
     private List<DeudaExternaDTO> deudas;
