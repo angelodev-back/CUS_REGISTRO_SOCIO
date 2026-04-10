@@ -542,20 +542,40 @@ public class WebController {
         // Buscar el Socio por el usuario actual
         Optional<Socio> socioOpt = socioRepository.findByUsuario(usuario);
         if (socioOpt.isPresent()) {
-            Socio socio = socioOpt.get();
+            Socio socioEntity = socioOpt.get();
             List<com.idat.pe.Cus_Registro_Postulante.dto.EstadoCuentaDTO> estados = 
-                estadoCuentaService.obtenerEstadoCuentaPorSocio(socio.getId());
-            Double saldoTotal = estadoCuentaService.calcularSaldoTotalPendiente(socio.getId());
+                estadoCuentaService.obtenerEstadoCuentaPorSocio(socioEntity.getId());
+            Double saldoTotal = estadoCuentaService.calcularSaldoTotalPendiente(socioEntity.getId());
             
-            model.addAttribute("socio", socio.getPostulante());
+            // Usar DTO para consistencia con los campos que espera la vista (nombres, estadoPostulacion, etc)
+            PostulanteDTO p = postulanteService.buscarPorId(socioEntity.getPostulante().getId());
+            
+            model.addAttribute("socio", p);
+            model.addAttribute("socioEntity", socioEntity);
             model.addAttribute("estadosCuenta", estados);
-            model.addAttribute("saldoTotal", saldoTotal);
+            model.addAttribute("saldoTotal", saldoTotal != null ? saldoTotal : 0.0);
+            model.addAttribute("numCuenta", "ACC-" + String.format("%06d", socioEntity.getId()));
             
-            // Perfil
-            String nombre = socio.getPostulante().getNombres() + " " + socio.getPostulante().getApellidoPaterno();
-            String iniciales = generarIniciales(socio.getPostulante().getNombres(), socio.getPostulante().getApellidoPaterno());
+            // Perfil: Manejar Persona Natural o Jurídica
+            String nombre;
+            if (socioEntity.getPostulante().getNombres() != null && !socioEntity.getPostulante().getNombres().trim().isEmpty()) {
+                nombre = socioEntity.getPostulante().getNombres() + " " + 
+                         (socioEntity.getPostulante().getApellidoPaterno() != null ? socioEntity.getPostulante().getApellidoPaterno() : "");
+            } else {
+                nombre = socioEntity.getPostulante().getRazonSocial();
+            }
+            
+            String iniciales = generarIniciales(
+                socioEntity.getPostulante().getNombres() != null ? socioEntity.getPostulante().getNombres() : socioEntity.getPostulante().getRazonSocial(),
+                socioEntity.getPostulante().getApellidoPaterno() != null ? socioEntity.getPostulante().getApellidoPaterno() : ""
+            );
+            
             model.addAttribute("socioNombre", nombre);
             model.addAttribute("socioIniciales", iniciales);
+        } else {
+            // Caso de seguridad: si no hay socio vinculado, evitamos nulos en la vista
+            model.addAttribute("socio", null);
+            model.addAttribute("saldoTotal", 0.0);
         }
         
         return "socio/verificar-estado-cuenta";

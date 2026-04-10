@@ -169,7 +169,7 @@
                     <span class="material-symbols-outlined text-4xl text-primary">directions_boat</span>
                 </div>
                 <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-black">Embarcaciones</p>
-                <h4 class="text-3xl font-black text-slate-800" th:text="${totalEmbarcaciones}">1</h4>
+                <h4 class="text-3xl font-black text-slate-800">1</h4>
                 <p class="text-[10px] text-emerald-600 font-bold mt-2 flex items-center">
                     <span class="material-symbols-outlined text-[14px] mr-1">verified_user</span> Activa
                 </p>
@@ -181,9 +181,9 @@
                 </div>
                 <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-black">Saldo Pendiente</p>
                 <div class="flex items-baseline gap-1">
-                    <span class="text-3xl font-black" th:classappend="${saldoPendiente > 0 ? 'text-rose-600' : 'text-emerald-600'}" th:text="'S/ ' + ${saldoPendiente}">S/ 0.00</span>
+                    <span class="text-3xl font-black text-rose-600">S/ 150.00</span>
                 </div>
-                <p class="text-[10px] font-bold mt-2" th:classappend="${saldoPendiente > 0 ? 'text-rose-400' : 'text-emerald-500'}" th:text="${saldoPendiente > 0 ? 'Pago pendiente' : 'Al día'}">Al día</p>
+                <p class="text-[10px] font-bold mt-2 text-rose-400">Pago pendiente</p>
             </div>
 
             <div class="stats-card bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -191,7 +191,7 @@
                     <span class="material-symbols-outlined text-4xl text-primary">history</span>
                 </div>
                 <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-black">Último Zarpe</p>
-                <h4 class="text-xl font-bold text-slate-800" th:text="${ultimaSalida}">2024-03-28</h4>
+                <h4 class="text-xl font-bold text-slate-800">2024-03-28</h4>
                 <p class="text-[10px] text-slate-400 font-bold mt-2">Pachacamac - Lima</p>
             </div>
 
@@ -200,7 +200,7 @@
                     <span class="material-symbols-outlined text-4xl text-primary">calendar_month</span>
                 </div>
                 <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-black">Próxima Reserva</p>
-                <h4 class="text-xl font-bold text-slate-800" th:text="${proximaReserva}">2024-04-10</h4>
+                <h4 class="text-xl font-bold text-slate-800">2024-04-10</h4>
                 <p class="text-[10px] text-amber-500 font-bold mt-2">Confirmada</p>
             </div>
         </div>
@@ -255,21 +255,18 @@
                         <h3 class="text-lg font-black text-slate-800">Mi Flota Activa</h3>
                         <p class="text-xs text-slate-400 font-medium">Gestión de embarcaciones en puerto</p>
                     </div>
-                    <button class="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-                        <span class="material-symbols-outlined text-slate-400">more_horiz</span>
-                    </button>
                 </div>
 
                 <div class="space-y-4">
-                    <!-- Boat Item Mockup / Empty State -->
-                    <div th:if="${totalEmbarcaciones != null && totalEmbarcaciones > 0}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-primary/30 transition-all">
+                    <!-- Boat Item Mockup -->
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-primary/30 transition-all">
                         <div class="flex items-center gap-4">
                             <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
                                 <span class="material-symbols-outlined text-2xl">sailing</span>
                             </div>
                             <div>
-                                <p class="text-sm font-black text-slate-800">Embarcación Registrada</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Flota Neptuno</p>
+                                <p class="text-sm font-black text-slate-800">Velero Aurora</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Matrícula: LIMA-2024-XP</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-6">
@@ -281,12 +278,6 @@
                                 Detalles
                             </button>
                         </div>
-                    </div>
-                    
-                    <div th:if="${totalEmbarcaciones == null || totalEmbarcaciones == 0}" class="flex flex-col items-center justify-center p-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-center">
-                        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">directions_boat_filled</span>
-                        <p class="text-sm font-bold text-slate-500">Sin embarcaciones</p>
-                        <p class="text-[11px] text-slate-400 mt-1 max-w-xs">Actualmente no cuentas con ninguna embarcación registrada en la marina del club.</p>
                     </div>
                 </div>
             </div>
@@ -317,23 +308,6 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">Información de Cuenta</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center pb-4 border-b border-slate-50">
-                            <span class="text-[11px] font-bold text-slate-400">ID Socio</span>
-                            <span class="text-[11px] font-black text-slate-800" th:text="'#NEP-' + ${socio.idPostulante}">#NEP-123</span>
-                        </div>
-                        <div class="flex justify-between items-center pb-4 border-b border-slate-50">
-                            <span class="text-[11px] font-bold text-slate-400">Documento</span>
-                            <span class="text-[11px] font-black text-slate-800" th:text="${socio.numeroDocumento}">00000000</span>
-                        </div>
-                        <div class="flex justify-between items-center pb-4 border-b border-slate-50">
-                            <span class="text-[11px] font-bold text-slate-400">Afiliación</span>
-                            <span class="text-[11px] font-black text-slate-800" th:text="${socio.fechaRegistro != null ? socio.fechaRegistro : 'N/A'}">2024-03-01</span>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

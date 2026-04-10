@@ -67,7 +67,7 @@
         </a>
         
         <!-- Opciones para Socio NAUTICO -->
-        <th:block th:if="${#strings.equalsIgnoreCase(socio.tipoInteres, 'NAUTICO')}">
+        <th:block th:if="${socio != null && socio.tipoInteres != null && #strings.equalsIgnoreCase(socio.tipoInteres, 'NAUTICO')}">
             <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/socio/dashboard}">
                 <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">directions_boat</span>
                 <span>Mis Embarcaciones</span>
@@ -79,7 +79,7 @@
         </th:block>
 
         <!-- Opciones para Socio SOCIAL -->
-        <th:block th:if="${#strings.equalsIgnoreCase(socio.tipoInteres, 'SOCIAL')}">
+        <th:block th:if="${socio != null && socio.tipoInteres != null && #strings.equalsIgnoreCase(socio.tipoInteres, 'SOCIAL')}">
             <a class="flex items-center text-slate-500 px-4 py-3 hover:bg-slate-50 hover:text-primary rounded-xl transition-all group" th:href="@{/verificar-estado-cuenta}">
                 <span class="material-symbols-outlined mr-3 group-hover:scale-110 transition-transform">receipt_long</span>
                 <span>Facturación</span>
@@ -151,6 +151,22 @@
             </div>
         </div>
 
+        <!-- Sugerencia de Cambio de Contraseña -->
+        <div class="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-r-2xl shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+                    <span class="material-symbols-outlined">security</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-black text-amber-900 uppercase tracking-wider">Sugerencia de Seguridad</p>
+                    <p class="text-sm text-amber-800 mt-0.5">Te recomendamos actualizar tu contraseña periódicamente para proteger tu información financiera.</p>
+                </div>
+                <a th:href="@{/recuperar-password}" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition-all">
+                    Cambiar ahora
+                </a>
+            </div>
+        </div>
+
         <div class="grid grid-cols-12 gap-8">
             <!-- Left Side: Profile Info -->
             <div class="col-span-12 lg:col-span-8 space-y-8">
@@ -167,16 +183,16 @@
 
                     <div class="grid grid-cols-2 gap-x-12 gap-y-8">
                         <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nombre Completo</p>
-                            <p class="text-sm font-black text-slate-700" th:text="${socio.nombres + ' ' + socio.apellidoPaterno + ' ' + socio.apellidoMaterno}">Diego Martinez Rojas</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nombre / Razón Social</p>
+                            <p class="text-sm font-black text-slate-700" th:text="${socioNombre}">Nombre Completo</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nro de Cuenta</p>
+                            <p class="text-sm font-black text-primary" th:text="${numCuenta != null ? numCuenta : 'SIN CUENTA'}">ACC-000001</p>
                         </div>
                         <div class="space-y-1">
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">DNI / Documento</p>
                             <p class="text-sm font-black text-slate-700" th:text="${socio.numeroDocumento}">71458236</p>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Correo Electrónico</p>
-                            <p class="text-sm font-black text-slate-700" th:text="${socio.correoElectronico}">diego@mail.com</p>
                         </div>
                         <div class="space-y-1">
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tipo de Membresía</p>
@@ -259,8 +275,8 @@
                             <span class="material-symbols-outlined">verified</span>
                         </div>
                         <div>
-                            <p class="text-xs font-black text-slate-800" th:text="${(socio != null ? socio.tipoSocio : 'Socio') + ' Activo'}">Socio Activo</p>
-                            <p class="text-[10px] text-slate-400">Desde: <span th:text="${socio != null ? socio.fechaActivacion : 'Reciente'}">2024</span></p>
+                            <p class="text-xs font-black text-slate-800" th:text="${(socioEntity != null ? socioEntity.tipoSocio : 'Socio') + ' Activo'}">Socio Activo</p>
+                            <p class="text-[10px] text-slate-400">Desde: <span th:text="${socioEntity != null ? socioEntity.fechaActivacion : 'Reciente'}">2024</span></p>
                         </div>
                     </div>
                 </div>
