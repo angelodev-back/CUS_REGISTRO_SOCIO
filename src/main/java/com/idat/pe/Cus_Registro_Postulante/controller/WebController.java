@@ -479,24 +479,54 @@ public class WebController {
         Usuario usuario = obtenerUsuarioActual();
         if (usuario == null) return "redirect:/login";
 
-        // Obtener datos del socio (basado en postulante aprobado)
-        PostulanteDTO p = postulanteService.buscarPorNumeroDocumento(usuario.getUsername());
+        // Priorizar el socio vinculado al usuario autenticado.
+        PostulanteDTO p = socioRepository.findByUsuario(usuario)
+                .map(Socio::getPostulante)
+                .map(Postulante::getId)
+                .map(postulanteService::buscarPorId)
+                .orElse(null);
+
+        if (p == null) {
+            p = postulanteService.buscarPorNumeroDocumento(usuario.getUsername());
+        }
+
+        if (p == null && usuario.getCorreoElectronico() != null) {
+            p = postulanteRepository.findByCorreoElectronico(usuario.getCorreoElectronico())
+                    .map(ent -> postulanteService.buscarPorId(ent.getId()))
+                    .orElse(null);
+        }
+
         if (p == null) {
             p = postulanteRepository.findByCorreoElectronico(usuario.getUsername())
                     .map(ent -> postulanteService.buscarPorId(ent.getId()))
                     .orElse(null);
         }
 
-        if (p != null) {
-            model.addAttribute("socio", p);
-            agregarPerfilSocio(model, p);
-            
-            // Datos estadísticos simulados o reales (HU-09/15/17)
-            model.addAttribute("totalEmbarcaciones", 1); // Placeholder
-            model.addAttribute("saldoPendiente", 150.00); // Placeholder o desde service
-            model.addAttribute("ultimaSalida", "2024-03-28");
-            model.addAttribute("proximaReserva", "2024-04-10");
+        if (p == null) {
+            p = PostulanteDTO.builder()
+                    .idPostulante(0)
+                    .nombres(usuario.getUsername())
+                    .apellidoPaterno("")
+                    .tipoInteres("SOCIAL")
+                    .build();
         }
+
+        model.addAttribute("socio", p);
+        agregarPerfilSocio(model, p);
+        
+        // Obtener datos reales de la BD
+        Double saldoPendiente = 0.0;
+        Optional<Socio> socioEntityOpt = socioRepository.findByUsuario(usuario);
+        if (socioEntityOpt.isPresent()) {
+            saldoPendiente = estadoCuentaService.calcularSaldoTotalPendiente(socioEntityOpt.get().getId());
+            if (saldoPendiente == null) saldoPendiente = 0.0;
+        }
+        
+        // Datos estadísticos
+        model.addAttribute("totalEmbarcaciones", 0); // Hasta registrar modulo de embarcaciones reales
+        model.addAttribute("saldoPendiente", saldoPendiente); 
+        model.addAttribute("ultimaSalida", "Sin Registro");
+        model.addAttribute("proximaReserva", "Sin Reserva");
 
         return "socio/dashboard";
     }
@@ -716,8 +746,13 @@ public class WebController {
     }
 
     private void agregarPerfilSocio(Model model, PostulanteDTO p) {
-        String nombre = p.getNombres() != null ? (p.getNombres() + " " + p.getApellidoPaterno()) : p.getRazonSocial();
-        String iniciales = p.getNombres() != null ? generarIniciales(p.getNombres(), p.getApellidoPaterno()) : "SC";
+        String nombres = p.getNombres() != null ? p.getNombres().trim() : "";
+        String apellidoPaterno = p.getApellidoPaterno() != null ? p.getApellidoPaterno().trim() : "";
+        String razonSocial = p.getRazonSocial() != null ? p.getRazonSocial().trim() : "";
+
+        String nombreCompleto = (nombres + " " + apellidoPaterno).trim();
+        String nombre = !nombreCompleto.isBlank() ? nombreCompleto : (!razonSocial.isBlank() ? razonSocial : "Socio");
+        String iniciales = !nombres.isBlank() ? generarIniciales(nombres, apellidoPaterno) : generarIniciales(nombre, "");
         
         model.addAttribute("socioNombre", nombre);
         model.addAttribute("socioIniciales", iniciales);

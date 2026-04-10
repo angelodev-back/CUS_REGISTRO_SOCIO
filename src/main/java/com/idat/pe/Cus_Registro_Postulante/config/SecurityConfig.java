@@ -19,6 +19,12 @@ public class SecurityConfig {
     @Autowired
     private CustomAuthenticationSuccessHandler successHandler;
 
+    @Autowired
+    private CustomAuthenticationFailureHandler failureHandler;
+
+    @Autowired
+    private CustomLogoutSuccessHandler logoutSuccessHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -50,12 +56,12 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .successHandler(successHandler)
-                .failureUrl("/login?error=true")
+                .failureHandler(failureHandler)
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessHandler(logoutSuccessHandler)
                 .deleteCookies("JSESSIONID")
                 .invalidateHttpSession(true)
                 .permitAll()

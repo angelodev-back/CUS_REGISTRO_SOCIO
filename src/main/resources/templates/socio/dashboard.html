@@ -147,7 +147,7 @@
             <div class="absolute bottom-0 left-0 w-64 h-64 -ml-20 -mb-20 bg-primary/20 rounded-full blur-3xl"></div>
             
             <div class="relative z-10 space-y-4">
-                <h2 class="text-4xl font-black tracking-tight">¡Hola de nuevo, <span th:text="${socio.nombres != null ? socio.nombres : 'Socio'}">María</span>! 👋</h2>
+                <h2 class="text-4xl font-black tracking-tight">¡Hola de nuevo, <span th:text="${socioNombre != null ? socioNombre : 'Socio'}">María</span>! 👋</h2>
                 <p class="text-primary-light text-lg max-w-xl font-medium leading-relaxed opacity-90">
                     Es un excelente día para navegar. Revisa tus embarcaciones y prepara tu próximo plan de navegación.
                 </p>
@@ -222,9 +222,9 @@
                 </div>
                 <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-black">Facturación Pendiente</p>
                 <div class="flex items-baseline gap-1">
-                    <span class="text-3xl font-black text-emerald-600">S/ 0.00</span>
+                    <span class="text-3xl font-black" th:classappend="${saldoPendiente != null && saldoPendiente > 0 ? 'text-rose-600' : 'text-emerald-600'}" th:text="'S/ ' + ${saldoPendiente != null ? saldoPendiente : '0.00'}">S/ 0.00</span>
                 </div>
-                <p class="text-[10px] text-emerald-500 font-bold mt-2">¡Todo pagado!</p>
+                <p class="text-[10px] font-bold mt-2" th:classappend="${saldoPendiente != null && saldoPendiente > 0 ? 'text-rose-400' : 'text-emerald-500'}" th:text="${saldoPendiente != null && saldoPendiente > 0 ? 'Pago pendiente' : '¡Todo pagado!'}">¡Todo pagado!</p>
             </div>
 
             <div class="stats-card bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -261,15 +261,15 @@
                 </div>
 
                 <div class="space-y-4">
-                    <!-- Boat Item Mockup -->
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-primary/30 transition-all">
+                    <!-- Boat Item Mockup / Empty State -->
+                    <div th:if="${totalEmbarcaciones != null && totalEmbarcaciones > 0}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-primary/30 transition-all">
                         <div class="flex items-center gap-4">
                             <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100 group-hover:bg-primary group-hover:text-white transition-all">
                                 <span class="material-symbols-outlined text-2xl">sailing</span>
                             </div>
                             <div>
-                                <p class="text-sm font-black text-slate-800">Velero Aurora</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Matrícula: LIMA-2024-XP</p>
+                                <p class="text-sm font-black text-slate-800">Embarcación Registrada</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Flota Neptuno</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-6">
@@ -281,6 +281,12 @@
                                 Detalles
                             </button>
                         </div>
+                    </div>
+                    
+                    <div th:if="${totalEmbarcaciones == null || totalEmbarcaciones == 0}" class="flex flex-col items-center justify-center p-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-center">
+                        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">directions_boat_filled</span>
+                        <p class="text-sm font-bold text-slate-500">Sin embarcaciones</p>
+                        <p class="text-[11px] text-slate-400 mt-1 max-w-xs">Actualmente no cuentas con ninguna embarcación registrada en la marina del club.</p>
                     </div>
                 </div>
             </div>
@@ -319,8 +325,12 @@
                             <span class="text-[11px] font-black text-slate-800" th:text="'#NEP-' + ${socio.idPostulante}">#NEP-123</span>
                         </div>
                         <div class="flex justify-between items-center pb-4 border-b border-slate-50">
+                            <span class="text-[11px] font-bold text-slate-400">Documento</span>
+                            <span class="text-[11px] font-black text-slate-800" th:text="${socio.numeroDocumento}">00000000</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-4 border-b border-slate-50">
                             <span class="text-[11px] font-bold text-slate-400">Afiliación</span>
-                            <span class="text-[11px] font-black text-slate-800" th:text="${socio.fechaRegistro}">2024-03-01</span>
+                            <span class="text-[11px] font-black text-slate-800" th:text="${socio.fechaRegistro != null ? socio.fechaRegistro : 'N/A'}">2024-03-01</span>
                         </div>
                     </div>
                 </div>

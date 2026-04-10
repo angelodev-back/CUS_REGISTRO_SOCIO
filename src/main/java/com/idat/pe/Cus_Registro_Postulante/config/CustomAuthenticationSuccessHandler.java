@@ -37,13 +37,13 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         // 1. Validación de Mismatch entre Portal y Rol (Seguridad HU-10)
         if (isJefe && !"jefe".equals(portalSource)) {
             SecurityContextHolder.clearContext();
-            response.sendRedirect("/login?error=true&portal_mismatch=true");
+            response.sendRedirect("/login?portal_mismatch=true");
             return;
         }
         
         if (isSocio && "jefe".equals(portalSource)) {
             SecurityContextHolder.clearContext();
-            response.sendRedirect("/jefe/login?error=true&portal_mismatch=true");
+            response.sendRedirect("/jefe/login?portal_mismatch=true");
             return;
         }
 

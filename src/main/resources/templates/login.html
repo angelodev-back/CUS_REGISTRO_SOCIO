@@ -135,6 +135,19 @@
                 <button type="submit" class="btn-submit w-100 justify-content-center">
                     Acceder
                 </button>
+
+                <!-- Botón oculto para Acceso Administrativo -->
+                <div class="text-center mt-4">
+                    <button type="button" class="border-0 bg-transparent text-secondary p-0" onclick="document.getElementById('admin-access-panel').style.display = document.getElementById('admin-access-panel').style.display === 'none' ? 'block' : 'none';" title="Opciones avanzadas">
+                        <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.5;">more_horiz</span>
+                    </button>
+                    <div id="admin-access-panel" style="display: none; margin-top: 8px;">
+                        <a th:href="@{/jefe/login}" class="text-decoration-none" style="font-size: 13px; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">admin_panel_settings</span>
+                            Acceso Administrativo
+                        </a>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
