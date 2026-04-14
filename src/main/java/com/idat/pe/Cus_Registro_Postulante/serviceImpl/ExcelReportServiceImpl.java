@@ -199,16 +199,20 @@ public class ExcelReportServiceImpl implements ExcelReportService {
     }
 
     private String construirNombreCompleto(Postulante p) {
+        if (p == null) return "Postulante";
         if (p.getNombres() != null && !p.getNombres().isBlank()) {
-            String nombres = p.getNombres().trim();
-            String apellidoP = p.getApellidoPaterno() != null ? p.getApellidoPaterno().trim() : "";
-            
-            // Si el apellido ya está en nombres (prevención de redundancia por data sucia)
-            if (!apellidoP.isEmpty() && nombres.toLowerCase().contains(apellidoP.toLowerCase())) {
-                return nombres;
-            }
-            return (nombres + " " + apellidoP).trim();
+            return construirNombreCompleto(p.getNombres(), p.getApellidoPaterno());
         }
         return p.getRazonSocial() != null ? p.getRazonSocial() : "Postulante";
+    }
+
+    private String construirNombreCompleto(String nombres, String apellidoP) {
+        String n = (nombres != null) ? nombres.trim() : "";
+        String ap = (apellidoP != null) ? apellidoP.trim() : "";
+        
+        if (!ap.isEmpty() && n.toLowerCase().contains(ap.toLowerCase())) {
+            return n;
+        }
+        return (n + " " + ap).trim();
     }
 }

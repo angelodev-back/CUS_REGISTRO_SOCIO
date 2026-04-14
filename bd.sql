@@ -442,5 +442,11 @@ FROM socio s
 -- =====================================================
 -- Usuario JEFE:   jefe_admin / 123456
 -- Usuario SOCIO:  se genera desde /jefe/socios-aprobados
+
+
 use neptuno;
-select * from  postulante
+select * from postulante;
+
+describe postulante
+
+
