@@ -34,7 +34,7 @@ public class RegistroPostulanteDTO {
     private String apellidoMaterno;
 
     // Persona Jurídica (si tipoDocumento es RUC)
-    @Size(max = 200, message = "La razón social no debe exceder 200 caracteres")
+    @Size(max = 100, message = "La razón social no debe exceder 100 caracteres")
     private String razonSocial;
 
     @Email(message = "Formato de correo inválido")
@@ -48,8 +48,8 @@ public class RegistroPostulanteDTO {
     private String tipoTelefono;
 
     @NotBlank(message = "El teléfono es obligatorio")
-    @Size(max = 15, message = "El teléfono no debe exceder 15 caracteres")
-    @Pattern(regexp = "^\\+?\\d+$", message = "El teléfono solo debe contener dígitos y el prefijo + cuando aplique")
+    @Size(min = 9, max = 9, message = "El teléfono debe tener exactamente 9 dígitos")
+    @Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe contener exactamente 9 dígitos numéricos")
     private String telefono;
 
     @Size(max = 200, message = "La dirección no debe exceder 200 caracteres")

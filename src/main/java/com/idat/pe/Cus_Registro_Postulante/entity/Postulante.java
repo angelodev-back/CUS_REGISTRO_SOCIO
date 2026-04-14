@@ -33,7 +33,7 @@ public class Postulante {
     private String apellidoMaterno;
 
     // Persona Jurídica
-    @Column(name = "razon_social", length = 200)
+    @Column(name = "razon_social", length = 100)
     private String razonSocial;
 
     @Column(name = "correo_electronico", nullable = false, unique = true, length = 100)
@@ -42,7 +42,7 @@ public class Postulante {
     @Column(name = "telefono", length = 15)
     private String telefono;
 
-    @Column(name = "direccion", length = 200)
+    @Column(name = "direccion", length = 100)
     private String direccion;
 
     @Column(name = "ciudad", length = 100)

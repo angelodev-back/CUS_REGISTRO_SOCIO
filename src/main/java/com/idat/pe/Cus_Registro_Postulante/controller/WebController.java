@@ -43,12 +43,6 @@ import java.util.HashMap;
 @Controller
 public class WebController {
 
-    private static final String RECOVERY_ATTEMPTS_KEY = "passwordRecoveryAttempts";
-    private static final String RECOVERY_LOCK_UNTIL_KEY = "passwordRecoveryLockUntil";
-    private static final int MAX_RECOVERY_ATTEMPTS = 5;
-    private static final long RECOVERY_LOCK_MINUTES = 15;
-    private static final String RECOVERY_GENERIC_ERROR = "No se pudo validar tu identidad con los datos proporcionados.";
-
     @Autowired
     private PostulanteService postulanteService;
 
@@ -100,95 +94,20 @@ public class WebController {
         return "jefe/login";
     }
 
-    @Autowired
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    @PostMapping("/socio/actualizar-password")
+    @ResponseBody
+    public ResponseEntity<?> actualizarPassword(@RequestParam String actual, @RequestParam String nueva) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(401).body(Map.of("mensaje", "Sesión no válida"));
+            }
 
-    @GetMapping("/recuperar-password")
-    public String recuperarPasswordView() {
-        return "publico/recuperar-password";
-    }
-
-    @PostMapping("/recuperar-password")
-    public String recuperarPasswordSubmit(@RequestParam("numDocumento") String numDocumento,
-                                          @RequestParam("correo") String correo,
-                                          @RequestParam("fechaNacimiento") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaNacimiento,
-                                          @RequestParam("nuevaPassword") String nuevaPassword,
-                                          @RequestParam("confirmarPassword") String confirmarPassword,
-                                          HttpSession session,
-                                          RedirectAttributes ra) {
-        if (isPasswordRecoveryLocked(session)) {
-            LocalDateTime lockedUntil = (LocalDateTime) session.getAttribute(RECOVERY_LOCK_UNTIL_KEY);
-            String horaDesbloqueo = lockedUntil != null
-                    ? lockedUntil.toLocalTime().withSecond(0).withNano(0).toString()
-                    : "más tarde";
-            ra.addFlashAttribute("error", "Demasiados intentos fallidos. Intenta nuevamente después de las " + horaDesbloqueo + ".");
-            return "redirect:/recuperar-password";
+            socioService.actualizarPassword(auth.getName(), actual, nueva);
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", e.getMessage()));
         }
-
-        String documento = numDocumento != null ? numDocumento.trim() : "";
-        String correoNormalizado = correo != null ? correo.trim().toLowerCase() : "";
-        String nueva = nuevaPassword != null ? nuevaPassword.trim() : "";
-        String confirmacion = confirmarPassword != null ? confirmarPassword.trim() : "";
-
-        if (!documento.matches("\\d{8}|\\d{11}")) {
-            ra.addFlashAttribute("error", "Ingresa un documento válido: DNI (8 dígitos) o RUC (11 dígitos).");
-            return "redirect:/recuperar-password";
-        }
-        if (correoNormalizado.isBlank() || correoNormalizado.length() > 100) {
-            ra.addFlashAttribute("error", "Ingresa un correo válido.");
-            return "redirect:/recuperar-password";
-        }
-        if (fechaNacimiento == null) {
-            ra.addFlashAttribute("error", "Ingresa la fecha de nacimiento o constitución registrada.");
-            return "redirect:/recuperar-password";
-        }
-        if (!nueva.equals(confirmacion)) {
-            ra.addFlashAttribute("error", "La nueva contraseña y su confirmación no coinciden.");
-            return "redirect:/recuperar-password";
-        }
-        if (!esPasswordSegura(nueva)) {
-            ra.addFlashAttribute("error", "La contraseña debe tener entre 8 y 72 caracteres, con mayúscula, minúscula, número y símbolo.");
-            return "redirect:/recuperar-password";
-        }
-
-        Optional<Postulante> postulanteOpt = postulanteRepository.findByNumeroDocumento(documento);
-        if (postulanteOpt.isEmpty()) {
-            return rejectPasswordRecoveryAttempt(ra, session, RECOVERY_GENERIC_ERROR);
-        }
-
-        Postulante postulante = postulanteOpt.get();
-        boolean identidadValida = postulante.getCorreoElectronico() != null
-                && postulante.getCorreoElectronico().equalsIgnoreCase(correoNormalizado)
-                && postulante.getFechaNacimiento() != null
-                && postulante.getFechaNacimiento().equals(fechaNacimiento);
-
-        if (!identidadValida || postulante.getEstado() != EstadoPostulante.APROBADO) {
-            return rejectPasswordRecoveryAttempt(ra, session, RECOVERY_GENERIC_ERROR);
-        }
-
-        Optional<Socio> socioOpt = socioRepository.findByPostulante(postulante);
-        if (socioOpt.isEmpty() || socioOpt.get().getUsuario() == null) {
-            return rejectPasswordRecoveryAttempt(ra, session, RECOVERY_GENERIC_ERROR);
-        }
-
-        Usuario usuario = socioOpt.get().getUsuario();
-        if (!Boolean.TRUE.equals(usuario.getEstadoUsuario())) {
-            return rejectPasswordRecoveryAttempt(ra, session, RECOVERY_GENERIC_ERROR);
-        }
-        if (usuario.getCorreoElectronico() == null || !usuario.getCorreoElectronico().equalsIgnoreCase(correoNormalizado)) {
-            return rejectPasswordRecoveryAttempt(ra, session, RECOVERY_GENERIC_ERROR);
-        }
-        if (passwordEncoder.matches(nueva, usuario.getPassword())) {
-            ra.addFlashAttribute("error", "La nueva contraseña debe ser diferente a la anterior.");
-            return "redirect:/recuperar-password";
-        }
-
-        usuario.setPassword(passwordEncoder.encode(nueva));
-        usuarioRepository.save(usuario);
-        clearPasswordRecoveryAttempts(session);
-
-        ra.addFlashAttribute("mensaje", "Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
-        return "redirect:/login";
     }
 
     // --- FLUJO REGISTRO ---
@@ -782,56 +701,6 @@ public class WebController {
         String primera = (primerTexto != null && !primerTexto.isBlank()) ? primerTexto.substring(0, 1).toUpperCase() : "A";
         String segunda = (segundoTexto != null && !segundoTexto.isBlank()) ? segundoTexto.substring(0, 1).toUpperCase() : "D";
         return primera + segunda;
-    }
-
-    private boolean esPasswordSegura(String password) {
-        if (password == null || password.length() < 8 || password.length() > 72) {
-            return false;
-        }
-
-        boolean tieneMayuscula = password.chars().anyMatch(Character::isUpperCase);
-        boolean tieneMinuscula = password.chars().anyMatch(Character::isLowerCase);
-        boolean tieneNumero = password.chars().anyMatch(Character::isDigit);
-        boolean tieneSimbolo = password.chars().anyMatch(c -> !Character.isLetterOrDigit(c) && !Character.isWhitespace(c));
-
-        return tieneMayuscula && tieneMinuscula && tieneNumero && tieneSimbolo;
-    }
-
-    private boolean isPasswordRecoveryLocked(HttpSession session) {
-        Object lockObj = session.getAttribute(RECOVERY_LOCK_UNTIL_KEY);
-        if (lockObj instanceof LocalDateTime lockUntil) {
-            if (LocalDateTime.now().isBefore(lockUntil)) {
-                return true;
-            }
-            clearPasswordRecoveryAttempts(session);
-        }
-        return false;
-    }
-
-    private void registerFailedPasswordRecoveryAttempt(HttpSession session) {
-        int attempts = 0;
-        Object attemptsObj = session.getAttribute(RECOVERY_ATTEMPTS_KEY);
-        if (attemptsObj instanceof Integer) {
-            attempts = (Integer) attemptsObj;
-        }
-
-        attempts++;
-        session.setAttribute(RECOVERY_ATTEMPTS_KEY, attempts);
-
-        if (attempts >= MAX_RECOVERY_ATTEMPTS) {
-            session.setAttribute(RECOVERY_LOCK_UNTIL_KEY, LocalDateTime.now().plusMinutes(RECOVERY_LOCK_MINUTES));
-        }
-    }
-
-    private void clearPasswordRecoveryAttempts(HttpSession session) {
-        session.removeAttribute(RECOVERY_ATTEMPTS_KEY);
-        session.removeAttribute(RECOVERY_LOCK_UNTIL_KEY);
-    }
-
-    private String rejectPasswordRecoveryAttempt(RedirectAttributes ra, HttpSession session, String message) {
-        registerFailedPasswordRecoveryAttempt(session);
-        ra.addFlashAttribute("error", message);
-        return "redirect:/recuperar-password";
     }
 
     private String inferirTipoTelefono(String telefono) {

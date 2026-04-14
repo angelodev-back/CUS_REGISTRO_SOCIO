@@ -161,9 +161,9 @@
                     <p class="text-xs font-black text-amber-900 uppercase tracking-wider">Sugerencia de Seguridad</p>
                     <p class="text-sm text-amber-800 mt-0.5">Te recomendamos actualizar tu contraseña periódicamente para proteger tu información financiera.</p>
                 </div>
-                <a th:href="@{/recuperar-password}" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition-all">
+                <button id="btnOpenPasswordModal" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition-all">
                     Cambiar ahora
-                </a>
+                </button>
             </div>
         </div>
 
@@ -301,5 +301,140 @@
     </div>
 </main>
 
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="togglePasswordModal()"></div>
+            
+            <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-slate-100">
+                <div class="bg-primary h-2 w-full"></div>
+                <div class="p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center">
+                                <span class="material-symbols-outlined">lock_reset</span>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-800" id="modal-title">Actualizar Contraseña</h3>
+                        </div>
+                        <button onclick="togglePasswordModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <form id="passwordForm" class="space-y-5">
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Contraseña Actual</label>
+                            <input type="password" id="currentPassword" required class="w-full bg-slate-50 border-slate-100 rounded-xl focus:ring-primary focus:border-primary text-sm p-3 transition-all" placeholder="Introduce tu clave actual">
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Nueva Contraseña</label>
+                            <input type="password" id="newPassword" required class="w-full bg-slate-50 border-slate-100 rounded-xl focus:ring-primary focus:border-primary text-sm p-3 transition-all" placeholder="Mínimo 8 caracteres">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Confirmar Nueva Contraseña</label>
+                            <input type="password" id="confirmPassword" required class="w-full bg-slate-50 border-slate-100 rounded-xl focus:ring-primary focus:border-primary text-sm p-3 transition-all" placeholder="Repite la nueva clave">
+                        </div>
+
+                        <div id="modal-alert-container" class="hidden">
+                            <!-- Alert messages injected here -->
+                        </div>
+
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" onclick="togglePasswordModal()" class="flex-1 px-4 py-3 bg-slate-100 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-200 transition-all">
+                                Cancelar
+                            </button>
+                            <button type="submit" id="btnSavePassword" class="flex-2 px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                <span>Guardar Cambios</span>
+                                <span id="spinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function togglePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.toggle('hidden');
+            if(modal.classList.contains('hidden')) {
+                document.getElementById('passwordForm').reset();
+                hideModalAlert();
+            }
+        }
+
+        function showModalAlert(message, type = 'error') {
+            const container = document.getElementById('modal-alert-container');
+            const bgClass = type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100';
+            const icon = type === 'success' ? 'check_circle' : 'error';
+            
+            container.innerHTML = `
+                <div class="flex items-center gap-2 p-3 text-xs font-medium rounded-xl border ${bgClass}">
+                    <span class="material-symbols-outlined text-sm">${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            container.classList.remove('hidden');
+        }
+
+        function hideModalAlert() {
+            document.getElementById('modal-alert-container').classList.add('hidden');
+        }
+
+        document.getElementById('btnOpenPasswordModal').addEventListener('click', togglePasswordModal);
+
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const current = document.getElementById('currentPassword').value;
+            const nueva = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('btnSavePassword');
+            const spinner = document.getElementById('spinner');
+
+            if (nueva.length < 5) {
+                showModalAlert('La nueva contraseña debe tener al menos 5 caracteres');
+                return;
+            }
+
+            if (nueva !== confirm) {
+                showModalAlert('Las contraseñas nuevas no coinciden');
+                return;
+            }
+
+            hideModalAlert();
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('actual', current);
+                formData.append('nueva', nueva);
+
+                const response = await fetch('/socio/actualizar-password', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showModalAlert(result.mensaje, 'success');
+                    setTimeout(() => {
+                        togglePasswordModal();
+                    }, 2000);
+                } else {
+                    showModalAlert(result.mensaje || 'Error al actualizar contraseña');
+                }
+            } catch (error) {
+                showModalAlert('Error de conexión con el servidor');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

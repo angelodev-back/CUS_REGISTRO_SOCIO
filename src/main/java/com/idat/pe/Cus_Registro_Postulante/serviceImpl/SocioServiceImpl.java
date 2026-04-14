@@ -156,6 +156,20 @@ public class SocioServiceImpl implements SocioService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void actualizarPassword(String username, String oldPassword, String newPassword) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+
+        if (!passwordEncoder.matches(oldPassword, usuario.getPassword())) {
+            throw new RuntimeException("La contraseña actual es incorrecta");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(newPassword));
+        usuarioRepository.save(usuario);
+    }
+
     private String enmascararEmail(String email) {
         if (email == null || email.length() < 5) return "*****" + (email != null ? email : "");
         int indexAt = email.indexOf("@");

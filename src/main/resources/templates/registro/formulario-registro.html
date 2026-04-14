@@ -33,21 +33,17 @@
         <p class="step-nav-title">Secciones del formulario</p>
 
         <ul class="step-nav" id="stepNav">
-            <li class="active" data-sec="sec-tipo">
+            <li class="active" data-sec="sec-identificacion">
                 <div class="step-num">1</div>
-                <span class="step-lbl">Tipo de socio</span>
+                <span class="step-lbl">Identificación</span>
             </li>
-            <li data-sec="sec-personal">
+            <li data-sec="sec-personales">
                 <div class="step-num">2</div>
                 <span class="step-lbl">Datos personales</span>
             </li>
             <li data-sec="sec-contacto">
                 <div class="step-num">3</div>
                 <span class="step-lbl">Contacto y dirección</span>
-            </li>
-            <li data-sec="sec-documentos">
-                <div class="step-num">4</div>
-                <span class="step-lbl">Documentos adjuntos</span>
             </li>
         </ul>
 
@@ -134,7 +130,7 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Razón Social <span class="opt">(Solo para RUC)</span></label>
-                            <input type="text" th:field="*{razonSocial}" class="fi" placeholder="Empresa S.A.C." maxlength="200">
+                            <input type="text" th:field="*{razonSocial}" class="fi" placeholder="Empresa S.A.C." maxlength="100">
                         </div>
                     </div>
 
@@ -169,14 +165,22 @@
 
                     <div class="frow frow-2">
                         <div class="fg">
-                            <label>Correo Electrónico <span class="req">*</span></label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <label style="margin-bottom: 0;">Correo Electrónico <span class="req">*</span></label>
+                                <button type="button" id="btn-editar-contacto" class="btn-edit-link" style="display: none;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                    Editar contacto
+                                </button>
+                            </div>
                             <input type="email" th:field="*{correo}" class="fi" placeholder="nombre@correo.com" required maxlength="100">
                         </div>
                         <div class="fg">
                             <label>Tipo de Teléfono <span class="req">*</span></label>
                             <select th:field="*{tipoTelefono}" class="fi" id="tipoTelefonoSelect" required>
-                                <option value="CELULAR">Celular (+51 9XXXXXXXX)</option>
-                                <option value="FIJO">Fijo (0XXXXXXXX)</option>
+                                <option value="CELULAR">Celular (9 dígitos)</option>
+                                <option value="FIJO">Fijo (7 dígitos - Lima/Callao)</option>
                             </select>
                         </div>
                     </div>
@@ -184,14 +188,14 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Teléfono <span class="req">*</span></label>
-                            <input type="tel" th:field="*{telefono}" class="fi" id="telefonoInput" placeholder="+51987654321" required maxlength="15" minlength="9" inputmode="tel" pattern="\+519[0-9]{8}" title="Celular Perú: +51 seguido de 9 y 8 dígitos">
+                            <input type="tel" th:field="*{telefono}" class="fi" id="telefonoInput" placeholder="987654321" required maxlength="9" minlength="9" inputmode="tel" pattern="[0-9]{9}" title="Ingrese los 9 dígitos del teléfono">
                         </div>
                     </div>
 
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Dirección <span class="req">*</span></label>
-                            <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización" required maxlength="200">
+                            <input type="text" th:field="*{direccion}" class="fi" placeholder="Calle, número, urbanización" required maxlength="100">
                         </div>
                     </div>
 
@@ -199,7 +203,7 @@
                     <div class="frow frow-1">
                         <div class="fg">
                             <label>Ciudad</label>
-                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores Lima" maxlength="50" pattern="[A-Za-zÀ-ÿÑñ\s]{0,50}" title="Solo letras y espacios (máximo 50 caracteres)">
+                            <input type="text" th:field="*{ciudad}" class="fi" placeholder="Ej. Miraflores Lima" maxlength="100" pattern="[A-Za-zÀ-ÿÑñ\s]{0,100}" title="Solo letras y espacios (máximo 100 caracteres)">
                         </div>
                     </div>
                 </div>
@@ -381,6 +385,44 @@
         margin-top: 4px;
         display: block;
     }
+
+    /* ── Edit Link Style ── */
+    .btn-edit-link {
+        background: none;
+        border: none;
+        color: #0094bc;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s ease;
+    }
+    .btn-edit-link:hover {
+        color: #1565a0;
+        text-decoration: underline;
+    }
+    .btn-edit-link svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* ── Disabled Fields Decoration ── */
+    .fi:disabled, select:disabled {
+        background-color: #f8fafc !important; /* Soft gray */
+        color: #64748b !important;          /* Muted text */
+        cursor: not-allowed;
+        opacity: 0.8;
+        border-color: #e2e8f0;
+        box-shadow: none;
+    }
+    
+    /* Animation for smooth transition */
+    .fi {
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
 </style>
 
 <script th:inline="javascript">
@@ -396,6 +438,7 @@
             this.numeroDocInput = document.getElementById('numeroDocumento');
             this.telefonoInput = document.getElementById('telefonoInput');
             this.btnValidar = document.getElementById('btn-validar');
+            this.btnEditar = document.getElementById('btn-editar-contacto');
             this.lblFecha = document.getElementById('lblFecha');
             this.textOnlyRegex = /^[A-Za-zÀ-ÿÑñ\s]+$/;
             
@@ -427,6 +470,41 @@
         }
 
         /**
+         * Bloquea o desbloquea campos del formulario
+         */
+        setFieldsDisabled(disabled) {
+            // El tipo de documento se mantiene habilitado por requerimiento
+            this.tipoDocSelect.disabled = false;
+            
+            this.numeroDocInput.disabled = disabled;
+            this.btnValidar.disabled = disabled;
+            if (disabled) this.btnValidar.style.opacity = "0.5";
+            else this.btnValidar.style.opacity = "1";
+
+            // Resto de campos
+            Object.values(this.fields).forEach(field => {
+                if (field) field.disabled = disabled;
+            });
+        }
+
+        /**
+         * Habilita solo los campos de contacto para edición
+         */
+        unlockContactFields() {
+            if (this.fields.correo) this.fields.correo.disabled = false;
+            if (this.fields.tipoTelefono) this.fields.tipoTelefono.disabled = false;
+            if (this.fields.telefono) this.fields.telefono.disabled = false;
+            
+            this.btnEditar.style.display = "none";
+            
+            this.showModal({
+                title: "Edición Habilitada",
+                text: "Ahora puedes actualizar tu correo y teléfono de contacto.",
+                type: "success"
+            });
+        }
+
+        /**
          * Verifica si llegaron errores desde el servidor vía Thymeleaf
          */
         checkServerErrors() {
@@ -454,6 +532,8 @@
             this.tipoDocSelect.addEventListener('change', () => {
                 this.clearFields();
                 this.updateUIByDocumentType();
+                // Al cambiar el tipo, permitimos nueva validación
+                this.setFieldsDisabled(false);
             });
 
             if (this.tipoTelefonoSelect) {
@@ -464,6 +544,11 @@
 
             // Botón Validar
             this.btnValidar.addEventListener('click', () => this.validateAndFill());
+
+            // Botón Editar Contacto
+            if (this.btnEditar) {
+                this.btnEditar.addEventListener('click', () => this.unlockContactFields());
+            }
             
             // Confirmación antes de enviar
             this.form.addEventListener('submit', (e) => {
@@ -486,6 +571,9 @@
                     confirmText: "Sí, registrar",
                     cancelText: "No, revisar",
                     onConfirm: () => {
+                        // RE-HABILITAR CAMPOS PARA ENVÍO
+                        this.setFieldsDisabled(false);
+
                         this.btnSubmit = this.form.querySelector('.btn-submit:not(#btn-validar)');
                         if (this.btnSubmit) {
                             this.btnSubmit.disabled = true;
@@ -512,7 +600,7 @@
 
             if (this.fields.telefono) {
                 this.fields.telefono.addEventListener('input', () => {
-                    this.fields.telefono.value = this.sanitizePhoneInput(this.fields.telefono.value);
+                    this.fields.telefono.value = this.sanitizePhoneInput(this.fields.telefono.value, this.tipoTelefonoSelect.value);
                     this.validatePhoneRealtime();
                 });
             }
@@ -561,14 +649,9 @@
         validateDocumentRealtime() {
             const tipoDoc = (this.tipoDocSelect.value || '').toUpperCase();
             const numeroDoc = this.numeroDocInput.value.trim();
-            const longitudRequerida = 8;
+            const longitudRequerida = (tipoDoc === 'DNI') ? 8 : 11;
 
             if (!numeroDoc) {
-                this.clearLiveInputError(this.numeroDocInput);
-                return;
-            }
-
-            if (tipoDoc === 'RUC') {
                 this.clearLiveInputError(this.numeroDocInput);
                 return;
             }
@@ -576,7 +659,7 @@
             if (numeroDoc.length < longitudRequerida) {
                 this.setLiveInputError(
                     this.numeroDocInput,
-                    `${tipoDoc} incompleto: ${numeroDoc.length}/${longitudRequerida} dígitos.`
+                    `${tipoDoc} incompleto: faltan ${longitudRequerida - numeroDoc.length} dígitos.`
                 );
                 return;
             }
@@ -602,12 +685,13 @@
             }
 
             if (tipoTelefono === 'FIJO') {
-                if (telefono.length < 9) {
-                    this.setLiveInputError(this.fields.telefono, `Teléfono fijo incompleto: ${telefono.length}/9 caracteres.`);
+                const lenReq = 7;
+                if (telefono.length < lenReq) {
+                    this.setLiveInputError(this.fields.telefono, `Teléfono fijo incompleto: ${telefono.length}/${lenReq} dígitos.`);
                     return;
                 }
-                if (!/^0\d{8}$/.test(telefono)) {
-                    this.setLiveInputError(this.fields.telefono, "Teléfono fijo inválido: debe iniciar con 0 y tener 9 dígitos.");
+                if (telefono.length > lenReq) {
+                    this.setLiveInputError(this.fields.telefono, `Teléfono fijo inválido: solo ${lenReq} dígitos.`);
                     return;
                 }
                 this.clearLiveInputError(this.fields.telefono);
@@ -615,16 +699,13 @@
             }
 
             if (tipoTelefono === 'CELULAR') {
-                if (!telefono.startsWith('+51')) {
-                    this.setLiveInputError(this.fields.telefono, "Celular inválido: debe iniciar con +51.");
+                const lenReq = 9;
+                if (telefono.length < lenReq) {
+                    this.setLiveInputError(this.fields.telefono, `Celular incompleto: ${telefono.length}/${lenReq} dígitos.`);
                     return;
                 }
-                if (telefono.length < 12) {
-                    this.setLiveInputError(this.fields.telefono, `Celular incompleto: ${telefono.length}/12 caracteres.`);
-                    return;
-                }
-                if (!/^\+519\d{8}$/.test(telefono)) {
-                    this.setLiveInputError(this.fields.telefono, "Celular inválido: debe iniciar en +519 y tener 12 caracteres.");
+                if (!/^9\d{8}$/.test(telefono)) {
+                    this.setLiveInputError(this.fields.telefono, "Celular inválido: debe iniciar con 9 y tener 9 dígitos.");
                     return;
                 }
                 this.clearLiveInputError(this.fields.telefono);
@@ -634,44 +715,27 @@
             this.setLiveInputError(this.fields.telefono, "Seleccione el tipo de teléfono.");
         }
 
-        sanitizePhoneInput(rawValue) {
-            const tipoTelefono = this.tipoTelefonoSelect ? this.tipoTelefonoSelect.value : 'CELULAR';
-            const raw = (rawValue || '').trim();
-
-            if (!raw) {
-                return '';
-            }
-
-            if (tipoTelefono === 'FIJO') {
-                return raw.replace(/\D/g, '').slice(0, 9);
-            }
-
-            let digits = raw.replace(/\D/g, '');
-            if (digits.startsWith('51')) {
-                digits = digits.slice(2);
-            }
-            digits = digits.slice(0, 9);
-
-            if (!digits) {
-                return '+51';
-            }
-            return `+51${digits}`;
+        sanitizePhoneInput(rawValue, tipo) {
+            const raw = (rawValue || '').trim().replace(/\D/g, '');
+            const max = (tipo === 'FIJO') ? 7 : 9;
+            return raw.slice(0, max);
         }
 
         updatePhoneUIByType() {
             if (!this.fields.telefono) return;
 
             const isFijo = this.tipoTelefonoSelect && this.tipoTelefonoSelect.value === 'FIJO';
+            const lenReq = isFijo ? 7 : 9;
 
-            this.fields.telefono.placeholder = isFijo ? '054531278' : '+51987654321';
-            this.fields.telefono.minLength = isFijo ? 9 : 12;
-            this.fields.telefono.maxLength = isFijo ? 9 : 12;
-            this.fields.telefono.setAttribute('pattern', isFijo ? '0[0-9]{8}' : '\\+519[0-9]{8}');
+            this.fields.telefono.placeholder = isFijo ? '213XXXX' : '987654321';
+            this.fields.telefono.minLength = lenReq;
+            this.fields.telefono.maxLength = lenReq;
+            this.fields.telefono.setAttribute('pattern', isFijo ? '[0-9]{7}' : '9[0-9]{8}');
             this.fields.telefono.title = isFijo
-                ? 'Teléfono fijo Perú: debe iniciar con 0 y tener 9 dígitos.'
-                : 'Celular Perú: debe iniciar con +519 y tener 12 caracteres.';
+                ? 'Teléfono fijo (Lima/Callao): exactamente 7 dígitos.'
+                : 'Celular Perú: debe iniciar con 9 y tener 9 dígitos.';
 
-            this.fields.telefono.value = this.sanitizePhoneInput(this.fields.telefono.value);
+            this.fields.telefono.value = this.sanitizePhoneInput(this.fields.telefono.value, this.tipoTelefonoSelect.value);
             this.validatePhoneRealtime();
         }
 
@@ -720,6 +784,7 @@
             const terminos = document.getElementById('terminos').checked;
 
             // 1. Validar Documento
+            const longitudReq = (tipoDoc === 'DNI') ? 8 : 11;
             if (!numeroDoc) {
                 this.showFieldError('numeroDocumento', "Debe ingresar su número de documento.");
                 hasError = true;
@@ -727,11 +792,8 @@
                 if (!/^\d+$/.test(numeroDoc)) {
                     this.showFieldError('numeroDocumento', "El documento debe contener solo números.");
                     hasError = true;
-                } else if (numeroDoc.length > 11) {
-                    this.showFieldError('numeroDocumento', "El número de documento no debe exceder 11 dígitos.");
-                    hasError = true;
-                } else if (tipoDoc === 'DNI' && numeroDoc.length !== 8) {
-                    this.showFieldError('numeroDocumento', "El DNI debe tener exactamente 8 dígitos.");
+                } else if (numeroDoc.length !== longitudReq) {
+                    this.showFieldError('numeroDocumento', `El ${tipoDoc} debe tener exactamente ${longitudReq} dígitos.`);
                     hasError = true;
                 }
             }
@@ -801,14 +863,14 @@
             } else if (!tipoTelefono) {
                 this.showFieldError('tipoTelefono', "Debe seleccionar el tipo de teléfono.");
                 hasError = true;
-            } else if (this.fields.telefono.value.trim().length > 15) {
-                this.showFieldError('telefono', "El teléfono no debe exceder 15 caracteres.");
+            } else if (this.fields.telefono.value.trim().length !== 9) {
+                this.showFieldError('telefono', "El teléfono debe tener exactamente 9 dígitos.");
                 hasError = true;
             } else if (tipoTelefono === 'FIJO' && !/^0\d{8}$/.test(this.fields.telefono.value.trim())) {
-                this.showFieldError('telefono', "Para teléfono fijo debe iniciar con 0 y tener 9 dígitos.");
+                this.showFieldError('telefono', "Para teléfono fijo debe iniciar con 0.");
                 hasError = true;
-            } else if (tipoTelefono === 'CELULAR' && !/^\+519\d{8}$/.test(this.fields.telefono.value.trim())) {
-                this.showFieldError('telefono', "Para celular debe ingresar +51 seguido de un número que inicie en 9.");
+            } else if (tipoTelefono === 'CELULAR' && !/^9\d{8}$/.test(this.fields.telefono.value.trim())) {
+                this.showFieldError('telefono', "Para celular el número debe iniciar con 9.");
                 hasError = true;
             }
             if (!this.fields.direccion.value.trim()) {
@@ -973,10 +1035,16 @@
         updateUIByDocumentType() {
             const isDNI = this.tipoDocSelect.value === 'DNI';
             this.numeroDocInput.placeholder = isDNI ? "Número de DNI" : "Número de RUC";
-            const longitudDocumentoMax = 11;
+            const longitudDoc = isDNI ? 8 : 11;
 
-            this.numeroDocInput.maxLength = longitudDocumentoMax;
-            this.numeroDocInput.minLength = isDNI ? 8 : 1;
+            this.numeroDocInput.maxLength = longitudDoc;
+            this.numeroDocInput.minLength = longitudDoc;
+            
+            // Re-validar si ya hay contenido
+            if (this.numeroDocInput.value) {
+                this.validateDocumentRealtime();
+            }
+
             if (isDNI) {
                 this.numeroDocInput.setAttribute('pattern', '[0-9]{8}');
                 this.numeroDocInput.title = 'DNI válido: exactamente 8 dígitos numéricos.';
@@ -1061,9 +1129,14 @@
 
                 if (record) {
                     this.fillForm(record, tipo);
+                    
+                    // Bloquear campos y mostrar botón editar
+                    this.setFieldsDisabled(true);
+                    if (this.btnEditar) this.btnEditar.style.display = "inline-flex";
+
                     this.showModal({ 
                         title: "Datos Encontrados", 
-                        text: `Datos encontrados de RENIEC para el ${tipoDocumento} ${numero}.`,
+                        text: `Datos encontrados de RENIEC para el ${tipoDocumento} ${numero}. Se han bloqueado los campos por seguridad, puedes editar tu contacto si es necesario.`,
                         type: "alert",
                         confirmText: "Entendido"
                     });

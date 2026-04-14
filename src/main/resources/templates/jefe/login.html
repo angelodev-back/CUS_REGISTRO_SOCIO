@@ -158,18 +158,21 @@
                 <input type="hidden" name="portal_source" value="jefe" />
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-secondary">ID de Usuario / Email</label>
-                    <input type="text" name="username" class="form-control fi" placeholder="ejemplo@neptuno.pe" required pattern=".{4,100}" />
+                    <input type="text" id="username" name="username" class="form-control fi" placeholder="ejemplo@neptuno.pe" required maxlength="60" />
+                    <div id="username-error" class="invalid-feedback-custom" style="display:none; color:#ef4444; font-size:12px; margin-top:5px; font-weight:500;"></div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label small fw-bold text-secondary">Clave de Acceso</label>
                     <div class="position-relative">
-                        <input type="password" id="password" name="password" class="form-control fi w-100" placeholder="********" required style="padding-right: 45px;" />
+                        <input type="password" id="password" name="password" class="form-control fi w-100" placeholder="********" required maxlength="60" style="padding-right: 45px;" />
                         <button type="button" onclick="togglePassword()" class="position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent text-secondary p-0 me-3 d-flex align-items-center justify-content-center" style="cursor: pointer; z-index: 10;">
                             <span id="eye-icon" class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
                         </button>
                     </div>
+                    <div id="password-error" class="invalid-feedback-custom" style="display:none; color:#ef4444; font-size:12px; margin-top:5px; font-weight:500;"></div>
+                    <!-- Forgot Password link removed -->
                 </div>
-                <button type="submit" class="btn-submit w-100">
+                <button type="submit" id="btn-submit" class="btn-submit w-100">
                     Entrar al Panel
                 </button>
             </form>
@@ -177,9 +180,17 @@
     </div>
 </div>
 
+
+<!-- Help Modal Removed -->
+
 <script>
+    const passwordInput = document.getElementById('password');
+    const usernameInput = document.getElementById('username');
+    const btnSubmit = document.getElementById('btn-submit');
+    const passwordErrorDiv = document.getElementById('password-error');
+    const usernameErrorDiv = document.getElementById('username-error');
+
     function togglePassword() {
-        const passwordInput = document.getElementById('password');
         const eyeIcon = document.getElementById('eye-icon');
         
         if (passwordInput.type === 'password') {
@@ -191,7 +202,51 @@
         }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function() {
+    function validateForm() {
+        const passLen = passwordInput.value.trim().length;
+        const userLen = usernameInput.value.trim().length;
+        let hasError = false;
+
+        // Validar longitud máxima (50)
+        if (passLen > 50) {
+            passwordErrorDiv.innerText = "La clave no debe exceder los 50 caracteres.";
+            passwordErrorDiv.style.display = 'block';
+            passwordInput.style.borderColor = '#ef4444';
+            hasError = true;
+        } else {
+            passwordErrorDiv.style.display = 'none';
+            passwordInput.style.borderColor = '';
+        }
+
+        if (userLen > 50) {
+            usernameErrorDiv.innerText = "El ID de usuario no debe exceder los 50 caracteres.";
+            usernameErrorDiv.style.display = 'block';
+            usernameInput.style.borderColor = '#ef4444';
+            hasError = true;
+        } else {
+            usernameErrorDiv.style.display = 'none';
+            usernameInput.style.borderColor = '';
+        }
+
+        // Si hay error de longitud o están vacíos, deshabilitar
+        const isEmpty = passLen === 0 || userLen === 0;
+        
+        btnSubmit.disabled = hasError || isEmpty;
+        btnSubmit.style.opacity = (hasError || isEmpty) ? "0.5" : "1";
+        btnSubmit.style.cursor = (hasError || isEmpty) ? "not-allowed" : "pointer";
+    }
+
+    passwordInput.addEventListener('input', validateForm);
+    usernameInput.addEventListener('input', validateForm);
+    
+    // Inicializar estado del botón
+    validateForm();
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        if (passwordInput.value.length > 50 || usernameInput.value.length > 50) {
+            e.preventDefault();
+            return;
+        }
         document.getElementById('login-loader').style.display = 'flex';
     });
 </script>

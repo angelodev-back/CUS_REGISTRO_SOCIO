@@ -62,19 +62,22 @@ public class ExcelReportServiceImpl implements ExcelReportService {
                 row.createCell(0).setCellValue(h.getId());
                 row.createCell(1).setCellValue(h.getFechaCambio().toString());
                 
-                String nombrePostulante = h.getPostulante().getNombres() != null 
-                    ? h.getPostulante().getNombres() + " " + h.getPostulante().getApellidoPaterno()
-                    : h.getPostulante().getRazonSocial();
+                String nombrePostulante = construirNombreCompleto(h.getPostulante());
                 row.createCell(2).setCellValue(nombrePostulante);
                 row.createCell(3).setCellValue(h.getPostulante().getNumeroDocumento());
                 row.createCell(4).setCellValue(h.getEstadoAnterior());
                 row.createCell(5).setCellValue(h.getEstadoNuevo());
                 
                 String responsable = (h.getEmpleado() != null) 
-                    ? h.getEmpleado().getNombres() + " " + h.getEmpleado().getApellidoPaterno()
+                    ? (h.getEmpleado().getNombres() + " " + h.getEmpleado().getApellidoPaterno())
                     : "Sistema / Postulante";
                 row.createCell(6).setCellValue(responsable);
-                row.createCell(7).setCellValue(h.getMotivo());
+                
+                String motivoFinal = h.getMotivo();
+                if ("aprobado".equalsIgnoreCase(h.getEstadoNuevo()) && h.getInforme() != null && h.getInforme().getRecomendacionManual() != null) {
+                    motivoFinal = h.getInforme().getRecomendacionManual();
+                }
+                row.createCell(7).setCellValue(motivoFinal);
             }
 
             for (int i = 0; i < columns.length; i++) {
@@ -113,7 +116,7 @@ public class ExcelReportServiceImpl implements ExcelReportService {
 
             Row r2 = sheet.createRow(2);
             r2.createCell(0).setCellValue("Postulante:");
-            r2.createCell(1).setCellValue(p.getNombres() != null ? p.getNombres() + " " + p.getApellidoPaterno() : p.getRazonSocial());
+            r2.createCell(1).setCellValue(construirNombreCompleto(p));
             
             Row r3 = sheet.createRow(3);
             r3.createCell(0).setCellValue("Documento:");
@@ -143,16 +146,24 @@ public class ExcelReportServiceImpl implements ExcelReportService {
             rhTitle.getCell(0).setCellStyle(titleStyle);
 
             Row rhHeader = sheet.createRow(currentLine++);
-            String[] cols = {"Fecha", "Estado Anterior", "Estado Nuevo", "Responsable", "Motivo"};
+            String[] cols = {"Fecha", "Estado Anterior", "Estado Nuevo", "Motivo"};
             for(int i=0; i<cols.length; i++) rhHeader.createCell(i).setCellValue(cols[i]);
 
             for (HistorialEstadoPostulante h : historial) {
                 Row row = sheet.createRow(currentLine++);
-                row.createCell(0).setCellValue(h.getFechaChangeStr()); // Usar helper
+                row.createCell(0).setCellValue(h.getFechaChangeStr()); 
                 row.createCell(1).setCellValue(h.getEstadoAnterior());
                 row.createCell(2).setCellValue(h.getEstadoNuevo());
-                row.createCell(3).setCellValue(h.getEmpleado() != null ? h.getEmpleado().getNombres() : "Sistema");
-                row.createCell(4).setCellValue(h.getMotivo());
+                
+                String motivoFinal = h.getMotivo();
+                if ("aprobado".equalsIgnoreCase(h.getEstadoNuevo())) {
+                    if (h.getInforme() != null && h.getInforme().getRecomendacionManual() != null) {
+                        motivoFinal = h.getInforme().getRecomendacionManual();
+                    } else if (motivoFinal != null && motivoFinal.contains("DNI-4+*!")) {
+                        motivoFinal = "Aprobado";
+                    }
+                }
+                row.createCell(3).setCellValue(motivoFinal);
             }
 
             // Sección 4: Firmas
@@ -166,14 +177,13 @@ public class ExcelReportServiceImpl implements ExcelReportService {
             rfLabel.createCell(2).setCellValue("Responsable de Admisión");
 
             Row rfNames = sheet.createRow(currentLine++);
-            String nameP = (p.getNombres() != null ? (p.getNombres() + " " + p.getApellidoPaterno()) : p.getRazonSocial()).toUpperCase();
-            rfNames.createCell(0).setCellValue(nameP);
+            rfNames.createCell(0).setCellValue(construirNombreCompleto(p).toUpperCase());
 
-            String nameR = "RESPONSABLE DE ADMISIÓN";
-            if (info != null && info.getEstado().equals("FINALIZADO")) {
-                nameR = "JEFE DE SERVICIOS NAVIEROS";
-            } else if (!historial.isEmpty() && historial.get(0).getEmpleado() != null) {
-                nameR = (historial.get(0).getEmpleado().getNombres() + " " + historial.get(0).getEmpleado().getApellidoPaterno()).toUpperCase();
+            String nameR = "";
+            if (!historial.isEmpty() && historial.get(0).getEmpleado() != null) {
+                nameR = construirNombreCompleto(historial.get(0).getEmpleado().getNombres(), historial.get(0).getEmpleado().getApellidoPaterno()).toUpperCase();
+            } else if (info != null && info.getEstado() != null && info.getEstado().equals("FINALIZADO")) {
+                nameR = "JUAN PÉREZ";
             }
             rfNames.createCell(2).setCellValue(nameR);
 
@@ -186,5 +196,19 @@ public class ExcelReportServiceImpl implements ExcelReportService {
         } catch (IOException e) {
             throw new RuntimeException("Error al generar Excel detallado: " + e.getMessage());
         }
+    }
+
+    private String construirNombreCompleto(Postulante p) {
+        if (p.getNombres() != null && !p.getNombres().isBlank()) {
+            String nombres = p.getNombres().trim();
+            String apellidoP = p.getApellidoPaterno() != null ? p.getApellidoPaterno().trim() : "";
+            
+            // Si el apellido ya está en nombres (prevención de redundancia por data sucia)
+            if (!apellidoP.isEmpty() && nombres.toLowerCase().contains(apellidoP.toLowerCase())) {
+                return nombres;
+            }
+            return (nombres + " " + apellidoP).trim();
+        }
+        return p.getRazonSocial() != null ? p.getRazonSocial() : "Postulante";
     }
 }

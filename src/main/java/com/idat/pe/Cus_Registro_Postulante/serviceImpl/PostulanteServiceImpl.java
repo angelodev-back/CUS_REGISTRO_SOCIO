@@ -309,7 +309,7 @@ public class PostulanteServiceImpl implements PostulanteService {
 
             // Generar Historial con Informe
             InformeAdmision informe = informeAdmisionRepository.findByPostulante_Id(postulante.getId()).orElse(null);
-            registrarHistorial(postulante, estadoAnterior, "Cuenta socio activada (Regla: DNI-4+*!)", idEmpleado, informe);
+            registrarHistorial(postulante, estadoAnterior, "Solicitud de membresía aprobada", idEmpleado, informe);
 
         } catch (Exception e) {
             throw new RuntimeException("Error al aprobar: " + e.getMessage());

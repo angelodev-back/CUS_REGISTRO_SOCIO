@@ -34,7 +34,6 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/"),
                     new AntPathRequestMatcher("/login"),
                     new AntPathRequestMatcher("/jefe/login"),
-                    new AntPathRequestMatcher("/recuperar-password"),
                     new AntPathRequestMatcher("/inicio"),
                     new AntPathRequestMatcher("/registro/**"),
                     new AntPathRequestMatcher("/api/postulantes/buscar-por-documento/**"),

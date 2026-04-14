@@ -17,4 +17,6 @@ public interface SocioService {
     Map<String, Object> generarCuentaSocio(Integer socioId);
 
     ConsultaEstadoDTO consultarEstadoPublico(String numeroDocumento);
+
+    void actualizarPassword(String username, String oldPassword, String newPassword);
 }
